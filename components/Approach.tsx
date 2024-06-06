@@ -7,7 +7,7 @@ const Approach = () => {
     return (
         <section className="w-full py-20 -mt-30 text-5xl text-center">
             <h1 className="heading">
-                My <span className="text-purple">approach</span>
+                My <span className="text-purple">Approach</span>
             </h1>
             {/* remove bg-white dark:bg-black */}
             <div className="my-20 flex flex-col lg:flex-row items-center justify-center w-full gap-4">
@@ -22,30 +22,34 @@ const Approach = () => {
                     <CanvasRevealEffect
                         animationSpeed={5.1}
                         // add these classed for the border rounded overflowing -> rounded-3xl overflow-hidden
-                        containerClassName="bg-emerald-900 rounded-3xl overflow-hidden"
+                        containerClassName="bg-black-900 rounded-3xl overflow-hidden"
+                        colors={[
+                            // change the colors of the
+                            [0, 0, 7],
+                            [100, 115, 251],
+                        ]}
+                        dotSize={3}
                     />
+                    
                 </Card>
                 <Card
                     title="Development & Progress Update"
                     icon={<AceternityIcon order="Phase 2" />}
-                    des="Once we agree on the plan, I cue my lofi playlist and dive into
+                    des="Once we agree on the plan, I cue my 80's playlist and dive into
                 coding. From initial sketches to polished code, I keep you updated
                 every step of the way."
                 >
                     <CanvasRevealEffect
                         animationSpeed={3}
                         // change bg-black to bg-pink-900
-                        containerClassName="bg-pink-900 rounded-3xl overflow-hidden"
+                        containerClassName="bg-black-900 rounded-3xl overflow-hidden"
                         colors={[
                             // change the colors of the
-                            [255, 166, 158],
-                            [221, 255, 247],
+                            [0, 0, 7],
+                            [19, 244, 121],
                         ]}
-                        dotSize={2}
+                        dotSize={3}
                     />
-                    {/* Radial gradient for the cute fade */}
-                    {/* remove this one */}
-                    {/* <div className="absolute inset-0 [mask-image:radial-gradient(400px_at_center,white,transparent)] bg-black/50 dark:bg-black/90" /> */}
                 </Card>
                 <Card
                     title="Development & Launch"
@@ -56,9 +60,15 @@ const Approach = () => {
                 >
                     <CanvasRevealEffect
                         animationSpeed={3}
-                        containerClassName="bg-sky-600 rounded-3xl overflow-hidden"
-                        colors={[[125, 211, 252]]}
+                        containerClassName="bg-black-900 rounded-3xl overflow-hidden"
+                        colors={[
+                            // change the colors of the
+                            [0, 0, 7],
+                            [255, 155, 55],
+                        ]}
+                        dotSize={3}
                     />
+                     
                 </Card>
             </div>
         </section>

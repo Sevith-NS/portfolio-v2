@@ -29,11 +29,11 @@ const Hero = () => {
                    
 
                     <TextGenerateEffect className="text-center text-[40px] md:text:5xl lg:text-6xl" words="Hi, I am Sevith, Full Stack Developer Based in Bangalore" />
-                    <p className='text-center md:tracking-wider mb-4 text-sm md:text:text-lg lg:text-2xl'>
+                    <p className='text-center md:tracking-wider mb-4 text-sm md:text:text-lg lg:text-2xl xl:mt-10 mt-4'>
                         Transforming Ideas into seamless User Experiences
                     </p>
-                    <div className='flex flex-row lg:flex-row items-center gap-8'>
-                        <a href="https://drive.google.com/file/d/1OCL0hsmmp78hiWCMIk6plpvouzNJH8CG/view?usp=sharing">
+                    <div className='flex flex-row lg:flex-row items-center gap-8 xl:mt-1 mt-[8px]'>
+                        <a href="https://drive.google.com/file/d/1glmAqBRlE2iAGhgC6LaLvtYkAxWTtdQT/view?usp=sharing">
                             <MagicButton
 
                                 title="Download Resume"

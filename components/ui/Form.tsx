@@ -67,7 +67,7 @@ export function Form() {
 
     return (
         <CardContainer className="inter-var">
-            <CardBody className="relative group/card xl:mt-[-70px] mt-[-80px] dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] bg-transparent dark:border-white/[0.2] border-black/[0.1] xl:w-[480px] w-[23rem] h-auto rounded-xl p-6 border flex justify-center">
+            <CardBody className="relative group/card xl:mt-[-40px] mt-[-60px] dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] bg-transparent dark:border-white/[0.2] border-black/[0.1] xl:w-[480px] w-[23rem] h-auto rounded-xl p-6 border flex justify-center">
                 <CardItem
                     translateZ="50"
                     className="xl:text-3xl text-2xl flex flex-col items-center justify-center font-bold text-neutral-600 dark:text-white"

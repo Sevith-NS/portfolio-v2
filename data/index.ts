@@ -76,6 +76,14 @@ export const navItems = [
   export const projects = [
     {
       id: 1,
+      title: "Vercel Clone",
+      des: "Vercel's Frontend Cloud provides the developer experience and infrastructure to build, scale, and secure a faster, more personalized web.",
+      img: "/Vercel.png",
+      iconLists: ["/re.svg", "/tail.svg", "/ts.svg", "nodejs.svg", "aws.svg"],
+      link: "https://github.com/Sevith-NS/vercel-clone",
+    },
+    {
+      id: 1,
       title: "Zenfinance",
       des: "Dive into the future of finance with this dynamic MERN dashboard, blending machine learning predictions with real-time data visualization. Empower your financial insights with cutting-edge technology and intuitive design.",
       img: "/1.png",
@@ -86,9 +94,9 @@ export const navItems = [
       id: 2,
       title: "Ochi",
       des: "Ochi is an amazing design website which brings together the full power of Web Designing",
-      img: "/2.png",
+      img: "/Ochi.png",
       iconLists: [ "/tail.svg", "/javascript.svg", "/re.svg", "/fm.svg"],
-      link: "https://github.com/adrianhajdin/zoom-clone",
+      link: "https://github.com/Sevith-NS/ochi-front",
     },
     {
       id: 3,
@@ -120,7 +128,7 @@ export const navItems = [
       id: 2,
       title: "HR Intern",
       desc: "Designed and developed mobile app for both iOS & Android platforms using React Native.",
-      className: "md:col-span-2", // change to md:col-span-2
+      className: "md:col-span-2", 
       thumbnail: "/exp2.svg",
     },
     
@@ -134,11 +142,16 @@ export const navItems = [
     },
     // {
     //   id: 2,
-    //   img: "/twit.svg",
+    //   img: "/insta.svg",
     // },
     {
       id: 3,
       img: "/link.svg",
       link: "https://www.linkedin.com/in/sevith-n-s-079063273/",
     },
+    // {
+    //   id: 4,
+    //   img: "/twit.svg",
+    //   link: "https://www.linkedin.com/in/sevith-n-s-079063273/",
+    // },
   ];

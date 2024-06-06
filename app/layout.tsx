@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Raleway } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./provider";
 
-const inter = Inter({ subsets: ["latin"] });
+const font = Raleway({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Sevith's Portfolio",
   description: "Modern Portfolio",
+  icons: ["/1.svg"]
 };
 
 export default function RootLayout({
@@ -17,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en"  suppressHydrationWarning>
-      <body className={inter.className}> 
+      <body className={font.className}> 
       <ThemeProvider
             attribute="class"
             defaultTheme="dark"

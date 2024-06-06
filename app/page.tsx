@@ -23,7 +23,7 @@ import { Bounce, ToastContainer, toast } from 'react-toastify';
 const Home = () => {
   const locomotiveScroll = new LocomotiveScroll();
   return (
-    <main className="font-['Neue_Montreal'] relative bg-black-100 flex justify-center overflow-x-hidden items-center flex-col mx-auto sm:px-10 px-5">
+    <main className="relative bg-black-100 flex justify-center overflow-x-hidden items-center flex-col mx-auto sm:px-10 px-5">
 
       <div className="max-w-7xl w-full">
         <FloatingNav
@@ -34,11 +34,11 @@ const Home = () => {
         <Grid />
         {/* <Card/> */}
         <RecentProjects />
-        <Skills />
+        {/* <Skills /> */}
         {/* <Resume /> */}
         <Approach />
         <Footer />
-        <Form />
+        {/* <Form /> */}
         <ToastContainer
           position="top-center"
           autoClose={5000}

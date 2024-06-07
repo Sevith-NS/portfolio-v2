@@ -20,7 +20,7 @@ const Approach = () => {
                 navigation, and content requirements."
                 >
                     <CanvasRevealEffect
-                        animationSpeed={5.1}
+                        animationSpeed={1}
                         // add these classed for the border rounded overflowing -> rounded-3xl overflow-hidden
                         containerClassName="bg-black-900 rounded-3xl overflow-hidden"
                         colors={[
@@ -40,7 +40,7 @@ const Approach = () => {
                 every step of the way."
                 >
                     <CanvasRevealEffect
-                        animationSpeed={3}
+                        animationSpeed={1}
                         // change bg-black to bg-pink-900
                         containerClassName="bg-black-900 rounded-3xl overflow-hidden"
                         colors={[
@@ -59,7 +59,7 @@ const Approach = () => {
                 from the ground up."
                 >
                     <CanvasRevealEffect
-                        animationSpeed={3}
+                        animationSpeed={1}
                         containerClassName="bg-black-900 rounded-3xl overflow-hidden"
                         colors={[
                             // change the colors of the

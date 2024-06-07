@@ -15,15 +15,16 @@ import Form from "@/components/ui/Form";
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 
 const Home = () => {
-  const scrollRef = useRef(null);
+  const scrollRef = useRef<HTMLElement | null>(null);  // Specify the type here
 
   useEffect(() => {
     if (typeof window !== "undefined" && scrollRef.current) {
       // Import LocomotiveScroll dynamically to ensure it is only imported on the client-side
       import('locomotive-scroll').then((module) => {
         const LocomotiveScroll = module.default;
+        // Use type assertion to ensure TypeScript knows this is an HTMLElement
         const locomotiveScroll = new LocomotiveScroll({
-          el: scrollRef.current,
+          el: scrollRef.current as HTMLElement,
           smooth: true,
         });
         
@@ -45,7 +46,7 @@ const Home = () => {
         <Footer />
         <ToastContainer
           position="top-center"
-          autoClose={3000}
+          autoClose={5000}
           hideProgressBar={false}
           newestOnTop={false}
           closeOnClick

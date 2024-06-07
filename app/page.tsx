@@ -30,15 +30,10 @@ const Home = () => {
           navItems={navItems}
         />
         <Hero />
-
         <Grid />
-        {/* <Card/> */}
         <RecentProjects />
-        {/* <Skills /> */}
-        {/* <Resume /> */}
         <Approach />
         <Footer />
-        {/* <Form /> */}
         <ToastContainer
           position="top-center"
           autoClose={5000}
@@ -51,7 +46,7 @@ const Home = () => {
           pauseOnHover
           theme="dark"
           transition={Bounce}
-/>
+        />
       </div>
     </main>
   );

@@ -7,7 +7,6 @@ const font = Raleway({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Sevith's Portfolio",
-  description: "Modern Portfolio",
   icons: ["/1.svg"]
 };
 

@@ -15,22 +15,25 @@ import Form from "@/components/ui/Form";
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 
 const Home = () => {
-  const scrollRef = useRef<HTMLElement | null>(null);  // Specify the type here
+  const scrollRef = useRef<HTMLElement | null>(null);  // Ensure ref is either HTMLElement or null
 
   useEffect(() => {
-    if (typeof window !== "undefined" && scrollRef.current) {
-      // Import LocomotiveScroll dynamically to ensure it is only imported on the client-side
+    if (typeof window !== "undefined") {
+      // Safely import LocomotiveScroll and handle scrollRef
       import('locomotive-scroll').then((module) => {
         const LocomotiveScroll = module.default;
-        // Use type assertion to ensure TypeScript knows this is an HTMLElement
-        const locomotiveScroll = new LocomotiveScroll({
-          el: scrollRef.current as HTMLElement,
-          smooth: true,
-        });
-        
-        return () => {
-          locomotiveScroll.destroy();
-        };
+        if (scrollRef.current) {  // Ensure scrollRef.current is not null
+          const locomotiveScroll = new LocomotiveScroll({
+            el: scrollRef.current as HTMLElement,  // Type assertion
+            smooth: true,
+          });
+          
+          return () => {
+            locomotiveScroll.destroy();
+          };
+        }
+      }).catch(error => {
+        console.error('Error loading LocomotiveScroll:', error);
       });
     }
   }, []);

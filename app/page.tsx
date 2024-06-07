@@ -11,7 +11,7 @@ import { Bounce, ToastContainer, toast } from 'react-toastify';
 
 const Home = () => {
   return (
-    <main className="relative bg-black-100 flex justify-center overflow-x-hidden items-center flex-col mx-auto sm:px-10 px-5">
+    <main className="relative bg-black-100 flex justify-center overflow-x-hidden overflow-y-hidden items-center flex-col mx-auto sm:px-10 px-5">
 
       <div className="max-w-7xl w-full">
         <FloatingNav

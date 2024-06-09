@@ -25,8 +25,8 @@ const Approach = () => {
                         containerClassName="bg-transparent rounded-3xl overflow-hidden"
                         colors={[
                             // change the colors of the
-                            [0, 0, 7],
-                            [105, 205, 251],
+                            [255, 187, 0],
+                            [255, 187, 0],
                         ]}
                         dotSize={3}
                        
@@ -47,8 +47,8 @@ const Approach = () => {
                         containerClassName="bg-transparent rounded-3xl overflow-hidden"
                         colors={[
                             // change the colors of the
-                            [0, 0, 7],
-                            [200, 40, 121],
+                            [255, 0, 90],
+                            [255, 0, 90],
                         ]}
                         dotSize={3}
                        
@@ -66,8 +66,8 @@ const Approach = () => {
                         containerClassName="bg-transparent rounded-3xl overflow-hidden"
                         colors={[
                             // change the colors of the
-                            [0, 0, 7],
-                            [100, 155, 55],
+                            [0, 51, 255],
+                            [0, 51, 255],
                         ]}
                         dotSize={3}
                     />
@@ -103,7 +103,9 @@ const Card = ({
                 background: "rgb(4,7,29)",
                 backgroundColor:
                     "linear-gradient(90deg, rgba(4,7,29,1) 0%, rgba(12,14,35,1) 100%)",
+                
             }}
+            
         >
             
 

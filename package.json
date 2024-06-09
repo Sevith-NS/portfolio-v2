@@ -21,6 +21,7 @@
     "express": "^4.19.2",
     "framer-motion": "^11.2.9",
     "helmet": "^7.1.0",
+    "lenis": "^1.1.2",
     "locomotive-scroll": "^5.0.0-beta.13",
     "mini-svg-data-uri": "^1.4.4",
     "mongoose": "^8.4.1",

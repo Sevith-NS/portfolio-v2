@@ -7,12 +7,14 @@ import Link from "next/link";
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import emailjs from 'emailjs-com';
+import { MdOutlineClose } from "react-icons/md";
 
 export function Form() {
 
     const [name, setname] = useState<string>();
     const [mail, setmail] = useState<string>();
     const [message, setmessage] = useState<string>();
+    
 
 
     const notify = () => toast.success('Submitted Successfully!', {
@@ -72,7 +74,7 @@ export function Form() {
                     translateZ="50"
                     className="xl:text-3xl text-2xl flex flex-col items-center justify-center font-bold text-neutral-600 dark:text-white"
                 >
-                    <h1>Let&apos;s work together</h1>
+                    <h1>Let&apos;s work together  </h1>
                     <form onSubmit={handleSubmit} className="flex flex-col p-1">
                         <input onChange={(e) => setname(e.target.value)} value={name} type="text" name="name" placeholder="Name" className="bg-transparent border text-xl border-white/50 mt-5 rounded-xl p-3 sm:p-[-30px] w-[340px] xl:w-[450px] " required />
                         <input onChange={(e) => setmail(e.target.value)} value={mail} type="email" name="email" placeholder="Email" className="bg-transparent border text-xl border-white/50 mt-5 rounded-xl p-3 sm:p-[-30px] w-[340px]  xl:w-[450px] " required />
@@ -85,3 +87,7 @@ export function Form() {
     );
 };
 export default Form;
+function setFormVisible(arg0: boolean) {
+    throw new Error("Function not implemented.");
+}
+

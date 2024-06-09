@@ -7,13 +7,10 @@ import RecentProjects from "@/components/RecentProjects";
 import Approach from "@/components/Approach";
 import { FloatingNav } from "@/components/ui/FloatingNav";
 import { Bounce, ToastContainer, toast } from 'react-toastify';
-import { ReactLenis } from 'lenis/react'
-import LocomotiveScroll from "locomotive-scroll";
-
 
 const Home = () => {
     return (
-      <ReactLenis root>
+   
         <main className="relative bg-black-100 flex justify-center overflow-x-hidden overflow-y-hidden items-center flex-col mx-auto sm:px-10 px-5">
 
           <div className="max-w-7xl w-full">
@@ -40,7 +37,7 @@ const Home = () => {
             />
           </div>
         </main>
-      </ReactLenis >
+
     );
   
 };

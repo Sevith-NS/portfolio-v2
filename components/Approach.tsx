@@ -22,7 +22,7 @@ const Approach = () => {
                     <CanvasRevealEffect
                         animationSpeed={1}
                         // add these classed for the border rounded overflowing -> rounded-3xl overflow-hidden
-                        containerClassName="bg-black rounded-3xl overflow-hidden"
+                        containerClassName="bg-transparent rounded-3xl overflow-hidden"
                         colors={[
                             // change the colors of the
                             [0, 0, 7],
@@ -44,7 +44,7 @@ const Approach = () => {
                     <CanvasRevealEffect
                         animationSpeed={1}
                         
-                        containerClassName="bg-black rounded-3xl overflow-hidden"
+                        containerClassName="bg-transparent rounded-3xl overflow-hidden"
                         colors={[
                             // change the colors of the
                             [0, 0, 7],
@@ -63,7 +63,7 @@ const Approach = () => {
                 >
                     <CanvasRevealEffect
                         animationSpeed={1}
-                        containerClassName="bg-black rounded-3xl overflow-hidden"
+                        containerClassName="bg-transparent rounded-3xl overflow-hidden"
                         colors={[
                             // change the colors of the
                             [0, 0, 7],

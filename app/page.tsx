@@ -1,17 +1,29 @@
 "use client"
 import { navItems } from "@/data";
 import Hero from "@/components/Hero";
+import dynamic from "next/dynamic";
 import Grid from "@/components/Grid";
 import Footer from "@/components/Footer";
 import RecentProjects from "@/components/RecentProjects";
 import Approach from "@/components/Approach";
 import { FloatingNav } from "@/components/ui/FloatingNav";
 import { Bounce, ToastContainer, toast } from 'react-toastify';
-import LocomotiveScroll from "locomotive-scroll";
+import { useEffect } from "react";
 
 
 const Home = () => {
-  const locomotiveScroll = new LocomotiveScroll();
+  useEffect(() => {
+    let locomotiveScroll: import("locomotive-scroll");
+    if (typeof window !== 'undefined') {
+      import("locomotive-scroll").then((LocomotiveScrollModule) => {
+        const LocomotiveScroll = LocomotiveScrollModule.default;
+        locomotiveScroll = new LocomotiveScroll();
+      });
+    }
+    return () => {
+      if (locomotiveScroll) locomotiveScroll.destroy();
+    };
+  }, []);
   return (
     <main className="relative bg-black-100 flex justify-center overflow-x-hidden overflow-y-hidden items-center flex-col mx-auto sm:px-10 px-5">
       <div className="max-w-7xl w-full">

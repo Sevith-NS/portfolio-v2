@@ -6,13 +6,9 @@ import Footer from "@/components/Footer";
 import RecentProjects from "@/components/RecentProjects";
 import Approach from "@/components/Approach";
 import { FloatingNav } from "@/components/ui/FloatingNav";
-
-
-
 import { Bounce, ToastContainer, toast } from 'react-toastify';
 
 const Home = () => {
-
   return (
     <main className="relative bg-black-100 flex justify-center overflow-x-hidden overflow-y-hidden items-center flex-col mx-auto sm:px-10 px-5">
 

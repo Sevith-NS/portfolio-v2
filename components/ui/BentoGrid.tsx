@@ -8,6 +8,7 @@ import animationData from '@/data/confetti.json'
 import MagicButton from "./MagicButton";
 import { IoCopyOutline } from "react-icons/io5";
 import { projects } from "@/data";
+import { BoxesCore } from "./Background-boxes";
 
 
 export const BentoGrid = ({
@@ -67,6 +68,7 @@ export const BentoGridItem = ({
       setCopied(true);
       setTimeout(() => setCopied(false), 5000); 
   }
+  
   return (
     <div
       className={cn(
@@ -131,6 +133,7 @@ export const BentoGridItem = ({
 
           {/* for the github 3d globe */}
           {id === 2 && <GlobeDemo />}
+          {id === 1 && <BoxesCore />}
 
           {/* Tech stack list div */}
           {id === 3 && (

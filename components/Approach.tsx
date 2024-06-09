@@ -22,13 +22,15 @@ const Approach = () => {
                     <CanvasRevealEffect
                         animationSpeed={1}
                         // add these classed for the border rounded overflowing -> rounded-3xl overflow-hidden
-                        containerClassName="bg-black-900 rounded-3xl overflow-hidden"
+                        containerClassName="bg-black rounded-3xl overflow-hidden"
                         colors={[
                             // change the colors of the
                             [0, 0, 7],
-                            [100, 115, 251],
+                            [105, 205, 251],
                         ]}
                         dotSize={3}
+                       
+                        
                     />
                     
                 </Card>
@@ -41,14 +43,15 @@ const Approach = () => {
                 >
                     <CanvasRevealEffect
                         animationSpeed={1}
-                        // change bg-black to bg-pink-900
-                        containerClassName="bg-black-900 rounded-3xl overflow-hidden"
+                        
+                        containerClassName="bg-black rounded-3xl overflow-hidden"
                         colors={[
                             // change the colors of the
                             [0, 0, 7],
-                            [19, 244, 121],
+                            [200, 40, 121],
                         ]}
                         dotSize={3}
+                       
                     />
                 </Card>
                 <Card
@@ -60,11 +63,11 @@ const Approach = () => {
                 >
                     <CanvasRevealEffect
                         animationSpeed={1}
-                        containerClassName="bg-black-900 rounded-3xl overflow-hidden"
+                        containerClassName="bg-black rounded-3xl overflow-hidden"
                         colors={[
                             // change the colors of the
                             [0, 0, 7],
-                            [255, 155, 55],
+                            [100, 155, 55],
                         ]}
                         dotSize={3}
                     />
@@ -79,7 +82,6 @@ const Card = ({
     title,
     icon,
     children,
-    // add this one for the desc
     des,
 }: {
     title: string;
@@ -119,15 +121,14 @@ const Card = ({
 
             <div className="relative z-20 px-10">
                 <div
-                    // add this for making it center
-                    // absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]
+              
                     className="text-center group-hover/canvas-card:-translate-y-4 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] 
               group-hover/canvas-card:opacity-0 transition duration-200 min-w-40 mx-auto flex items-center justify-center"
                 >
                     {icon}
                 </div>
                 <h2
-                    // change text-3xl, add text-center
+                    
                     className="dark:text-white text-center text-3xl opacity-0 group-hover/canvas-card:opacity-100
                relative z-10 text-black mt-4  font-bold group-hover/canvas-card:text-white 
                group-hover/canvas-card:-translate-y-2 transition duration-200"
@@ -155,7 +156,7 @@ const AceternityIcon = ({ order }: { order: string }) => {
                 <span
                     className="absolute inset-[-1000%] z-0 animate-[spin_2s_linear_infinite]
                bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]"
-                    style={{zIndex: 0}}
+               style={{zIndex: 0}}
                 />
                 <span
                     className="relative z-10 inline-flex h-full w-full cursor-pointer items-center 

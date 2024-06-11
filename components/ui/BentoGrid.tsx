@@ -11,6 +11,7 @@ import { projects } from "@/data";
 import { BoxesCore } from "./Background-boxes";
 
 
+
 export const BentoGrid = ({
   className,
   children,
@@ -131,8 +132,23 @@ export const BentoGridItem = ({
             
           </div>
 
+          {id === 1 && (
+            <>
+              {/* Render BoxesCore only on larger screens */}
+              <div className="hidden lg:block">
+                <BoxesCore />
+              </div>
+              {/* Render background image on smaller screens */}
+              <div className="block lg:hidden absolute w-full h-full flex items-center justify-center">
+                <img
+                  src="/1stgridbg.png"
+                  alt="Background"
+                  className="object-cover w-full h-full object-center"
+                />
+              </div>
+            </>
+          )}
           {/* for the github 3d globe */}
-          {id === 1 && <BoxesCore />}
           {id === 2 && <GlobeDemo />}
 
           {/* Tech stack list div */}

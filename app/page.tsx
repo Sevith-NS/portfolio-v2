@@ -8,7 +8,7 @@ import RecentProjects from "@/components/RecentProjects";
 import Approach from "@/components/Approach";
 import { FloatingNav } from "@/components/ui/FloatingNav";
 import { Bounce, ToastContainer, toast } from 'react-toastify';
-import { useEffect } from "react";
+
 
 
 const Home = () => {

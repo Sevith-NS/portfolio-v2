@@ -12,18 +12,7 @@ import { useEffect } from "react";
 
 
 const Home = () => {
-  useEffect(() => {
-    let locomotiveScroll: import("locomotive-scroll");
-    if (typeof window !== 'undefined') {
-      import("locomotive-scroll").then((LocomotiveScrollModule) => {
-        const LocomotiveScroll = LocomotiveScrollModule.default;
-        locomotiveScroll = new LocomotiveScroll();
-      });
-    }
-    return () => {
-      if (locomotiveScroll) locomotiveScroll.destroy();
-    };
-  }, []);
+  
   return (
     <main className="relative bg-black-100 flex justify-center overflow-x-hidden overflow-y-hidden items-center flex-col mx-auto sm:px-10 px-5">
       <div className="max-w-7xl w-full">

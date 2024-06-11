@@ -139,9 +139,9 @@ export const BentoGridItem = ({
                 <BoxesCore />
               </div>
               {/* Render background image on smaller screens */}
-              <div className="block lg:hidden absolute w-full h-full flex items-center justify-center">
+              <div className="block lg:hidden absolute w-full h-full items-center justify-center">
                 <img
-                  src="/1stgridbg.png"
+                  src="/1stgridbgg.png"
                   alt="Background"
                   className="object-cover w-full h-full object-center"
                 />

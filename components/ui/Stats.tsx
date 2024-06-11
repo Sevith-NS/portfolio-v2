@@ -30,7 +30,7 @@ const Stats = () => {
             <div className="flex flex-wrap gap-4 xl:max-w-none mt-20 xl:mb-[-70px] mb-[-100px] xl:ml-4 ml-0">
                 {stats.map((item, index)=>{
                     return <div className="flex-1 flex gap-4 sm:gap-2  items-center justify-start" key={index}>
-                        <CountUp end={item.num} duration={5} delay={2} className="text-6xl xl:text-6xl font-extrabold xl:ml-4 ml-14"/>
+                        <CountUp end={item.num} duration={5} delay={2} className="text-5xl xl:text-6xl font-extrabold xl:ml-4 ml-auto"/>
                         <p className={`${item.text.length < 30 ? "max-w-[100px]" : "max-w-[1080px]"} leading-snug text-white/80`}>{item.text}</p>
                     </div>
                 })}

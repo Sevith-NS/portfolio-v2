@@ -2,12 +2,10 @@ import React from 'react'
 import { Spotlight } from './ui/Spotlight'
 import { TextGenerateEffect } from './ui/TextGenerateEffect';
 import MagicButton from './ui/MagicButton';
-import { FaCloudDownloadAlt, FaLocationArrow } from 'react-icons/fa';
 import { IoCloudDownloadOutline } from 'react-icons/io5';
 import { socialMedia } from '@/data';
 import Stats from './ui/Stats';
-import { AuroraBackground } from './ui/Aurora';
-import { motion } from 'framer-motion';
+
 
 
 const Hero = () => {

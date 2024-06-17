@@ -26,7 +26,7 @@ const Approach = () => {
                         colors={[
                             // change the colors of the
                             // [255, 187, 0],
-                            [255, 187, 0],
+                            [61, 189, 42],
                         ]}
                         dotSize={2.5}
                        
@@ -48,7 +48,7 @@ const Approach = () => {
                         colors={[
                             // change the colors of the
                             // [255, 0, 90],
-                            [255, 0, 90],
+                            [228, 15, 247],
                         ]}
                         dotSize={2.5}
                        
@@ -67,7 +67,7 @@ const Approach = () => {
                         colors={[
                             // change the colors of the
                             // [0, 51, 255],
-                            [0, 51, 255],
+                            [0, 221, 255],
                         ]}
                         dotSize={2.5}
                     />

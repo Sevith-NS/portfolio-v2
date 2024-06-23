@@ -103,7 +103,7 @@ export const navItems = [
       title: "Learn2Lead",
       des: "Transform your career with LEARN2LEAD, an advanced e-learning platform designed for comprehensive interview preparation. Dive into courses, videos, and study materials, and enhance your skills with interactive quizzes and mock interviews. rack your progress through personalized dashboards and easily manage updated content. Explore internship opportunities and present your entrepreneurial ideas with the PitchIt module. ",
       img: "/3.png",
-      iconLists: ["html5.svg", "css.svg", "javascript.svg", "php.svg"],
+      iconLists: ["html5.svg", "css.svg", "javascript.svg", "php.svg", "stripe.svg"],
       link: "https://github.com/Sevith-NS/learn2lead",
     },
     {

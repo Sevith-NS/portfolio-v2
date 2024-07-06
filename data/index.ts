@@ -63,7 +63,7 @@ export const navItems = [
     },
     {
       id: 6,
-      title: "Let's get down to business if you are Impressed?",
+      title: "Ready to connect? Click here to grab my email!",
       description: "",
       className: "lg:col-span-2 md:col-span-3 md:row-span-1",
       imgClassName: "",

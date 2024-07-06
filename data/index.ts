@@ -63,7 +63,7 @@ export const navItems = [
     },
     {
       id: 6,
-      title: "Ready to connect? Click here to grab my email!",
+      title: "Talent meets opportunity. Shall we begin?",
       description: "",
       className: "lg:col-span-2 md:col-span-3 md:row-span-1",
       imgClassName: "",

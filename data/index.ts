@@ -79,7 +79,7 @@ export const navItems = [
       title: "Tesseract AI",
       des: "Tesseract AI is a personalized mock interview platform designed to help students enhance their presentation skills, offering AI-generated questions, text-to-speech. Perfect for preparing for placements and internships.",
       img: "/tesseract.png",
-      iconLists: ["/re.svg", "/tail.svg", "/javascript.svg", "next.svg", "gemini.svg", "clerk.svg"],
+      iconLists: ["/re.svg", "/tail.svg", "/javascript.svg", "next.svg", "gemini.svg", "clerk.svg", "neon.png"],
       link: "https://tesseractai.vercel.app/",
     },
     {

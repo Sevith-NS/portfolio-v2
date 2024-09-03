@@ -76,6 +76,14 @@ export const navItems = [
   export const projects = [
     {
       id: 1,
+      title: "Tesseract AI",
+      des: "Tesseract AI is a personalized mock interview platform designed to help students enhance their presentation skills, offering AI-generated questions, text-to-speech. Perfect for preparing for placements and internships.",
+      img: "/tesseract.png",
+      iconLists: ["/re.svg", "/tail.svg", "/javascript.svg", "next.svg", "gemini.svg", "clerk.svg"],
+      link: "https://tesseractai.vercel.app/",
+    },
+    {
+      id: 2,
       title: "Vercel Clone",
       des: "Vercel's Frontend Cloud provides the developer experience and infrastructure to build, scale, and secure a faster, more personalized web.",
       img: "/Vercel.png",
@@ -83,7 +91,7 @@ export const navItems = [
       link: "https://github.com/Sevith-NS/vercel-clone",
     },
     {
-      id: 1,
+      id: 3,
       title: "Zenfinance",
       des: "Dive into the future of finance with this dynamic MERN dashboard, blending machine learning predictions with real-time data visualization. Empower your financial insights with cutting-edge technology and intuitive design.",
       img: "/1.png",
@@ -91,7 +99,7 @@ export const navItems = [
       link: "https://zenfinance-five.vercel.app/",
     },
     {
-      id: 2,
+      id: 4,
       title: "Ochi",
       des: "Ochi is an amazing design website which brings together the full power of Web Designing",
       img: "/Ochi.png",
@@ -99,7 +107,7 @@ export const navItems = [
       link: "https://github.com/Sevith-NS/ochi-front",
     },
     {
-      id: 3,
+      id: 5,
       title: "Learn2Lead",
       des: "Transform your career with LEARN2LEAD, an advanced e-learning platform designed for comprehensive interview preparation. Dive into courses, videos, and study materials, and enhance your skills with interactive quizzes and mock interviews. rack your progress through personalized dashboards and easily manage updated content. Explore internship opportunities and present your entrepreneurial ideas with the PitchIt module. ",
       img: "/3.png",
@@ -107,7 +115,7 @@ export const navItems = [
       link: "https://github.com/Sevith-NS/learn2lead",
     },
     {
-      id: 4,
+      id: 6,
       title: "Spotify",
       des: "Embark on a sonic journey with Spotify, where every beat becomes a thread in the tapestry of your life. Dive into a kaleidoscope of melodies, curated just for you, as you discover new rhythms that resonate with your soul. Let Spotify be your symphony, painting your world in the colors of music.",
       img: "/4.png",

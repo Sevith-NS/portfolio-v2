@@ -31,7 +31,7 @@ const Hero = () => {
                         Transforming Ideas into seamless User Experiences
                     </p>
                     <div className='flex flex-row lg:flex-row items-center gap-8 xl:mt-1 mt-[8px]'>
-                        <a href="https://drive.google.com/file/d/1cAK7NQLd8nl9yQghp43H8-sFKuLkof5C/view?usp=sharing">
+                        <a href="https://drive.google.com/file/d/1kM9O-HZJvC0dxo_QvVV92z3eQhJcIqQJ/view?usp=sharing">
                             <MagicButton
 
                                 title="Download Resume"

@@ -53,7 +53,7 @@ export const navItems = [
   
     {
       id: 5,
-      title: "Currently building an AI Mock Interview Website",
+      title: "Currently building a 3D Product Landing Page",
       // description: "LinkedIn",
       className: "md:col-span-3 md:row-span-2",
       imgClassName: "absolute right-0 bottom-0 md:w-96 w-60",
@@ -104,7 +104,7 @@ export const navItems = [
       des: "Ochi is an amazing design website which brings together the full power of Web Designing",
       img: "/Ochi.png",
       iconLists: [ "/tail.svg", "/javascript.svg", "/re.svg", "/fm.svg"],
-      link: "https://github.com/Sevith-NS/ochi-front",
+      link: "https://ochi-front.vercel.app/",
     },
     {
       id: 5,
@@ -127,7 +127,7 @@ export const navItems = [
   export const workExperience = [
     {
       id: 1,
-      title: "Market Analyst Intern",
+      title: "Capital Market Analyst Intern",
       desc: "Assisted in the development of a web-based platform using React.js, enhancing interactivity.",
       className: "md:col-span-2",
       thumbnail: "/exp1.svg",
@@ -148,18 +148,22 @@ export const navItems = [
       img: "/git.svg",
       link:"https://github.com/Sevith-NS",
     },
-    // {
-    //   id: 2,
-    //   img: "/insta.svg",
-    // },
+
+    {
+      id: 2,
+      img: "/insta.svg",
+      link:"https://www.instagram.com/sevith_ns/"
+    },
+
     {
       id: 3,
       img: "/link.svg",
-      link: "https://www.linkedin.com/in/sevith-n-s-079063273/",
+      link: "https://www.linkedin.com/in/sevith-n-s-079063273/"
     },
+
     // {
     //   id: 4,
     //   img: "/twit.svg",
-    //   link: "https://www.linkedin.com/in/sevith-n-s-079063273/",
+    //   link: "https://www.linkedin.com/in/sevith-n-s-079063273/"
     // },
   ];

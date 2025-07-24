@@ -158,7 +158,7 @@ export const navItems = [
     {
       id: 3,
       img: "/link.svg",
-      link: "https://www.linkedin.com/in/sevith-n-s-079063273/"
+      link: "https://www.linkedin.com/in/sevith-s-079063273/"
     },
 
     // {

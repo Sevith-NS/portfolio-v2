@@ -155,11 +155,11 @@ export const navItems = [
       link:"https://www.instagram.com/sevith_ns/"
     },
 
-    // {
-    //   id: 3,
-    //   img: "/link.svg",
-    //   link: "https://www.linkedin.com/in/sevith-s-079063273/"
-    // },
+    {
+      id: 3,
+      img: "/link.svg",
+      link: "https://www.linkedin.com/in/sevith-s-079063273/"
+    },
 
     // {
     //   id: 4,

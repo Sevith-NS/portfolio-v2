@@ -1,4 +1,167 @@
 @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
-  
+@tailwind components;
+@tailwind utilities;
+
+/* White by day, lapis-navy by night. Lapis is the one accent. Pastels live only on project plates. */
+@layer base {
+  :root {
+    --paper: 255 255 255;
+    --sheet: 247 247 245;
+    --ink: 17 17 17;
+    --ink-2: 71 71 71;
+    --ink-3: 110 110 110;
+    --rule: 232 232 230;
+    --hl: 0 45 180;
+    --on-hl: 255 255 255;
+    --accent: 0 45 180;
+    --tint-sage: 213 227 218;
+    --tint-butter: 234 241 198;
+    --tint-blush: 245 225 218;
+    --tint-lapis: 221 227 246;
+    --tint-stone: 236 236 234;
+    --tint-rose: 244 222 228;
+    --tint-mint: 214 238 229;
+    color-scheme: light;
+  }
+
+  .dark {
+    --paper: 9 13 30;
+    --sheet: 17 23 46;
+    --ink: 242 242 240;
+    --ink-2: 190 192 200;
+    --ink-3: 150 154 170;
+    --rule: 36 44 74;
+    --hl: 128 155 255;
+    --on-hl: 9 13 30;
+    --accent: 128 155 255;
+    --tint-sage: 28 48 44;
+    --tint-butter: 44 50 30;
+    --tint-blush: 56 38 40;
+    --tint-lapis: 26 38 88;
+    --tint-stone: 34 38 52;
+    --tint-rose: 54 32 48;
+    --tint-mint: 20 50 52;
+    color-scheme: dark;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    overflow-x: clip;
+    caret-color: rgb(var(--accent));
+  }
+
+  ::selection {
+    background: rgb(var(--hl));
+    color: rgb(var(--on-hl));
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent));
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  a {
+    text-underline-offset: 0.22em;
+    text-decoration-thickness: 1px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--rule)) transparent;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--rule));
+    border: 3px solid rgb(var(--paper));
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  .tabular { font-variant-numeric: tabular-nums; }
+}
+
+/* Lenis smooth scroll */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+@layer components {
+  /* The lapis marker: a solid band that sweeps in behind the key phrase. */
+  .hl {
+    background-image: linear-gradient(rgb(var(--hl)), rgb(var(--hl)));
+    background-repeat: no-repeat;
+    background-position: 0 85%;
+    background-size: 0% 12%;
+    transition: background-size 900ms cubic-bezier(0.16, 1, 0.3, 1);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  .hl[data-on="true"] { background-size: 100% 12%; }
+
+  .section-title {
+    @apply font-serif text-[2.4rem] md:text-[3.75rem] font-normal tracking-[-0.025em] leading-[1.05] text-ink;
+    text-wrap: balance;
+  }
+
+  .note {
+    @apply font-sans text-[0.8125rem] font-medium leading-5 text-ink-3 tabular;
+  }
+
+  .chip {
+    @apply inline-flex items-center rounded-full border border-rule px-3 py-1 text-[0.8125rem] font-medium text-ink-2;
+  }
+
+  .btn {
+    @apply inline-flex items-center gap-2 rounded-full px-5 h-11 text-[0.9375rem] font-medium
+      transition-[transform,background-color,color,border-color] duration-200 ease-out
+      active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary { @apply bg-accent text-on-hl hover:bg-accent/90; }
+  .btn-ghost { @apply border border-rule text-ink hover:border-ink bg-paper; }
+
+  /* Film grain for colour fields: a tiny SVG noise tile, not a scrolling filter. */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.18;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>");
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hl { transition: none; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* Handwritten lapis annotation, written on with a left-to-right mask wipe. */
+.scribble {
+  font-family: var(--font-script), cursive;
+  color: rgb(var(--accent));
+  line-height: 1;
+  mask-image: linear-gradient(90deg, #000 45%, transparent 55%);
+  mask-size: 240% 100%;
+  mask-position: 100% 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 45%, transparent 55%);
+  -webkit-mask-size: 240% 100%;
+  -webkit-mask-position: 100% 0;
+  transition: mask-position 1.6s cubic-bezier(0.65, 0, 0.35, 1), -webkit-mask-position 1.6s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.scribble[data-on="true"] { mask-position: 0 0; -webkit-mask-position: 0 0; }
+@media (prefers-reduced-motion: reduce) {
+  .scribble { mask-image: none; -webkit-mask-image: none; }
+}
+
+/* The custom cursor only exists for fine pointers. */
+@media (hover: hover) and (pointer: fine) {
+  .has-cursor, .has-cursor a, .has-cursor button { cursor: none; }
+  .has-cursor input, .has-cursor textarea { cursor: text; }
+}

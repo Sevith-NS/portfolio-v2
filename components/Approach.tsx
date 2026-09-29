@@ -1,190 +1,111 @@
 "use client";
-import React from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { CanvasRevealEffect } from "@/components/ui/CanvasRevealEffect";
+
+import { useRef, useState } from "react";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { approach } from "@/data";
+import { cn } from "@/lib/utils";
+import { SectionHeader } from "./SectionHeader";
+
+type Step = (typeof approach)[number];
+
+// The working document each phase produces. Illustrative, and labeled that way.
+const Artifact = ({ step, className }: { step: Step; className?: string }) => (
+  <div className={cn("rounded-2xl border border-rule bg-sheet p-5 shadow-[0_24px_48px_-32px_rgb(0_0_0/0.35)] md:p-7", className)}>
+    <div className="flex items-center justify-between border-b border-rule pb-4">
+      <p className="text-[0.9375rem] font-medium text-ink">{step.artifact.heading}</p>
+      <p className="note">Example</p>
+    </div>
+    <ul className="mt-2">
+      {step.artifact.rows.map((row, i) => (
+        <motion.li
+          key={row.text}
+          initial={{ opacity: 0, x: -6 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", stiffness: 140, damping: 20, delay: 0.08 + i * 0.07 }}
+          className="flex items-center gap-3 border-b border-rule/70 py-3.5 last:border-0"
+        >
+          <span
+            className={cn(
+              "w-[4.75rem] shrink-0 rounded-full border px-2 py-0.5 text-center font-mono text-[0.6875rem]",
+              i === 0 ? "border-transparent bg-hl text-on-hl" : "border-rule text-ink-2"
+            )}
+          >
+            {row.tag}
+          </span>
+          <span className="text-[0.9375rem] leading-snug text-ink">{row.text}</span>
+        </motion.li>
+      ))}
+    </ul>
+  </div>
+);
 
 const Approach = () => {
-    return (
-        <section className="w-full py-20 -mt-30 text-5xl text-center">
-            <h1 className="heading">
-                My <span className="text-purple">Approach</span>
-            </h1>
-            {/* remove bg-white dark:bg-black */}
-            <div className="my-20 flex flex-col lg:flex-row items-center justify-center w-full gap-4">
-                {/* add des prop */}
-                <Card
-                    title="Planning & Strategy"
-                    icon={<AceternityIcon order="Phase 1" />}
-                    des="Collaborate to map the website's goals, target audience, 
-                and key functionalities to discuss things like site structure, 
-                navigation, and content requirements."
-                >
-                    <CanvasRevealEffect
-                        animationSpeed={1}
-                        // add these classed for the border rounded overflowing -> rounded-3xl overflow-hidden
-                        containerClassName="bg-transparent rounded-3xl overflow-hidden"
-                        colors={[
-                            // change the colors of the
-                            // [255, 187, 0],
-                            [61, 189, 42],
-                        ]}
-                        dotSize={2.5}
-                       
-                        
-                    />
-                    
-                </Card>
-                <Card
-                    title="Development & Progress Update"
-                    icon={<AceternityIcon order="Phase 2" />}
-                    des="Once agreed on the plan, I cue my 80's playlist and dive into
-                coding. From initial sketches to polished code, and keep everyone updated
-                every step of the way."
-                >
-                    <CanvasRevealEffect
-                        animationSpeed={1}
-                        
-                        containerClassName="bg-transparent rounded-3xl overflow-hidden"
-                        colors={[
-                            // change the colors of the
-                            // [255, 0, 90],
-                            [228, 15, 247],
-                        ]}
-                        dotSize={2.5}
-                       
-                    />
-                </Card>
-                <Card
-                    title="Deployment & Launch"
-                    icon={<AceternityIcon order="Phase 3" />}
-                    des="This is where the magic happens! Based on the approved design, 
-                I'll translate everything into functional code, building the website
-                from the ground up."
-                >
-                    <CanvasRevealEffect
-                        animationSpeed={1}
-                        containerClassName="bg-transparent rounded-3xl overflow-hidden"
-                        colors={[
-                            // change the colors of the
-                            // [0, 51, 255],
-                            [0, 221, 255],
-                        ]}
-                        dotSize={2.5}
-                    />
-                     
-                </Card>
-            </div>
-        </section>
-    );
-};
+  const ref = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 60%", "end 60%"] });
 
-const Card = ({
-    title,
-    icon,
-    children,
-    des,
-}: {
-    title: string;
-    icon: React.ReactNode;
-    children?: React.ReactNode;
-    des: string;
-}) => {
-    const [hovered, setHovered] = React.useState(false);
-    return (
-        <div
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-  
-            className="border border-black/[0.2] group/canvas-card flex items-center justify-center
-             dark:border-white/[0.2]  max-w-sm w-full mx-auto p-4 relative lg:h-[35rem] rounded-3xl "
-            style={{
-                //   add these two
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    const i = Math.min(approach.length - 1, Math.max(0, Math.floor(v * approach.length)));
+    setActive(i);
+  });
 
-                background: "#000",
-                backgroundColor:
-                    "linear-gradient(90deg, rgba(4,7,29,1) 0%, rgba(12,14,35,1) 100%)",
-                
-            }}
-            
-        >
-            
+  return (
+    <section id="approach" className="mx-auto max-w-page px-4 py-20 md:px-8 md:py-24">
+      <SectionHeader
+        title="How I work."
+        note="Three phases I run on every release, with the kind of working document each one produces."
+      />
 
-            <AnimatePresence>
-                {hovered && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="h-full w-full absolute inset-0"
-                    >
-                        {children}
-                    </motion.div>
-                )}
-            </AnimatePresence>
+      <div ref={ref} className="mt-14 grid gap-8 md:grid-cols-12">
+        <ol className="md:col-span-6">
+          {approach.map((step, i) => (
+            <li
+              key={step.title}
+              className={cn(
+                "border-t border-rule py-8 transition-opacity duration-500 md:flex md:min-h-[62vh] md:flex-col md:justify-center md:py-0",
+                active === i ? "md:opacity-100" : "md:opacity-35"
+              )}
+            >
+              <h3 className="text-3xl font-semibold tracking-[-0.03em] text-ink md:text-4xl">{step.title}</h3>
+              <p className="mt-4 max-w-[52ch] leading-relaxed text-ink-2 md:text-lg md:leading-relaxed">{step.des}</p>
+              <p className="mt-5 text-sm text-ink">
+                <span className="text-ink-3">In practice: </span>
+                {step.proof}
+              </p>
+              <Artifact step={step} className="mt-8 md:hidden" />
+            </li>
+          ))}
+        </ol>
 
-            <div className="relative z-20 px-10">
-                <div
-              
-                    className="text-center group-hover/canvas-card:-translate-y-4 absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] 
-              group-hover/canvas-card:opacity-0 transition duration-200 min-w-40 mx-auto flex items-center justify-center"
-                >
-                    {icon}
-                </div>
-                <h2
-                    
-                    className="dark:text-white text-center text-3xl opacity-0 group-hover/canvas-card:opacity-100
-               relative z-10 text-black mt-4  font-bold group-hover/canvas-card:text-white 
-               group-hover/canvas-card:-translate-y-2 transition duration-200"
-                >
-                    {title}
-                </h2>
-                {/* add this one for the description */}
-                <p
-                    className="text-sm opacity-0 group-hover/canvas-card:opacity-100
-               relative z-10 mt-4 group-hover/canvas-card:text-white text-center
-               group-hover/canvas-card:-translate-y-2 transition duration-200"
-                    style={{ color: "#E4ECFF" }}
-                >
-                    {des}
-                </p>
-            </div>
-        </div>
-    );
-};
-// add order prop for the Phase number change
-const AceternityIcon = ({ order }: { order: string }) => {
-    return (
-        <div>
-            <button className="relative inline-flex overflow-hidden rounded-full p-[1px] ">
-                <span
-                    className="absolute inset-[-1000%] z-0 animate-[spin_2s_linear_infinite]
-               bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]"
-               style={{zIndex: 0}}
-                />
-                <span
-                    className="relative z-10 inline-flex h-full w-full cursor-pointer items-center 
-              justify-center rounded-full bg-slate-950 px-5 py-2 text-purple backdrop-blur-3xl font-bold text-2xl"
-                >
-                    {order}
+        <div className="hidden md:col-span-5 md:col-start-8 md:block">
+          <div className="sticky top-[calc(50vh-11rem)]">
+            <div className="mb-4 flex gap-1.5" aria-hidden>
+              {approach.map((s, i) => (
+                <span key={s.title} className="h-1 flex-1 overflow-hidden rounded-full bg-rule">
+                  <motion.span
+                    className="block h-full origin-left bg-ink"
+                    animate={{ scaleX: i <= active ? 1 : 0 }}
+                    transition={{ type: "spring", stiffness: 120, damping: 24 }}
+                  />
                 </span>
-            </button>
+              ))}
+            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={active}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <Artifact step={approach[active]} />
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
-    );
-};
-
-export const Icon = ({ className, ...rest }: any) => {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            className={className}
-            {...rest}
-        >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m6-6H6" />
-        </svg>
-    );
+      </div>
+    </section>
+  );
 };
 
 export default Approach;

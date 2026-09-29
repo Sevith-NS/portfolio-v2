@@ -1,99 +1,142 @@
 "use client";
 
 import React, { useState } from "react";
-import { CardBody, CardContainer, CardItem } from "../ui/3d-card";
-import { Bounce, ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import emailjs from 'emailjs-com';
-import { MdOutlineClose } from "react-icons/md";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, CheckCircle, CircleNotch, WarningCircle } from "@phosphor-icons/react";
+import emailjs from "@emailjs/browser";
+import { email } from "@/data";
+import { cn } from "@/lib/utils";
 
+type Status = "idle" | "sending" | "sent" | "error";
+type Fields = { name: string; mail: string; message: string };
+type Errors = Partial<Record<keyof Fields, string>>;
 
-interface FormProps {
-    onClose: () => void;
-  }
-
-export function Form({ onClose }: FormProps) {
-
-    const [name, setname] = useState<string>('');
-    const [mail, setmail] = useState<string>('');
-    const [message, setmessage] = useState<string>('');
-
-    const notify = () => toast.success('Submitted Successfully!', {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-        transition: Bounce
-
-    });
-
-    const handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault();
-
-        const templateParams = {
-            from_name: name,
-            from_mail: mail,
-            message: message,
-            subject: "New Portfolio Message"
-        };
-
-        emailjs.send(
-            process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-            process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
-            templateParams,
-            process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!)
-            .then((response) => {
-                console.log('SUCCESS!', response.status, response.text);
-                notify();
-                setname('');
-                setmail('');
-                setmessage('');
-            }, (err) => {
-                console.log('FAILED...', err);
-                toast.error('Failed to send message. Please try again later.', {
-                    position: "top-center",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                    transition: Bounce
-                });
-            });
-    };
-
-    return (
-        <CardContainer className="inter-var">
-             
-                <CardBody className="relative group/card xl:mt-[-40px] mt-[-60px] mb-[-100px] dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] bg-transparent dark:border-white/[0.2] border-black/[0.1] xl:w-[480px] w-[23rem] h-auto rounded-xl p-6 border flex justify-center">
-                    <CardItem
-                        translateZ="50"
-                        className="xl:text-3xl text-2xl flex flex-col items-center justify-center font-bold text-neutral-600 dark:text-white"
-                    >
-                        <MdOutlineClose onClick={onClose}  className="xl:mt-[-15px] xl:ml-[440px] xl:mb-1 xl:size-7 mt-[-15px] ml-[330px] mb-1 size-5"/>
-
-                        <h1>Let&apos;s work together
-                        </h1>
-
-                        <form onSubmit={handleSubmit} className="flex flex-col p-1">
-                            <input onChange={(e) => setname(e.target.value)} value={name} type="text" name="name" placeholder="Name" className="bg-transparent border text-xl border-white/50 mt-5 rounded-xl p-3 sm:p-[-30px] w-[340px] xl:w-[450px] " required />
-                            <input onChange={(e) => setmail(e.target.value)} value={mail} type="email" name="email" placeholder="Email" className="bg-transparent border text-xl border-white/50 mt-5 rounded-xl p-3 sm:p-[-30px] w-[340px]  xl:w-[450px] " required />
-                            <textarea onChange={(e) => setmessage(e.target.value)} value={message} name="text" placeholder="Message" className="bg-transparent border text-xl border-white/50 mt-5 rounded-xl p-3 sm:p-[-30px] w-[340px]  xl:w-[450px] h-[200px]" required />
-                            <button type="submit" className="bg-transparent border text-xl border-white/50 mt-3 rounded-full p-3 sm:p-[-30px] w-[340px]  xl:w-[450px] hover:bg-white hover:text-black">Submit</button>
-                        </form>
-                    </CardItem>
-                   
-                </CardBody>
-            
-        </CardContainer>
-    );
+const validate = (f: Fields): Errors => {
+  const e: Errors = {};
+  if (!f.name.trim()) e.name = "Add your name so I know who to reply to.";
+  if (!f.mail.trim()) e.mail = "Add an email so I can reply.";
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.mail)) e.mail = "That email doesn't look complete. Check for typos.";
+  if (f.message.trim().length < 10) e.message = "Write a sentence or two about what you have in mind.";
+  return e;
 };
+
+const inputClass =
+  "w-full rounded-xl border bg-paper px-4 py-3 text-base text-ink placeholder:text-ink-3 outline-none transition-colors focus:border-ink focus-visible:outline-none";
+
+export function Form() {
+  const [fields, setFields] = useState<Fields>({ name: "", mail: "", message: "" });
+  const [errors, setErrors] = useState<Errors>({});
+  const [status, setStatus] = useState<Status>("idle");
+
+  const set = (k: keyof Fields) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFields((f) => ({ ...f, [k]: e.target.value }));
+    if (errors[k]) setErrors((er) => ({ ...er, [k]: undefined }));
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const found = validate(fields);
+    setErrors(found);
+    const first = (Object.keys(found) as (keyof Fields)[])[0];
+    if (first) {
+      document.getElementById(`f-${first}`)?.focus();
+      return;
+    }
+
+    setStatus("sending");
+    try {
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+        { from_name: fields.name, from_mail: fields.mail, message: fields.message, subject: "New Portfolio Message" },
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+      );
+      setStatus("sent");
+      setFields({ name: "", mail: "", message: "" });
+    } catch (err) {
+      console.error("EmailJS send failed", err);
+      setStatus("error");
+    }
+  };
+
+  const field = (k: keyof Fields, label: string, input: React.ReactNode) => (
+    <div className="flex flex-col gap-2">
+      <label htmlFor={`f-${k}`} className="text-sm font-medium text-ink">
+        {label}
+      </label>
+      {input}
+      {errors[k] && (
+        <p id={`f-${k}-err`} role="alert" className="flex items-center gap-1.5 text-sm text-ink">
+          <WarningCircle size={15} weight="fill" className="shrink-0 text-[#D9480F] dark:text-[#FF8A5B]" />
+          {errors[k]}
+        </p>
+      )}
+    </div>
+  );
+
+  const aria = (k: keyof Fields) => ({
+    id: `f-${k}`,
+    name: k,
+    value: fields[k],
+    onChange: set(k),
+    "aria-invalid": !!errors[k],
+    "aria-describedby": errors[k] ? `f-${k}-err` : undefined,
+    className: cn(inputClass, errors[k] ? "border-[#D9480F] dark:border-[#FF8A5B]" : "border-rule"),
+  });
+
+  return (
+    <div className="relative rounded-2xl border border-rule bg-sheet p-5 md:p-8">
+      <AnimatePresence mode="wait" initial={false}>
+        {status === "sent" ? (
+          <motion.div
+            key="sent"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="flex min-h-[22rem] flex-col items-start justify-center gap-4"
+          >
+            <CheckCircle size={32} weight="fill" className="text-ink" />
+            <p className="text-2xl font-semibold tracking-[-0.02em] text-ink">Note received.</p>
+            <p className="max-w-[40ch] text-ink-2">Thanks for reaching out. I&apos;ll get back to you soon.</p>
+            <button type="button" onClick={() => setStatus("idle")} className="btn btn-ghost mt-2">
+              Send another
+            </button>
+          </motion.div>
+        ) : (
+          <motion.form key="form" noValidate onSubmit={handleSubmit} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-5">
+            <div className="grid gap-5 sm:grid-cols-2">
+              {field("name", "Name", <input type="text" autoComplete="name" placeholder="Your name" {...aria("name")} />)}
+              {field("mail", "Email", <input type="email" autoComplete="email" placeholder="you@company.com" {...aria("mail")} />)}
+            </div>
+            {field(
+              "message",
+              "Message",
+              <textarea rows={5} placeholder="A role, a project, or a question" {...aria("message")} className={cn(aria("message").className, "resize-y")} />
+            )}
+
+            {status === "error" && (
+              <p role="alert" className="flex items-start gap-2 rounded-xl border border-rule bg-paper p-3 text-sm text-ink">
+                <WarningCircle size={17} weight="fill" className="mt-px shrink-0 text-[#D9480F] dark:text-[#FF8A5B]" />
+                The message didn&apos;t send. Try again, or email me directly at {email}.
+              </p>
+            )}
+
+            <button type="submit" disabled={status === "sending"} className="btn btn-primary self-start">
+              {status === "sending" ? (
+                <>
+                  <CircleNotch size={16} className="animate-spin" /> Sending
+                </>
+              ) : (
+                <>
+                  Send note <ArrowRight size={16} />
+                </>
+              )}
+            </button>
+          </motion.form>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default Form;
-
-

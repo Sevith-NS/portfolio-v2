@@ -1,64 +1,86 @@
-import React from 'react'
-import { Spotlight } from './ui/Spotlight'
-import { TextGenerateEffect } from './ui/TextGenerateEffect';
-import MagicButton from './ui/MagicButton';
-import { IoCloudDownloadOutline } from 'react-icons/io5';
-import { socialMedia } from '@/data';
-import Stats from './ui/Stats';
+"use client";
 
+import { motion } from "framer-motion";
+import { ArrowUpRight, EnvelopeSimple, Mouse } from "@phosphor-icons/react";
+import { email, resumeLink } from "@/data";
+import { Scribble } from "./ui/Scribble";
 
+const ease = [0.16, 1, 0.3, 1] as const;
 
+// Centered serif statement, a lapis handwritten note crossing it, and a quiet cue to scroll.
 const Hero = () => {
-    return (
+  const words = "Product builder who designs, defines and ships thoughtful AI products.".split(" ");
+  return (
+    <section id="top" className="relative mx-auto flex min-h-[100dvh] max-w-[64rem] flex-col items-center justify-center px-4 pb-16 pt-28 text-center md:px-8">
+      <motion.p
+        initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        transition={{ duration: 0.8, ease }}
+        className="text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-accent"
+      >
+        Sevith Sadashiva · Bangalore
+      </motion.p>
 
-        <div className='pb=20 pt-[50px]'>
-            <div>
-                    <Spotlight className='-top-40 -left-10 md:-left-32 md:-top-20 h-screen' fill="white" />
-                    <Spotlight className='top-50 left-full h-[200vh] w-[50vw]' fill="purple" />
-                    <Spotlight className='top-28 left-80 h-[80vh] w-[50vw]' fill="blue" />
-            </div>
-            <div className="h-screen w-full dark:bg-black-100  bg-grid-black-100/[0.2] absolute top-0 left-0 flex items-center justify-center"
-            >               
-                <div className="absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-black-100" />
-            </div>
+      <h1 className="relative mt-7 max-w-[18ch] font-serif text-[2.6rem] leading-[1.08] tracking-[-0.02em] text-ink sm:text-6xl md:text-[4.1rem]">
+        {words.map((w, i) => (
+          <span key={i}>
+            <motion.span
+              className="inline-block"
+              initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.9, delay: 0.15 + i * 0.045, ease }}
+            >
+              {w}
+            </motion.span>
+            {i < words.length - 1 && " "}
+          </span>
+        ))}
+        <Scribble
+          delay={1100}
+          className="pointer-events-none absolute -bottom-16 right-0 -rotate-6 text-[3rem] sm:-bottom-20 sm:-right-6 sm:text-[4.4rem] md:-right-16 md:text-[5.2rem]"
+        >
+          hi, i&apos;m sevith
+        </Scribble>
+      </h1>
 
-            <div className='flex justify-center relative my-20 z-10'>
-                <div className='max-w-[89vw] md:max-w-2xl lg:max-w-[60vw] flex flex-col items-center'>
-                   
+      <motion.p
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.8, ease }}
+        className="mt-28 max-w-[52ch] text-[1.0625rem] leading-relaxed text-ink-2 sm:mt-32"
+      >
+        Technical Writer at Digital.ai, aiming for AI PM and product design roles. I led content for a GenAI launch by day, and
+        design and build AI products end to end on my own time.
+      </motion.p>
 
-                    <TextGenerateEffect className="text-center text-[40px] md:text:5xl lg:text-6xl" words="Hi, I am Sevith, Full Stack Developer Based in Bangalore" />
-                    <p className='text-center md:tracking-wider mb-4 text-sm md:text:text-lg lg:text-2xl xl:mt-10 mt-4'>
-                        Transforming Ideas into seamless User Experiences
-                    </p>
-                    <div className='flex flex-row lg:flex-row items-center gap-8 xl:mt-1 mt-[8px]'>
-                        <a href="https://drive.google.com/file/d/1SnWbw4nr33ANP0K1h8832c1O_su7ySVo/view?usp=sharing">
-                            <MagicButton
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.95, ease }}
+        className="mt-8 flex flex-wrap items-center justify-center gap-3"
+      >
+        <a href={resumeLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+          Résumé <ArrowUpRight size={15} />
+        </a>
+        <a href={`mailto:${email}`} className="btn btn-ghost">
+          <EnvelopeSimple size={16} /> {email}
+        </a>
+      </motion.div>
 
-                                title="Download Resume"
-                                icon={<IoCloudDownloadOutline className='w-5 h-5 ml-2' />}
-                                position='right'
-
-                            />
-                        </a>
-                        <div className='flex gap-4 xl:mt-[40px] sm:mt-[50px]'>
-                            {socialMedia.map((info) => (
-                                <div
-                                    key={info.id}
-                                    className="w-10 h-10 cursor-pointer flex justify-center items-center backdrop-filter backdrop-blur-lg saturate-180 bg-opacity-75"
-                                >
-                                    <a href={info.link} target="_blank" rel="noopener noreferrer">
-                                        <img src={info.img} alt="icons" width={35} height={35} />
-                                    </a>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <Stats />
-                </div>
-            </div>
-        </div>
-
-    );
+      <motion.a
+        href="#projects"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.6, duration: 0.8 }}
+        className="mt-16 flex flex-col items-center gap-2 text-[0.9375rem] font-medium text-ink-3 hover:text-ink"
+      >
+        <motion.span animate={{ y: [0, 4, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
+          <Mouse size={22} />
+        </motion.span>
+        scroll to see work
+      </motion.a>
+    </section>
+  );
 };
 
 export default Hero;

@@ -1,42 +1,103 @@
-import { workExperience } from '@/data'
-import React from 'react'
-import { Button } from './ui/MovingBorder'
+"use client";
+
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowUpRight, Plus } from "@phosphor-icons/react";
+import { workExperience } from "@/data";
+import { SectionHeader } from "./SectionHeader";
 
 const Experience = () => {
-  return (
-    <div className='py-20 w-full' id="experience">
-      <h1 className='heading'>
-        <span className='text-purple'> Work Experience</span>
-      </h1>
-      <div className='w-full mt-12 grid lg:grid-cols-4 grid-cols-1 gap-10'>
-            {workExperience.map((card) => (
-                <Button 
-                    key={card.id}
-                    duration={Math.floor(Math.random() * 10000) + 10000}
-                    borderRadius='1.75rem'
-                    style={{
-                      background: "rgb(4,7,29)",
-                      backgroundColor:"linear-gradient(90deg, rgba(4,7,29,1) 0%, rgba(12,14,35,1) 100%)",
-                      borderRadius: `calc(1.75rem* 0.96)`,
-                    }}
-                    className='flex-1 text-black dark:text-white border-neutral-200 dark:border-slate-800'
-                >
-                    <div className='flex lg-flex-row flex-col lg:items-center p-3 py-6 md:p-5 lg:p-10 gap-2'>
-            
-                        <div className='lg:ms-5'>
-                            <h1 className='text-start text-2xl md:text-2xl font-bold'>
-                                {card.title}
-                            </h1>
-                            <p className='text-start text-white-100 mt-3 font-semibold '>
-                                {card.desc}
-                            </p>
-                        </div>
-                    </div>
-                </Button>
-            ))}
-      </div>
-    </div>
-  )
-}
+  const [open, setOpen] = useState<number | null>(1);
 
-export default Experience
+  return (
+    <section id="experience" className="mx-auto max-w-page px-4 py-20 md:px-8 md:py-24">
+      <SectionHeader
+        title="Where I've shipped."
+        note="Two roles, one thread: understand what users need, then get it into their hands."
+      />
+
+      {/* Hovering one entry isolates its thread; the rest fall back to graphite. */}
+      <ol className="group/log mt-14 border-t border-rule">
+        {workExperience.map((job) => {
+          const isOpen = open === job.id;
+          return (
+            <li
+              key={job.id}
+              className="grid gap-4 border-b border-rule py-8 transition-opacity duration-300 md:grid-cols-12 md:gap-8 md:py-10 [@media(hover:hover)]:group-hover/log:opacity-45 [@media(hover:hover)]:hover:!opacity-100"
+            >
+              <div className="md:col-span-3">
+                <p className="note">{job.duration}</p>
+                <p className="mt-1 text-lg font-medium text-ink">{job.company}</p>
+              </div>
+
+              <div className="md:col-span-6">
+                <h3 className="text-2xl font-semibold leading-tight tracking-[-0.02em] text-ink md:text-[1.75rem]">
+                  {job.title}
+                </h3>
+                <p className="mt-3 max-w-[60ch] leading-relaxed text-ink-2">{job.desc}</p>
+
+                <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2">
+                  <button
+                    type="button"
+                    onClick={() => setOpen(isOpen ? null : job.id)}
+                    aria-expanded={isOpen}
+                    aria-controls={`job-${job.id}`}
+                    className="inline-flex items-center gap-2 text-sm font-medium text-ink underline decoration-rule underline-offset-4 hover:decoration-ink"
+                  >
+                    <motion.span animate={{ rotate: isOpen ? 45 : 0 }} transition={{ type: "spring", stiffness: 300, damping: 22 }}>
+                      <Plus size={14} weight="bold" />
+                    </motion.span>
+                    {isOpen ? "Hide details" : `${job.points.length} details`}
+                  </button>
+
+                  {job.link && (
+                    <a
+                      href={job.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm font-medium text-ink underline decoration-rule underline-offset-4 hover:decoration-ink"
+                    >
+                      <ArrowUpRight size={14} weight="bold" />
+                      View work
+                    </a>
+                  )}
+                </div>
+
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.ul
+                      id={`job-${job.id}`}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      {job.points.map((p) => (
+                        <li key={p} className="flex gap-3 pt-3 text-[0.9375rem] leading-relaxed text-ink-2 first:pt-5">
+                          <span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink-3" />
+                          {p}
+                        </li>
+                      ))}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="md:col-span-3">
+                <p className="note">Headline result</p>
+                <p className="mt-1 text-[0.9375rem] leading-snug text-ink">
+                  <span className="rounded-sm bg-hl px-1.5 py-0.5 text-on-hl [box-decoration-break:clone] [-webkit-box-decoration-break:clone]">
+                    {job.decision}
+                  </span>
+                </p>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+};
+
+export default Experience;

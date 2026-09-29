@@ -1,4 +1,17 @@
 node_modules
 
-# Sentry Config File
+# Secrets: never commit env files
+.env
+.env*.local
 .env.sentry-build-plugin
+
+# Build output
+.next
+out
+*.tsbuildinfo
+next-env.d.ts
+
+# Local design-review captures
+.impeccable/review
+.impeccable/decision-payload.json
+.next-verify

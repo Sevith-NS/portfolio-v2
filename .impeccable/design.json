@@ -1,0 +1,755 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-29T15:01:00Z",
+  "title": "Design System: Sevith Sadashiva · Portfolio",
+  "extensions": {
+    "colorMeta": {
+      "lapis": {
+        "role": "primary",
+        "displayName": "Lapis",
+        "canonical": "rgb(36 64 168)",
+        "tonalRamp": [
+          "#020037",
+          "#0B1B5F",
+          "#21398A",
+          "#3A59B8",
+          "#557AE6",
+          "#7AA0FF",
+          "#A1C6FF",
+          "#CAEDFF"
+        ]
+      },
+      "on-lapis": {
+        "role": "primary",
+        "displayName": "Lapis Ground",
+        "canonical": "rgb(247 243 236)",
+        "tonalRamp": [
+          "#0C0B08",
+          "#272521",
+          "#44423D",
+          "#64615B",
+          "#85827C",
+          "#A8A59F",
+          "#CCC9C3",
+          "#F1EEE9"
+        ]
+      },
+      "oat-paper": {
+        "role": "neutral",
+        "displayName": "Oat Paper",
+        "canonical": "rgb(239 233 222)",
+        "tonalRamp": [
+          "#0D0B07",
+          "#28251F",
+          "#45413A",
+          "#656158",
+          "#878278",
+          "#A9A49B",
+          "#CDC9C0",
+          "#F2EEE6"
+        ]
+      },
+      "oat-sheet": {
+        "role": "neutral",
+        "displayName": "Oat Sheet",
+        "canonical": "rgb(247 243 236)",
+        "tonalRamp": [
+          "#0C0B08",
+          "#272521",
+          "#44423D",
+          "#64615B",
+          "#85827C",
+          "#A8A59F",
+          "#CCC9C3",
+          "#F1EEE9"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Blue-Black Ink",
+        "canonical": "rgb(22 27 45)",
+        "tonalRamp": [
+          "#080B15",
+          "#202432",
+          "#3C4152",
+          "#5A6174",
+          "#7A8298",
+          "#9DA4BA",
+          "#C2C9DD",
+          "#E8EEFF"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Ink 2",
+        "canonical": "rgb(64 69 88)",
+        "tonalRamp": [
+          "#080B14",
+          "#212431",
+          "#3D4151",
+          "#5B6073",
+          "#7C8197",
+          "#9FA4B8",
+          "#C3C8DB",
+          "#E9EEFF"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Ink 3",
+        "canonical": "rgb(96 99 114)",
+        "tonalRamp": [
+          "#090B12",
+          "#23242E",
+          "#3F414D",
+          "#5E606E",
+          "#7E8191",
+          "#A1A4B3",
+          "#C5C8D6",
+          "#EBEEFA"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Oat Rule",
+        "canonical": "rgb(216 206 188)",
+        "tonalRamp": [
+          "#0F0A04",
+          "#2A241A",
+          "#484135",
+          "#686052",
+          "#8A8171",
+          "#ADA494",
+          "#D0C8BA",
+          "#F5EEE1"
+        ]
+      },
+      "tint-sage": {
+        "role": "tint",
+        "displayName": "Sage Plate",
+        "canonical": "rgb(205 214 196)",
+        "tonalRamp": [
+          "#090D06",
+          "#22271D",
+          "#3E4438",
+          "#5D6456",
+          "#7D8675",
+          "#A0A899",
+          "#C5CCBE",
+          "#EBF1E4"
+        ]
+      },
+      "tint-butter": {
+        "role": "tint",
+        "displayName": "Butter Plate",
+        "canonical": "rgb(232 223 186)",
+        "tonalRamp": [
+          "#0F0B00",
+          "#2A2510",
+          "#484229",
+          "#696144",
+          "#8B8361",
+          "#ADA586",
+          "#D1CAAD",
+          "#F5EFD5"
+        ]
+      },
+      "tint-blush": {
+        "role": "tint",
+        "displayName": "Blush Plate",
+        "canonical": "rgb(234 212 200)",
+        "tonalRamp": [
+          "#110905",
+          "#2E221C",
+          "#4D3F37",
+          "#6E5D54",
+          "#917E73",
+          "#B3A196",
+          "#D7C5BC",
+          "#FBEBE2"
+        ]
+      },
+      "tint-lapis": {
+        "role": "tint",
+        "displayName": "Lapis Mist Plate",
+        "canonical": "rgb(203 210 236)",
+        "tonalRamp": [
+          "#080A15",
+          "#212432",
+          "#3D4152",
+          "#5B6075",
+          "#7B8199",
+          "#9EA4BA",
+          "#C3C8DD",
+          "#E9EEFF"
+        ]
+      },
+      "tint-stone": {
+        "role": "tint",
+        "displayName": "Stone Plate",
+        "canonical": "rgb(222 214 200)",
+        "tonalRamp": [
+          "#0E0B06",
+          "#29241D",
+          "#474138",
+          "#676055",
+          "#898175",
+          "#ABA498",
+          "#CFC8BD",
+          "#F3EEE4"
+        ]
+      },
+      "tint-rose": {
+        "role": "tint",
+        "displayName": "Rose Plate",
+        "canonical": "rgb(232 205 210)",
+        "tonalRamp": [
+          "#12080A",
+          "#2F2123",
+          "#4E3D40",
+          "#705B5F",
+          "#937B80",
+          "#B59EA2",
+          "#D8C3C7",
+          "#FCE9EC"
+        ]
+      },
+      "tint-mint": {
+        "role": "tint",
+        "displayName": "Mint Plate",
+        "canonical": "rgb(200 222 212)",
+        "tonalRamp": [
+          "#050D0A",
+          "#1C2823",
+          "#37463F",
+          "#54665E",
+          "#74887F",
+          "#97AAA2",
+          "#BDCEC6",
+          "#E3F3EC"
+        ]
+      },
+      "lapis-night": {
+        "role": "primary",
+        "displayName": "Night Lapis",
+        "canonical": "rgb(150 172 255)",
+        "tonalRamp": [
+          "#04042A",
+          "#171F4F",
+          "#303C76",
+          "#4B5BA0",
+          "#697CCB",
+          "#8DA1EA",
+          "#B2C6FF",
+          "#DAECFF"
+        ]
+      },
+      "on-lapis-night": {
+        "role": "primary",
+        "displayName": "Night Lapis Ground",
+        "canonical": "rgb(13 20 44)",
+        "tonalRamp": [
+          "#060A18",
+          "#1E2436",
+          "#394158",
+          "#57607B",
+          "#7682A0",
+          "#9AA4C2",
+          "#BFC9E4",
+          "#E5EEFF"
+        ]
+      },
+      "paper-night": {
+        "role": "neutral",
+        "displayName": "Lapis Navy",
+        "canonical": "rgb(13 20 44)",
+        "tonalRamp": [
+          "#060A18",
+          "#1E2436",
+          "#394158",
+          "#57607B",
+          "#7682A0",
+          "#9AA4C2",
+          "#BFC9E4",
+          "#E5EEFF"
+        ]
+      },
+      "sheet-night": {
+        "role": "neutral",
+        "displayName": "Navy Sheet",
+        "canonical": "rgb(20 29 60)",
+        "tonalRamp": [
+          "#060A1B",
+          "#1C243A",
+          "#37415D",
+          "#546081",
+          "#7481A7",
+          "#97A4C8",
+          "#BCC8EA",
+          "#E3EEFF"
+        ]
+      },
+      "ink-night": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "canonical": "rgb(239 233 222)",
+        "tonalRamp": [
+          "#0D0B07",
+          "#28251F",
+          "#45413A",
+          "#656158",
+          "#878278",
+          "#A9A49B",
+          "#CDC9C0",
+          "#F2EEE6"
+        ]
+      },
+      "ink-2-night": {
+        "role": "neutral",
+        "displayName": "Night Ink 2",
+        "canonical": "rgb(196 192 182)",
+        "tonalRamp": [
+          "#0D0B07",
+          "#27251F",
+          "#44423B",
+          "#646159",
+          "#868279",
+          "#A8A59C",
+          "#CCC9C1",
+          "#F1EEE7"
+        ]
+      },
+      "ink-3-night": {
+        "role": "neutral",
+        "displayName": "Night Ink 3",
+        "canonical": "rgb(152 156 174)",
+        "tonalRamp": [
+          "#090B12",
+          "#22242F",
+          "#3F414E",
+          "#5D606F",
+          "#7E8193",
+          "#A0A4B4",
+          "#C5C8D7",
+          "#EBEEFC"
+        ]
+      },
+      "rule-night": {
+        "role": "neutral",
+        "displayName": "Night Rule",
+        "canonical": "rgb(42 54 92)",
+        "tonalRamp": [
+          "#05091D",
+          "#1B243D",
+          "#364160",
+          "#536085",
+          "#7281AC",
+          "#95A4CD",
+          "#BAC8EE",
+          "#E1EEFF"
+        ]
+      },
+      "tint-sage-night": {
+        "role": "tint",
+        "displayName": "Sage Plate (night)",
+        "canonical": "rgb(34 48 54)",
+        "tonalRamp": [
+          "#060C10",
+          "#1D272B",
+          "#384449",
+          "#56646A",
+          "#75858C",
+          "#99A8AE",
+          "#BECCD2",
+          "#E4F1F6"
+        ]
+      },
+      "tint-butter-night": {
+        "role": "tint",
+        "displayName": "Butter Plate (night)",
+        "canonical": "rgb(48 48 52)",
+        "tonalRamp": [
+          "#0B0B0D",
+          "#252527",
+          "#424245",
+          "#616165",
+          "#828286",
+          "#A4A4A9",
+          "#C9C9CD",
+          "#EEEEF2"
+        ]
+      },
+      "tint-blush-night": {
+        "role": "tint",
+        "displayName": "Blush Plate (night)",
+        "canonical": "rgb(52 40 56)",
+        "tonalRamp": [
+          "#0F0811",
+          "#2A222D",
+          "#483E4B",
+          "#685C6D",
+          "#8B7D8F",
+          "#ADA0B1",
+          "#D0C4D5",
+          "#F5EAF9"
+        ]
+      },
+      "tint-lapis-night": {
+        "role": "tint",
+        "displayName": "Lapis Plate (night)",
+        "canonical": "rgb(30 44 92)",
+        "tonalRamp": [
+          "#040822",
+          "#182344",
+          "#324068",
+          "#4E5F8F",
+          "#6C80B7",
+          "#90A4D7",
+          "#B6C8F8",
+          "#DDEEFF"
+        ]
+      },
+      "tint-stone-night": {
+        "role": "tint",
+        "displayName": "Stone Plate (night)",
+        "canonical": "rgb(38 42 62)",
+        "tonalRamp": [
+          "#080A15",
+          "#212432",
+          "#3D4152",
+          "#5B6075",
+          "#7C8199",
+          "#9FA4BA",
+          "#C3C8DD",
+          "#E9EEFF"
+        ]
+      },
+      "tint-rose-night": {
+        "role": "tint",
+        "displayName": "Rose Plate (night)",
+        "canonical": "rgb(50 36 60)",
+        "tonalRamp": [
+          "#0F0814",
+          "#2A2031",
+          "#483C51",
+          "#695B73",
+          "#8B7B97",
+          "#AD9EB9",
+          "#D1C3DC",
+          "#F5E9FF"
+        ]
+      },
+      "tint-mint-night": {
+        "role": "tint",
+        "displayName": "Mint Plate (night)",
+        "canonical": "rgb(28 50 60)",
+        "tonalRamp": [
+          "#030D12",
+          "#19272E",
+          "#33454E",
+          "#50656F",
+          "#6E8792",
+          "#92A9B4",
+          "#B8CDD7",
+          "#DFF2FB"
+        ]
+      },
+      "error": {
+        "role": "error",
+        "displayName": "Signal Orange",
+        "canonical": "rgb(217 72 15)",
+        "tonalRamp": [
+          "#2D0000",
+          "#550000",
+          "#800800",
+          "#AD2C00",
+          "#DB4B15",
+          "#FC784F",
+          "#FFA37E",
+          "#FFCEAC"
+        ]
+      },
+      "error-night": {
+        "role": "error",
+        "displayName": "Night Signal Orange",
+        "canonical": "rgb(255 138 91)",
+        "tonalRamp": [
+          "#270000",
+          "#4D0200",
+          "#752100",
+          "#A03E0D",
+          "#CC5C2C",
+          "#ED855C",
+          "#FFAD88",
+          "#FFD6B4"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero name, case-study titles, curtain destination title, next-case card."
+      },
+      "headline": {
+        "displayName": "Section Title",
+        "purpose": "Every section title; short, sentence case, ends with a period."
+      },
+      "statement": {
+        "displayName": "Statement",
+        "purpose": "Project outcomes, hero subline, case-study outcome line."
+      },
+      "figure": {
+        "displayName": "Ledger Figure",
+        "purpose": "Resume numbers in the hero ledger, tabular."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Role titles and Approach phase titles."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "Intro paragraphs, 52 to 60ch."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading text."
+      },
+      "body-small": {
+        "displayName": "Body Small",
+        "purpose": "Buttons, chips, nav, list items."
+      },
+      "note": {
+        "displayName": "Mono Note",
+        "purpose": "Dates, margin labels, stack lists, frame and scene counters."
+      },
+      "script": {
+        "displayName": "Margin Scribble",
+        "purpose": "Handwritten lapis margin annotations, at most one per section."
+      }
+    },
+    "shadows": [
+      {
+        "name": "screenshot-float",
+        "value": "0 24px 48px -24px rgb(22 27 45 / 0.45)",
+        "purpose": "Under the product image rising out of a tinted plate."
+      },
+      {
+        "name": "screenshot-float-hero",
+        "value": "0 32px 64px -28px rgb(22 27 45 / 0.5)",
+        "purpose": "Case-study hero screenshot."
+      },
+      {
+        "name": "working-document",
+        "value": "0 24px 48px -32px rgb(0 0 0 / 0.35)",
+        "purpose": "The pinned Approach artifact card."
+      },
+      {
+        "name": "nav-float",
+        "value": "0 8px 24px -12px rgb(22 27 45 / 0.22)",
+        "purpose": "Floating nav pill, with 12px backdrop blur."
+      },
+      {
+        "name": "menu-float",
+        "value": "0 16px 40px -20px rgb(22 27 45 / 0.35)",
+        "purpose": "Mobile menu panel."
+      }
+    ],
+    "motion": [
+      {
+        "name": "curtain",
+        "value": "620ms cubic-bezier(0.76, 0, 0.24, 1)",
+        "purpose": "The film-slate page-transition curtain, in and out (clip-path wipe). The only page-transition curve."
+      },
+      {
+        "name": "curtain-title",
+        "value": "450ms cubic-bezier(0.16, 1, 0.3, 1), 220ms delay",
+        "purpose": "Destination title rising inside the curtain; Scene NN fades in at 300ms."
+      },
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "In-page reveals: highlighter stroke (900ms), plate screenshot lift (500ms), disclosures (350ms), swaps (300 to 450ms)."
+      },
+      {
+        "name": "scribble-write",
+        "value": "1600ms cubic-bezier(0.65, 0, 0.35, 1)",
+        "purpose": "Left-to-right mask wipe that writes a margin scribble on."
+      },
+      {
+        "name": "control",
+        "value": "200ms ease-out",
+        "purpose": "Button color, border and 0.98 press scale."
+      },
+      {
+        "name": "spring-ui",
+        "value": "spring stiffness 260-380, damping 30-32",
+        "purpose": "Nav hide/show, active nav pill glide, mobile menu."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "Curtain skipped, scribbles and highlighter render finished, 3D pieces hold still, all transitions ~0ms."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "page",
+        "value": "1240px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Lapis pill for the one or two actions per view (resume, case study, send).",
+      "html": "<button class=\"ds-btn-primary\">Download resume</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px;border:none;border-radius:9999px;background:#2440A8;color:#F7F3EC;font:500 15px/1 Geist,ui-sans-serif,system-ui,sans-serif;cursor:pointer;transition:transform .2s ease-out,background-color .2s ease-out}.ds-btn-primary:hover{background:rgb(36 64 168/.9)}.ds-btn-primary:active{transform:scale(.98)}.ds-btn-primary:focus-visible{outline:2px solid #161B2D;outline-offset:3px}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary actions and icon-only prev/next arrows.",
+      "html": "<button class=\"ds-btn-ghost\">sevithns@gmail.com</button>",
+      "css": ".ds-btn-ghost{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px;border:1px solid #D8CEBC;border-radius:9999px;background:rgb(247 243 236/.6);color:#161B2D;font:500 15px/1 Geist,ui-sans-serif,system-ui,sans-serif;cursor:pointer;transition:border-color .2s ease-out,transform .2s ease-out}.ds-btn-ghost:hover{border-color:#161B2D}.ds-btn-ghost:active{transform:scale(.98)}.ds-btn-ghost:focus-visible{outline:2px solid #161B2D;outline-offset:3px}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labelled field on paper inside a sheet card; border shifts to ink on focus.",
+      "html": "<label class=\"ds-field\"><span>Email</span><input placeholder=\"you@company.com\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:8px;font:500 14px Geist,ui-sans-serif,sans-serif;color:#161B2D;max-width:320px}.ds-field input{border:1px solid #D8CEBC;border-radius:12px;background:#EFE9DE;padding:12px 16px;font:400 16px Geist,ui-sans-serif,sans-serif;color:#161B2D;outline:none;transition:border-color .2s}.ds-field input::placeholder{color:#606372}.ds-field input:focus{border-color:#161B2D}"
+    },
+    {
+      "name": "Floating Nav",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Blurred sheet pill with lapis-period wordmark and a gliding 10% lapis active pill.",
+      "html": "<nav class=\"ds-nav\"><b>sevith<i>.</i></b><a class=\"on\">Projects</a><a>Approach</a><a>Studio</a><a>Contact</a></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;gap:4px;padding:6px 6px 6px 20px;border:1px solid #D8CEBC;border-radius:9999px;background:rgb(247 243 236/.85);box-shadow:0 8px 24px -12px rgb(22 27 45/.22);backdrop-filter:blur(12px);font:400 14px Geist,ui-sans-serif,sans-serif}.ds-nav b{font:600 17.6px 'Bricolage Grotesque',Geist,sans-serif;letter-spacing:-.03em;color:#161B2D;margin-right:auto;padding-right:16px}.ds-nav i{font-style:normal;color:#2440A8}.ds-nav a{padding:8px 12px;border-radius:9999px;color:#404558;cursor:pointer;transition:color .2s}.ds-nav a:hover{color:#161B2D}.ds-nav a.on{color:#161B2D;background:rgb(36 64 168/.1)}"
+    },
+    {
+      "name": "Interest Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Sheet pill with hairline; hovers to lapis.",
+      "html": "<span class=\"ds-chip\">Cinema</span> <span class=\"ds-chip ds-chip-on\">Type</span>",
+      "css": ".ds-chip{display:inline-block;padding:8px 16px;border:1px solid #D8CEBC;border-radius:9999px;background:#F7F3EC;color:#161B2D;font:400 15px Geist,ui-sans-serif,sans-serif;transition:border-color .2s,color .2s}.ds-chip:hover{border-color:#2440A8;color:#2440A8}.ds-chip-on{background:#2440A8;border-color:#2440A8;color:#F7F3EC}"
+    },
+    {
+      "name": "Project Plate",
+      "kind": "card",
+      "refersTo": "project-plate",
+      "description": "Tinted plate with the screenshot floating up from the bottom edge; outcome and mono stack below.",
+      "html": "<a class=\"ds-plate\"><div class=\"ds-plate-g\"><div class=\"ds-plate-img\"></div></div><p class=\"ds-plate-o\">I built an AI mock-interview coach so students can rehearse placements.</p><p class=\"ds-plate-n\">Tesseract AI · 2025 · Next.js, TypeScript, Gemini</p></a>",
+      "css": ".ds-plate{display:block;max-width:420px;cursor:pointer;text-decoration:none}.ds-plate-g{position:relative;aspect-ratio:4/3;border-radius:28px;overflow:hidden;background:#CBD2EC}.ds-plate-img{position:absolute;left:9%;right:9%;top:12%;bottom:0;border-radius:12px 12px 0 0;background:#F7F3EC;box-shadow:0 24px 48px -24px rgb(22 27 45/.45);transition:transform .5s cubic-bezier(.16,1,.3,1)}.ds-plate:hover .ds-plate-img{transform:translateY(-8px)}.ds-plate-o{margin:20px 0 0;font:500 20px/1.35 'Bricolage Grotesque',Geist,sans-serif;letter-spacing:-.02em;color:#161B2D}.ds-plate-n{margin:10px 0 0;font:400 12px/20px 'Geist Mono',ui-monospace,monospace;color:#606372}"
+    },
+    {
+      "name": "Film-Slate Curtain",
+      "kind": "custom",
+      "refersTo": "curtain",
+      "description": "Full-bleed lapis curtain between routes: destination title and Scene NN; 620ms clip-path wipe on cubic-bezier(0.76,0,0.24,1).",
+      "html": "<div class=\"ds-curtain\"><p>Tesseract AI</p><span>Scene 02</span></div>",
+      "css": ".ds-curtain{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;height:220px;padding:24px 32px;border-radius:16px;background:#2440A8;color:#F7F3EC;animation:ds-wipe 1.6s cubic-bezier(.76,0,.24,1) infinite alternate}.ds-curtain p{margin:0;font:600 56px/1 'Bricolage Grotesque',Geist,sans-serif;letter-spacing:-.04em}.ds-curtain span{font:400 12px 'Geist Mono',ui-monospace,monospace;opacity:.8}@keyframes ds-wipe{0%{clip-path:inset(100% 0 0 0)}40%,100%{clip-path:inset(0 0 0 0)}}@media (prefers-reduced-motion:reduce){.ds-curtain{animation:none}}"
+    },
+    {
+      "name": "Margin Scribble",
+      "kind": "custom",
+      "refersTo": "typography.script",
+      "description": "Handwritten lapis margin note, written on left to right; at most one per section.",
+      "html": "<span class=\"ds-scribble\">curious, precise, warm</span>",
+      "css": ".ds-scribble{display:inline-block;transform:rotate(-2deg);font:400 32px/1 'Nothing You Could Do',cursive;color:#2440A8;-webkit-mask-image:linear-gradient(90deg,#000 45%,transparent 55%);mask-image:linear-gradient(90deg,#000 45%,transparent 55%);-webkit-mask-size:240% 100%;mask-size:240% 100%;animation:ds-write 3s cubic-bezier(.65,0,.35,1) infinite}@keyframes ds-write{0%{-webkit-mask-position:100% 0;mask-position:100% 0}60%,100%{-webkit-mask-position:0 0;mask-position:0 0}}@media (prefers-reduced-motion:reduce){.ds-scribble{animation:none;-webkit-mask-image:none;mask-image:none}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Studio Sketchbook",
+    "overview": "A product builder's sketchbook, bound in oat paper and lapis. The work reads like a well-run product: hairline-ruled rows, a mono margin, figures set large and tabular, case studies laid out like briefs. The margins show the person: a handwritten lapis note here and there, a type specimen you can play with, a small 3D studio that changes scene every five minutes. The three words are curious, precise, warm, and every surface tries to be all three at once.\n\nThe ground is warm oat paper (light, the default) or deep lapis-navy (dark), with a faint 24px ruling fixed behind the page that fades out toward the bottom. On that ground, a single lapis accent does all the pointing: primary actions, the headline decision of each role, the highlighter stroke, the active scene, and the film-slate curtain that closes over the page between routes. Projects sit on softly tinted plates, each its own quiet color from a seven-tint family, with the product screenshot floating up out of the plate.\n\nMotion is Premium and cinematic, not busy. Page changes play like a film slate: a lapis curtain wipes up, names the destination and a scene number, then wipes away on the same curve. Three signature 3D pieces (the hero monogram, the film reel, the studio room) carry the spectacle; everything else moves with restraint and stops entirely under reduced motion.",
+    "keyCharacteristics": [
+      "Oat paper and lapis-navy grounds, one lapis accent, seven soft tints for project plates.",
+      "Bricolage Grotesque display, Geist body, Geist Mono notes, Nothing You Could Do for margin scribbles.",
+      "Hairline rules instead of cards for lists of facts; cards only where a thing is an object (form, working document, type specimen).",
+      "A film-slate lapis curtain between pages: clip-path wipe, 620ms, one curve in and out.",
+      "Three 3D signature pieces in oat clay and lapis gloss, and no others."
+    ],
+    "rules": [
+      {
+        "name": "The Single Lapis Rule",
+        "body": "Lapis is the only accent and it means \"act here\" or \"this was decided\". It marks actions, decisions and the curtain. If a lapis element is neither clickable nor a decision, it should be ink.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tint Family Rule",
+        "body": "Project plates use the tint family, one tint per project, carried through to its case study. Tints never hold UI chrome, text blocks or buttons, and a plate is never solid lapis.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Kicker Rule",
+        "body": "No labels above headings. A heading stands alone; context goes in the margin note beside it (the section header is title left, note right) or in the body below.",
+        "section": "typography"
+      },
+      {
+        "name": "The Mono Stack Rule",
+        "body": "Tech stacks are written as Geist Mono text (\"Next.js, TypeScript, Tailwind\"), never as logos or icon rows.",
+        "section": "typography"
+      },
+      {
+        "name": "The Ledger Rule",
+        "body": "Every number on the page comes from the resume (260+, 25+, 30+, 4, 30%, 10%) and is set tabular. Nothing is rounded up or invented.",
+        "section": "typography"
+      },
+      {
+        "name": "The Margin Scribble Rule",
+        "body": "Handwritten lapis scribbles are margin annotations only, at most one per section, and never carry information a visitor needs. They write themselves on with a left-to-right mask wipe (1.6s) when scrolled into view.",
+        "section": "typography"
+      },
+      {
+        "name": "The Hairline Rule",
+        "body": "Structure comes from 1px Rule lines and whitespace, not from boxes. A new card needs a reason to be an object.",
+        "section": "layout"
+      },
+      {
+        "name": "The Three Pieces Rule",
+        "body": "3D is used for the three signature pieces only: the hero \"S\" monogram (lapis clear-coat letter, oat clay forms, turns toward the cursor), the film reel (projects as frames on a turning film strip), and the studio room (isometric low-poly room, 7 scenes). Each pauses when off screen, caps DPR at 1.75, and respects reduced motion (no drift, no auto-advance, no pointer chase). No fourth 3D object.",
+        "section": "elevation"
+      },
+      {
+        "name": "The One Curtain Rule",
+        "body": "The motion personality is Premium, with one curtain curve: cubic-bezier(0.76, 0, 0.24, 1) at 620ms, used in and out. In-page reveals use a soft expo-out (cubic-bezier(0.16, 1, 0.3, 1)) or light springs; nothing bounces, and nothing competes with the curtain.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do keep lapis (#2440A8 / #96ACFF) for actions, decisions and the curtain only.",
+      "Do give every project one tint from the family and carry it into its case study.",
+      "Do write tech stacks as Geist Mono text.",
+      "Do take every number from the resume and set it tabular.",
+      "Do put context in the margin note beside a heading, never above it.",
+      "Do use one curtain curve, cubic-bezier(0.76, 0, 0.24, 1) at 620ms, for page transitions, and make every motion stop under reduced motion.",
+      "Do separate content with 1px Rule hairlines before reaching for a card."
+    ],
+    "donts": [
+      "Don't add a second accent color, gradients, or a colored text highlight that isn't lapis.",
+      "Don't use more than one scribble per section, or put needed information in a scribble.",
+      "Don't put labels, kickers or eyebrows above headings.",
+      "Don't show technology logos or icon rows for stacks.",
+      "Don't invent metrics, testimonials or client logos.",
+      "Don't add 3D beyond the monogram, the reel and the studio room, or let any of them animate under reduced motion.",
+      "Don't use pure black or pure white; ink is #161B2D and paper is #EFE9DE."
+    ]
+  }
+}

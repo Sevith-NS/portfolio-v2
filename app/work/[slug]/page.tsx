@@ -42,6 +42,7 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
 const field: Record<string, string> = {
   lapis: "bg-tint-lapis", sage: "bg-tint-sage", stone: "bg-tint-stone", butter: "bg-tint-butter",
   blush: "bg-tint-blush", mint: "bg-tint-mint", rose: "bg-tint-rose",
+  amber: "bg-tint-amber", garnet: "bg-tint-garnet", clover: "bg-tint-clover",
 };
 
 export default function CasePage({ params }: { params: { slug: string } }) {

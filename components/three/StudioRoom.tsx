@@ -1,181 +1,473 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { ContactShadows, SoftShadows, useAnimations, useGLTF } from "@react-three/drei";
 import { useReducedMotion } from "framer-motion";
-import { ContactShadows } from "@react-three/drei";
-import * as THREE from "three";
 import { useTheme } from "next-themes";
+import * as THREE from "three";
+import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { useInView3D } from "./useInView3D";
-import { ideas } from "@/data/studio";
+import { ideas, OUTDOOR } from "@/data/studio";
+import { StudioSkeleton } from "./StudioSkeleton";
 
-export type SceneId = "design" | "editing" | "trading" | "sports" | "cinema" | "cooking" | "panic" | "ideas";
+export type SceneId =
+  | "design" | "editing" | "trading" | "sports" | "gym" | "run" | "cinema" | "cooking" | "panic" | "ideas" | "bench";
 
+
+type V3 = [number, number, number];
+
+// Models are Kenney CC0 kits (furniture, nature, roads, food, mini characters). See public/models/LICENSE-kenney.txt.
+const M = "/models/";
+const MODELS = [
+  "desk", "chairDesk", "computerScreen", "computerKeyboard", "computerMouse", "laptop", "lampSquareFloor", "lampRoundTable",
+  "pottedPlant", "plantSmall1", "bookcaseOpen", "books", "rugRectangle", "rugRound", "loungeSofa", "televisionModern",
+  "cabinetTelevision", "tableCoffee", "kitchenCabinet", "kitchenStove", "kitchenFridge", "kitchenCabinetUpper", "kitchenSink",
+  "kitchenCoffeeMachine", "sideTable", "speaker", "cardboardBoxOpen", "trashcan", "chair", "radio", "pillowBlue",
+  "tree_oak", "tree_default", "tree_detailed", "plant_bush", "plant_bushLarge", "flower_redA", "flower_yellowA",
+  "flower_purpleA", "rock_smallA", "grass", "grass_large", "fence_simple",
+  "roads/light-curved", "food/frying-pan", "food/pot-stew", "food/mug", "food/cutting-board", "food/plate",
+] as const;
+type ModelName = (typeof MODELS)[number];
+const CHARACTER = `${M}chars/character-male-a.glb`;
+
+// ---------- palette ----------
 type Palette = {
-  floor: string; wall: string; wall2: string; wood: string; ink: string; lapis: string;
-  oat: string; skin: string; hair: string; screen: string; red: string; green: string; plant: string;
+  floor: string; floorLine: string; wall: string; wall2: string; trim: string; ink: string; lapis: string; paper: string;
+  screen: string; red: string; green: string; grass: string; soil: string; path: string; white: string; rubber: string;
   sage: string; butter: string; blush: string; mist: string;
 };
-
 const LIGHT: Palette = {
-  floor: "#E7E6E1", wall: "#F6F5F2", wall2: "#ECEBE7", wood: "#B68F6A", ink: "#1A1A1A", lapis: "#002DB4",
-  oat: "#FFFFFF", skin: "#B98260", hair: "#231A16", screen: "#0B1026", red: "#C2553F", green: "#3E8E6A", plant: "#5E7F5A",
-  sage: "#CDD6C4", butter: "#E8DFBA", blush: "#EAD4C8", mist: "#CBD2EC",
+  floor: "#C9A27E", floorLine: "#B08967", wall: "#F1EEE8", wall2: "#E6E2DA", trim: "#D9D3C8", ink: "#1C1F2B", lapis: "#1F44C8",
+  paper: "#FBFAF7", screen: "#0B1026", red: "#D9534F", green: "#3FA372", grass: "#7DB35A", soil: "#8B6748", path: "#D9C9A5",
+  white: "#F7F7F4", rubber: "#3A3B40", sage: "#CDD6C4", butter: "#E8DFBA", blush: "#EAD4C8", mist: "#CBD2EC",
 };
 const DARK: Palette = {
-  ...LIGHT, floor: "#18214A", wall: "#121A3C", wall2: "#0E1533", wood: "#6B5037", oat: "#E9E9E6", lapis: "#3D63E8",
+  ...LIGHT, floor: "#7A6250", floorLine: "#6A5444", wall: "#2A3152", wall2: "#232A48", trim: "#1D2340", grass: "#4F7A44", soil: "#5A4332", path: "#9E9278",
 };
 
-// ---------- voxel blocks ----------
-// Texels per world unit. Every block gets per-texel noise and darker edges in the shader,
-// so props of any size read as Minecraft-style blocks without image textures.
-const PX = 16;
-const geos = new Map<string, THREE.BoxGeometry>();
-const mats = new Map<string, THREE.MeshStandardMaterial>();
+// ---------- sky ----------
+type Sky = { name: string; window: string; sun: string; sunI: number; amb: number; hemiTop: string; hemiBottom: string; hemiI: number; beam: number };
+const SKIES = {
+  dawn: { name: "dawn", window: "#F2B8A0", sun: "#FFB38A", sunI: 1.6, amb: 0.35, hemiTop: "#FFD7C2", hemiBottom: "#5B4A6B", hemiI: 0.9, beam: 0.35 },
+  day: { name: "day", window: "#9CC3F5", sun: "#FFF6E8", sunI: 2.6, amb: 0.45, hemiTop: "#DCEBFF", hemiBottom: "#C8B89A", hemiI: 1.1, beam: 0.22 },
+  golden: { name: "golden", window: "#F5C27A", sun: "#FFC27A", sunI: 2.0, amb: 0.35, hemiTop: "#FFE2B8", hemiBottom: "#7A5A48", hemiI: 0.9, beam: 0.4 },
+  dusk: { name: "dusk", window: "#8796C9", sun: "#FFB98F", sunI: 1.1, amb: 0.38, hemiTop: "#9AA8D8", hemiBottom: "#3C3A44", hemiI: 0.95, beam: 0.22 },
+  night: { name: "night", window: "#1A2350", sun: "#9DB4FF", sunI: 0.55, amb: 0.3, hemiTop: "#4A5DB0", hemiBottom: "#141A36", hemiI: 1.0, beam: 0.1 },
+} satisfies Record<string, Sky>;
+const SKY_CYCLE: Sky[] = [SKIES.dawn, SKIES.day, SKIES.golden, SKIES.dusk, SKIES.night];
 
-function voxelGeometry(s: [number, number, number]) {
-  const key = s.join(",");
-  let g = geos.get(key);
-  if (!g) {
-    g = new THREE.BoxGeometry(...s);
-    const n = g.attributes.position.count;
-    g.setAttribute("aSize", new THREE.BufferAttribute(new Float32Array(Array.from({ length: n }, () => s).flat()), 3));
-    geos.set(key, g);
-  }
-  return g;
-}
+// Outdoor scenes pick the hour that suits them; the street light matters most once the sun is down.
+const SCENE_SKY: Partial<Record<SceneId, Sky>> = { sports: SKIES.golden, run: SKIES.dusk, bench: SKIES.night };
 
-function voxelMaterial(color: string, plank: boolean) {
-  const key = `${color}|${plank}`;
-  let m = mats.get(key);
-  if (m) return m;
-  m = new THREE.MeshStandardMaterial({ color, roughness: 0.9 });
-  if (plank) m.defines = { PLANK: "" };
-  m.onBeforeCompile = (s) => {
-    s.vertexShader = s.vertexShader
-      .replace("#include <common>", "#include <common>\nattribute vec3 aSize;\nvarying vec3 vLocal;\nvarying vec3 vHalf;\nvarying vec3 vFaceN;")
-      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvLocal = position;\nvHalf = aSize * 0.5;\nvFaceN = normal;");
-    s.fragmentShader = s.fragmentShader
-      .replace(
-        "#include <common>",
-        `#include <common>
-varying vec3 vLocal;
-varying vec3 vHalf;
-varying vec3 vFaceN;
-float vxHash(vec3 p) { return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453); }`
-      )
-      .replace(
-        "#include <color_fragment>",
-        `#include <color_fragment>
-{
-  vec3 an = abs(vFaceN);
-  vec3 q = vLocal + vHalf - vFaceN * 0.001;
-  // the two axes lying in this face, measured from its corner
-  vec2 uv = an.x > 0.5 ? q.zy : an.y > 0.5 ? q.xz : q.xy;
-  vec2 hs = an.x > 0.5 ? vHalf.zy : an.y > 0.5 ? vHalf.xz : vHalf.xy;
-  vec2 px = floor(uv * ${PX}.0);
-  float shade = 0.88 + 0.12 * vxHash(vec3(px, dot(vFaceN, vec3(1.0, 2.0, 3.0))));
-  #ifdef PLANK
-    float row = floor(px.y / 3.0);
-    shade *= 0.9 + 0.1 * vxHash(vec3(row, 7.0, 1.0));
-    if (mod(px.y, 3.0) < 1.0) shade *= 0.82;
-    if (mod(px.x + row * 5.0, 12.0) < 1.0) shade *= 0.85;
-  #endif
-  vec2 edge = hs - abs(uv - hs);
-  float band = min(1.0 / ${PX}.0, 0.3 * min(hs.x, hs.y));
-  if (min(edge.x, edge.y) < band) shade *= 0.8;
-  diffuseColor.rgb *= shade;
-}`
-      );
-  };
-  m.customProgramCacheKey = () => (plank ? "voxel-plank" : "voxel");
-  mats.set(key, m);
-  return m;
-}
-
-const Box = ({ p, s, c, r = [0, 0, 0], plank = false }: { p: [number, number, number]; s: [number, number, number]; c: string; r?: [number, number, number]; plank?: boolean }) => (
-  <mesh position={p} rotation={r} geometry={voxelGeometry(s)} material={voxelMaterial(c, plank)} castShadow receiveShadow />
-);
-
-// ---------- lighting ----------
-type Sky = { window: string; sun: string; sunI: number; amb: number; beam: string; beamI: number; beamLen: number };
-
-const SKIES: Record<"dawn" | "day" | "golden" | "dusk" | "night", Sky> = {
-  dawn: { window: "#F2B8A0", sun: "#FFB38A", sunI: 0.9, amb: 0.55, beam: "#FFB38A", beamI: 0.35, beamLen: 1.8 },
-  day: { window: "#8DB6F2", sun: "#FFFFFF", sunI: 1.5, amb: 0.75, beam: "#FFF4DA", beamI: 0.22, beamLen: 1.0 },
-  golden: { window: "#F5C27A", sun: "#FFC77A", sunI: 1.2, amb: 0.6, beam: "#FFC77A", beamI: 0.4, beamLen: 1.7 },
-  dusk: { window: "#6D5BA8", sun: "#C9A0FF", sunI: 0.6, amb: 0.45, beam: "#C9A0FF", beamI: 0.22, beamLen: 1.4 },
-  night: { window: "#141B3F", sun: "#8FA8FF", sunI: 0.35, amb: 0.3, beam: "#8FA8FF", beamI: 0.14, beamLen: 1.2 },
-};
-const SKY_CYCLE = [SKIES.dawn, SKIES.day, SKIES.golden, SKIES.dusk, SKIES.night];
-
-const LAMP: [number, number, number] = [-2.1, 1.42, -2.1];
-
-// Eases every light toward its target; under reduced motion it snaps in one frame.
-function Lights({ on, sky, still }: { on: boolean; sky: Sky; still: boolean }) {
-  const amb = useRef<THREE.AmbientLight>(null);
-  const hemi = useRef<THREE.HemisphereLight>(null);
-  const sun = useRef<THREE.DirectionalLight>(null);
-  const lamp = useRef<THREE.PointLight>(null);
-  const sunColor = useMemo(() => new THREE.Color(sky.sun), [sky]);
-  const invalidate = useThree((s) => s.invalidate);
-
-  useFrame((_, d) => {
-    if (!amb.current || !hemi.current || !sun.current || !lamp.current) return;
-    const k = still ? 1 : 1 - Math.exp(-5 * d);
-    const fill = on ? 1 : 0.12;
-    const targets: [THREE.Light, number][] = [
-      [amb.current, sky.amb * fill],
-      [hemi.current, 0.3 * fill],
-      [sun.current, sky.sunI * (on ? 1 : 0.3)],
-      [lamp.current, on ? 5 : 0],
-    ];
-    let moving = false;
-    for (const [light, t] of targets) {
-      light.intensity += (t - light.intensity) * k;
-      if (Math.abs(t - light.intensity) > 0.002) moving = true;
+// ---------- models ----------
+const shadowAll = (o: THREE.Object3D) =>
+  o.traverse((m) => {
+    if ((m as THREE.Mesh).isMesh) {
+      m.castShadow = true;
+      m.receiveShadow = true;
     }
-    sun.current.color.lerp(sunColor, k);
-    if (moving) invalidate();
   });
 
+// A model re-anchored to its bottom centre, so props place by where they stand, not by the kit's corner pivot.
+function useModel(name: ModelName) {
+  const { scene } = useGLTF(`${M}${name}.glb`, false, false);
+  return useMemo(() => {
+    const o = scene.clone(true);
+    const box = new THREE.Box3().setFromObject(o);
+    const c = box.getCenter(new THREE.Vector3());
+    o.position.set(-c.x, -box.min.y, -c.z);
+    shadowAll(o);
+    const g = new THREE.Group();
+    g.add(o);
+    g.updateMatrixWorld(true);
+    return g;
+  }, [scene]);
+}
+
+function Model({ name, p = [0, 0, 0], r = 0, s = 1 }: { name: ModelName; p?: V3; r?: number; s?: number }) {
+  const obj = useModel(name);
+  return <primitive object={obj} position={p} rotation={[0, r, 0]} scale={s} />;
+}
+
+// Find where you'd actually sit: rain rays down a grid over the model. The lowest surface above the
+// legs is the seat; anything well above it is a backrest or arm, and the seat's front faces away from it.
+type SeatInfo = { y: number; x: number; z: number; front: number | null };
+function findSeat(obj: THREE.Object3D): SeatInfo {
+  const box = new THREE.Box3().setFromObject(obj);
+  const H = box.max.y - box.min.y;
+  const ray = new THREE.Raycaster();
+  const down = new THREE.Vector3(0, -1, 0);
+  const hits: { x: number; y: number; z: number }[] = [];
+  const n = 9;
+  for (let i = 0; i < n; i++)
+    for (let j = 0; j < n; j++) {
+      const x = THREE.MathUtils.lerp(box.min.x, box.max.x, 0.06 + (0.88 * i) / (n - 1));
+      const z = THREE.MathUtils.lerp(box.min.z, box.max.z, 0.06 + (0.88 * j) / (n - 1));
+      ray.set(new THREE.Vector3(x, box.max.y + 1, z), down);
+      const h = ray.intersectObject(obj, true)[0];
+      if (h && h.point.y > box.min.y + H * 0.2) hits.push({ x, y: h.point.y, z });
+    }
+  const y = Math.min(...hits.map((h) => h.y));
+  const seat = hits.filter((h) => h.y < y + H * 0.06);
+  const back = hits.filter((h) => h.y > y + H * 0.25);
+  const avg = (a: typeof hits) => ({ x: a.reduce((t, h) => t + h.x, 0) / a.length, z: a.reduce((t, h) => t + h.z, 0) / a.length });
+  const c = avg(seat);
+  const b = back.length ? avg(back) : null;
+  return { y, x: c.x, z: c.z, front: b ? Math.atan2(c.x - b.x, c.z - b.z) : null };
+}
+
+// A seat and its sitter, placed from the seat's measured surface, so nobody sinks into the furniture.
+function Seated({ name, ...rest }: { name: ModelName; p?: V3; r?: number; s?: number; still: boolean; face?: number }) {
+  return <SeatedOn obj={useModel(name)} {...rest} />;
+}
+
+function SeatedOn({ obj, p = [0, 0, 0], r = 0, s = 1, still, face }: { obj: THREE.Object3D; p?: V3; r?: number; s?: number; still: boolean; face?: number }) {
+  const seat = useMemo(() => findSeat(obj), [obj]);
+  const cos = Math.cos(r), sin = Math.sin(r);
+  const at: V3 = [p[0] + (seat.x * cos + seat.z * sin) * s, p[1] + seat.y * s, p[2] + (-seat.x * sin + seat.z * cos) * s];
+  const facing = face ?? r + (seat.front ?? 0);
   return (
     <>
-      <ambientLight ref={amb} intensity={0.75} />
-      <directionalLight
-        ref={sun}
-        position={[5, 9, 4]}
-        intensity={1.5}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-camera-left={-5}
-        shadow-camera-right={5}
-        shadow-camera-top={5}
-        shadow-camera-bottom={-5}
-        shadow-bias={-0.0004}
-      />
-      <hemisphereLight ref={hemi} args={["#FFFFFF", "#002DB4", 0.3]} />
-      <pointLight ref={lamp} position={LAMP} intensity={5} distance={9} color="#FFD9A0" castShadow shadow-mapSize={[512, 512]} shadow-camera-near={0.05} shadow-bias={-0.002} />
+      <primitive object={obj} position={p} rotation={[0, r, 0]} scale={s} />
+      <Person clip="sit" seat={at} r={facing} still={still} />
     </>
   );
 }
 
-function FloorLamp({ c, on }: { c: Palette; on: boolean }) {
-  const [x, y, z] = LAMP;
+const Box = ({ p, s, c, r = [0, 0, 0], rough = 0.8, metal = 0, cast = true }: { p: V3; s: V3; c: string; r?: V3; rough?: number; metal?: number; cast?: boolean }) => (
+  <mesh position={p} rotation={r} castShadow={cast} receiveShadow>
+    <boxGeometry args={s} />
+    <meshStandardMaterial color={c} roughness={rough} metalness={metal} />
+  </mesh>
+);
+
+// A flat, self-lit rectangle: screen contents, sticky notes, posters.
+const Glow = ({ p, w, h, c, r = [0, 0, 0] }: { p: V3; w: number; h: number; c: string; r?: V3 }) => (
+  <mesh position={p} rotation={r}>
+    <planeGeometry args={[w, h]} />
+    <meshBasicMaterial color={c} toneMapped={false} />
+  </mesh>
+);
+
+// ---------- text ----------
+function fontVar(name: string, fallback: string) {
+  const v = typeof window === "undefined" ? "" : getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+}
+
+function useFontsReady() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let live = true;
+    document.fonts.ready.then(() => live && setReady(true));
+    return () => {
+      live = false;
+    };
+  }, []);
+  return ready;
+}
+
+// Text drawn to a canvas in the site's own faces, crisp at 4x.
+function Label({ text, size, color, p = [0, 0, 0], r = [0, 0, 0], maxWidth, face = "sans" }: { text: string; size: number; color: string; p?: V3; r?: V3; maxWidth?: number; face?: "sans" | "serif" }) {
+  const fonts = useFontsReady();
+  const tex = useMemo(() => {
+    const lines = text.split("\n");
+    const px = 96;
+    const lh = px * 1.12;
+    const family = face === "serif" ? fontVar("--font-serif", "Georgia, serif") : fontVar("--font-sans", "system-ui, sans-serif");
+    const font = `${face === "serif" ? 400 : 600} ${px}px ${family}`;
+    const c = document.createElement("canvas");
+    const g = c.getContext("2d")!;
+    g.font = font;
+    const w = Math.ceil(Math.max(...lines.map((l) => g.measureText(l).width))) + 12;
+    c.width = w;
+    c.height = Math.ceil(lh * lines.length) + 8;
+    g.font = font;
+    g.fillStyle = color;
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    lines.forEach((l, i) => g.fillText(l, w / 2, 4 + lh * (i + 0.5)));
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = 4;
+    return { t, aspect: w / c.height, lines: lines.length };
+  }, [text, color, face, fonts]); // eslint-disable-line react-hooks/exhaustive-deps -- redraw once fonts load
+  useEffect(() => () => tex.t.dispose(), [tex]);
+  let h = size * 1.12 * tex.lines;
+  let w = h * tex.aspect;
+  if (maxWidth && w > maxWidth) {
+    h *= maxWidth / w;
+    w = maxWidth;
+  }
   return (
-    <group position={[x, 0, z]}>
-      <Box p={[0, 0.03, 0]} s={[0.38, 0.06, 0.38]} c={c.ink} />
-      <Box p={[0, 0.68, 0]} s={[0.06, 1.24, 0.06]} c={c.ink} />
-      <mesh position={[0, y, 0]}>
-        <boxGeometry args={[0.14, 0.12, 0.14]} />
-        <meshBasicMaterial color={on ? "#FFE3A8" : "#4A4238"} toneMapped={false} />
-      </mesh>
-      <Box p={[0, y + 0.22, 0]} s={[0.46, 0.32, 0.46]} c={c.oat} />
+    <mesh position={p} rotation={r}>
+      <planeGeometry args={[w, h]} />
+      <meshBasicMaterial map={tex.t} transparent toneMapped={false} depthWrite={false} />
+    </mesh>
+  );
+}
+
+// ---------- the person ----------
+type Clip =
+  | "idle" | "sit" | "sprint" | "walk" | "attack-kick-right" | "interact-right" | "pick-up" | "holding-both" | "emote-no" | "crouch";
+
+// Kenney's Mini Character A, skinned and animated by its own clips.
+// `path` moves the whole body: a running loop or pacing back and forth.
+function useCharacter() {
+  const { scene, animations } = useGLTF(CHARACTER, false, false);
+  const model = useMemo(() => {
+    const o = cloneSkinned(scene);
+    shadowAll(o);
+    return o;
+  }, [scene]);
+  return { model, animations };
+}
+
+// Pose the model at one moment of a clip on a throwaway mixer, measure, and let go.
+function measurePose<T>(model: THREE.Object3D, clip: THREE.AnimationClip | undefined, t: number, read: () => T): T {
+  const mixer = new THREE.AnimationMixer(model);
+  if (clip) mixer.clipAction(clip).play();
+  mixer.setTime(t);
+  model.updateMatrixWorld(true);
+  const out = read();
+  mixer.stopAllAction();
+  mixer.uncacheRoot(model);
+  return out;
+}
+
+const boneAt = (model: THREE.Object3D, name: string, local: V3 = [0, 0, 0]) => {
+  const b = model.getObjectByName(name);
+  return b ? b.localToWorld(new THREE.Vector3(...local)) : new THREE.Vector3();
+};
+
+// Thigh half-thickness: the sitting body rests this far below the hip joints.
+const THIGH = 0.04;
+
+function Person({ clip, p = [0, 0, 0], r = 0, path, speed = 1, still, seat, bob }: { clip: Clip; p?: V3; r?: number; path?: "loop" | "pace"; speed?: number; still: boolean; seat?: V3; bob?: number }) {
+  const { model, animations } = useCharacter();
+  // Sitting: where the hips are in the sit pose, so they can be put on the seat's surface.
+  const sitting = !!seat;
+  const hip = useMemo(() => {
+    if (!sitting) return null;
+    const sit = animations.find((a) => a.name === "sit");
+    return measurePose(model, sit, 0, () => boneAt(model, "leg-left").add(boneAt(model, "leg-right")).multiplyScalar(0.5));
+  }, [model, animations, sitting]);
+  if (seat && hip) {
+    const cos = Math.cos(r), sin = Math.sin(r);
+    // hips a touch behind the seat's centre, toward the backrest
+    const bx = seat[0] - sin * 0.02, bz = seat[2] - cos * 0.02;
+    p = [bx - (hip.x * cos + hip.z * sin), seat[1] - (hip.y - THIGH), bz - (-hip.x * sin + hip.z * cos)];
+  }
+  const root = useRef<THREE.Group>(null);
+  const { actions } = useAnimations(animations, root);
+
+  useEffect(() => {
+    const a = actions[clip];
+    if (!a) return;
+    a.reset().setEffectiveTimeScale(speed).fadeIn(0.25).play();
+    return () => {
+      a.fadeOut(0.25);
+    };
+  }, [actions, clip, speed]);
+
+  useFrame(({ clock }) => {
+    const g = root.current;
+    if (!g || still) return;
+    const t = clock.elapsedTime;
+    if (path === "loop") {
+      const a = t * 0.9;
+      const R = 0.92;
+      g.position.set(R * Math.cos(a), p[1], R * Math.sin(a));
+      // face the direction of travel (the tangent of the loop), not away from it
+      g.rotation.y = Math.atan2(-Math.sin(a), Math.cos(a));
+    } else if (path === "pace") {
+      const x = Math.sin(t * 0.7) * 0.75;
+      g.position.set(p[0] + x, p[1], p[2]);
+      g.rotation.y = Math.cos(t * 0.7) > 0 ? Math.PI / 2 : -Math.PI / 2;
+    } else if (bob) {
+      g.position.set(p[0], p[1] + Math.abs(Math.sin(t * 2.4)) * bob, p[2]);
+    }
+  });
+
+  return (
+    <group ref={root} position={p} rotation={[0, r, 0]}>
+      <primitive object={model} />
     </group>
   );
 }
 
-// The window shows the sky; its colour eases when the sky changes.
+// ---------- lights ----------
+// Every light eases toward its target; under reduced motion it snaps.
+function useEase(still: boolean) {
+  const invalidate = useThree((s) => s.invalidate);
+  return (cur: number, target: number, d: number, rate = 5) => {
+    const k = still ? 1 : 1 - Math.exp(-rate * d);
+    const v = cur + (target - cur) * k;
+    if (Math.abs(target - v) > 0.002) invalidate();
+    return v;
+  };
+}
+
+function SkyLights({ sky, on, outdoor, still }: { sky: Sky; on: boolean; outdoor: boolean; still: boolean }) {
+  const amb = useRef<THREE.AmbientLight>(null);
+  const hemi = useRef<THREE.HemisphereLight>(null);
+  const sun = useRef<THREE.DirectionalLight>(null);
+  const ease = useEase(still);
+  const target = useMemo(
+    () => ({ sun: new THREE.Color(sky.sun), top: new THREE.Color(sky.hemiTop), bottom: new THREE.Color(sky.hemiBottom) }),
+    [sky]
+  );
+  useFrame((_, d) => {
+    if (!amb.current || !hemi.current || !sun.current) return;
+    // Indoors, switching the lights off leaves the window and the screens to do the work.
+    const dim = outdoor || on ? 1 : 0.35;
+    amb.current.intensity = ease(amb.current.intensity, sky.amb * dim, d);
+    hemi.current.intensity = ease(hemi.current.intensity, sky.hemiI * dim, d);
+    sun.current.intensity = ease(sun.current.intensity, sky.sunI, d);
+    const k = still ? 1 : 1 - Math.exp(-4 * d);
+    sun.current.color.lerp(target.sun, k);
+    hemi.current.color.lerp(target.top, k);
+    hemi.current.groundColor.lerp(target.bottom, k);
+  });
+  return (
+    <>
+      <ambientLight ref={amb} intensity={sky.amb} />
+      <hemisphereLight ref={hemi} args={[sky.hemiTop, sky.hemiBottom, sky.hemiI]} />
+      <directionalLight
+        ref={sun}
+        position={outdoor ? [-2.5, 7, 3] : [-3.5, 7, 1.8]}
+        intensity={sky.sunI}
+        color={sky.sun}
+        castShadow
+        shadow-mapSize={[2048, 2048]}
+        shadow-camera-left={-2.3}
+        shadow-camera-right={2.3}
+        shadow-camera-top={2.3}
+        shadow-camera-bottom={-2.3}
+        shadow-camera-near={2}
+        shadow-camera-far={14}
+        shadow-bias={-0.0003}
+        shadow-normalBias={0.015}
+      />
+    </>
+  );
+}
+
+// A warm bulb that eases on and off: the floor lamp indoors, a desk lamp, a street light outside.
+function Bulb({ p, on, intensity, distance = 4, color = "#FFD6A0", size = 0.05, shadow = false }: { p: V3; on: boolean; intensity: number; distance?: number; color?: string; size?: number; shadow?: boolean }) {
+  const light = useRef<THREE.PointLight>(null);
+  const glow = useRef<THREE.MeshBasicMaterial>(null);
+  const still = !!useReducedMotion();
+  const ease = useEase(still);
+  const off = useMemo(() => new THREE.Color("#4A4238"), []);
+  const lit = useMemo(() => new THREE.Color(color).multiplyScalar(1.6), [color]);
+  useFrame((_, d) => {
+    if (!light.current || !glow.current) return;
+    light.current.intensity = ease(light.current.intensity, on ? intensity : 0, d, 6);
+    glow.current.color.lerp(on ? lit : off, still ? 1 : 1 - Math.exp(-6 * d));
+  });
+  return (
+    <group position={p}>
+      <pointLight
+        ref={light}
+        intensity={on ? intensity : 0}
+        distance={distance}
+        decay={1.6}
+        color={color}
+        castShadow={shadow}
+        shadow-mapSize={[1024, 1024]}
+        shadow-camera-near={0.02}
+        shadow-bias={-0.002}
+        shadow-radius={6}
+      />
+      <mesh>
+        <sphereGeometry args={[size, 16, 12]} />
+        <meshBasicMaterial ref={glow} color={on ? lit : off} toneMapped={false} />
+      </mesh>
+    </group>
+  );
+}
+
+// Kenney's curved street light, scaled up, with its bulb under the hood.
+function StreetLight({ p, r = 0, on }: { p: V3; r?: number; on: boolean }) {
+  const S = 2.3;
+  return (
+    <group position={p} rotation={[0, r, 0]}>
+      <Model name="roads/light-curved" s={S} />
+      <Bulb p={[0, 0.6 * S, -0.105 * S]} on={on} intensity={16} distance={6} color="#FFC98A" size={0.045} />
+    </group>
+  );
+}
+
+function FloorLamp({ p, on }: { p: V3; on: boolean }) {
+  return (
+    <group position={p}>
+      <Model name="lampSquareFloor" />
+      <Bulb p={[0, 0.74, 0]} on={on} intensity={9} distance={5} size={0.035} />
+    </group>
+  );
+}
+
+// ---------- the room ----------
+// Planks drawn once to a canvas: a texture with no image file to fetch.
+function usePlanks(c: Palette) {
+  const tex = useMemo(() => {
+    const cv = document.createElement("canvas");
+    cv.width = 512;
+    cv.height = 512;
+    const g = cv.getContext("2d")!;
+    g.fillStyle = c.floor;
+    g.fillRect(0, 0, 512, 512);
+    const rows = 10;
+    for (let i = 0; i < rows; i++) {
+      const y = (i * 512) / rows;
+      g.fillStyle = `rgba(0,0,0,${0.03 + ((i * 37) % 5) * 0.012})`;
+      g.fillRect(0, y, 512, 512 / rows);
+      g.fillStyle = c.floorLine;
+      g.fillRect(0, y, 512, 2);
+      const off = ((i * 173) % 512) - 40;
+      g.fillRect(off, y, 2, 512 / rows);
+      g.fillRect((off + 260) % 512, y, 2, 512 / rows);
+    }
+    const t = new THREE.CanvasTexture(cv);
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = 8;
+    return t;
+  }, [c]);
+  useEffect(() => () => tex.dispose(), [tex]);
+  return tex;
+}
+
+const ROOM = 3; // the floor is ROOM x ROOM, walls on the back (-z) and left (-x)
+const H = ROOM / 2;
+const WALL_H = 1.7;
+
+function Shell({ c, sky }: { c: Palette; sky: Sky }) {
+  const planks = usePlanks(c);
+  return (
+    <>
+      {/* floor slab */}
+      <mesh position={[0, -0.06, 0]} receiveShadow castShadow>
+        <boxGeometry args={[ROOM, 0.12, ROOM]} />
+        <meshStandardMaterial attach="material-0" color={c.floorLine} />
+        <meshStandardMaterial attach="material-1" color={c.floorLine} />
+        <meshStandardMaterial attach="material-2" map={planks} roughness={0.7} />
+        <meshStandardMaterial attach="material-3" color={c.floorLine} />
+        <meshStandardMaterial attach="material-4" color={c.floorLine} />
+        <meshStandardMaterial attach="material-5" color={c.floorLine} />
+      </mesh>
+      {/* walls with a baseboard */}
+      <Box p={[0, WALL_H / 2, -H - 0.05]} s={[ROOM, WALL_H, 0.1]} c={c.wall} rough={0.95} cast={false} />
+      <Box p={[-H - 0.05, WALL_H / 2, -0.05]} s={[0.1, WALL_H, ROOM + 0.1]} c={c.wall2} rough={0.95} cast={false} />
+      <Box p={[0, 0.04, -H + 0.01]} s={[ROOM, 0.08, 0.02]} c={c.trim} />
+      <Box p={[-H + 0.01, 0.04, 0]} s={[0.02, 0.08, ROOM]} c={c.trim} />
+      <Window c={c} sky={sky} />
+    </>
+  );
+}
+
+// The window shows the sky; its glass eases when the sky changes, and the sun falls through it.
 function Window({ c, sky }: { c: Palette; sky: Sky }) {
   const pane = useRef<THREE.MeshBasicMaterial>(null);
   const target = useMemo(() => new THREE.Color(sky.window), [sky]);
@@ -186,322 +478,300 @@ function Window({ c, sky }: { c: Palette; sky: Sky }) {
     if (!pane.current.color.equals(target)) invalidate();
   });
   return (
-    <group position={[-2.49, 1.9, 0.6]}>
-      <Box p={[0, 0, 0]} s={[0.03, 1.2, 1.3]} c={c.oat} />
-      <mesh position={[0.02, 0, 0]}>
-        <boxGeometry args={[0.02, 1.04, 1.14]} />
+    <group position={[-H + 0.005, 0.95, 0.35]}>
+      <Box p={[0, 0, 0]} s={[0.04, 0.82, 0.92]} c={c.paper} />
+      <mesh position={[0.025, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[0.8, 0.7]} />
         <meshBasicMaterial ref={pane} color={sky.window} toneMapped={false} />
       </mesh>
-      <Box p={[0.035, 0, 0]} s={[0.02, 1.04, 0.05]} c={c.oat} />
-      <Box p={[0.035, 0, 0]} s={[0.02, 0.05, 1.14]} c={c.oat} />
+      <Box p={[0.035, 0, 0]} s={[0.02, 0.72, 0.03]} c={c.paper} />
+      <Box p={[0.035, 0, 0]} s={[0.02, 0.03, 0.82]} c={c.paper} />
+      <Box p={[0.07, -0.42, 0]} s={[0.12, 0.03, 0.98]} c={c.paper} />
     </group>
   );
 }
 
-// Light from the window falling on the floor: a pixel-stepped, additive patch with the mullion cross.
-const beamVert = /* glsl */ `
-varying vec2 vUv;
-void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
-const beamFrag = /* glsl */ `
-uniform vec3 uColor;
-uniform float uStrength;
-varying vec2 vUv;
-void main() {
-  vec2 p = floor(vUv * 16.0) / 16.0;
-  float bar = step(abs(p.y - 0.47), 0.04) + step(abs(p.x - 0.47), 0.04);
-  float fade = 1.0 - p.x;
-  gl_FragColor = vec4(uColor * uStrength * fade * (1.0 - clamp(bar, 0.0, 1.0)), 1.0);
-}`;
+// ---------- the outdoors ----------
+function Ground({ c, children }: { c: Palette; children?: React.ReactNode }) {
+  return (
+    <>
+      <mesh position={[0, -0.12, 0]} receiveShadow castShadow>
+        <boxGeometry args={[ROOM, 0.22, ROOM]} />
+        <meshStandardMaterial color={c.soil} roughness={1} />
+      </mesh>
+      <mesh position={[0, 0.0, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[ROOM, ROOM]} />
+        <meshStandardMaterial color={c.grass} roughness={1} />
+      </mesh>
+      <Box p={[0, -0.005, 0]} s={[ROOM + 0.02, 0.02, ROOM + 0.02]} c={c.grass} rough={1} />
+      {children}
+    </>
+  );
+}
 
-function WindowLight({ sky, on }: { sky: Sky; on: boolean }) {
-  const mat = useRef<THREE.ShaderMaterial>(null);
-  const mesh = useRef<THREE.Mesh>(null);
-  const uniforms = useMemo(() => ({ uColor: { value: new THREE.Color(sky.beam) }, uStrength: { value: sky.beamI } }), []); // eslint-disable-line react-hooks/exhaustive-deps
-  const target = useMemo(() => new THREE.Color(sky.beam), [sky]);
-  const invalidate = useThree((s) => s.invalidate);
-  useFrame((_, d) => {
-    if (!mat.current || !mesh.current) return;
-    const k = 1 - Math.exp(-3 * d);
-    const strength = sky.beamI * (on ? 1 : 1.6);
-    uniforms.uColor.value.lerp(target, k);
-    uniforms.uStrength.value += (strength - uniforms.uStrength.value) * k;
-    mesh.current.scale.x += (sky.beamLen - mesh.current.scale.x) * k;
-    mesh.current.position.x = -2.5 + mesh.current.scale.x / 2;
-    if (Math.abs(strength - uniforms.uStrength.value) > 0.002 || Math.abs(sky.beamLen - mesh.current.scale.x) > 0.002) invalidate();
+// Grass tufts and flowers, scattered on a fixed seed so the park looks the same for everyone.
+function Scatter({ seed, count, avoid }: { seed: number; count: number; avoid?: (x: number, z: number) => boolean }) {
+  const items = useMemo(() => {
+    const r = rng(seed);
+    const kinds: ModelName[] = ["grass", "grass_large", "grass", "flower_redA", "flower_yellowA", "flower_purpleA", "rock_smallA"];
+    const out: { name: ModelName; p: V3; r: number; s: number }[] = [];
+    for (let i = 0; out.length < count && i < count * 6; i++) {
+      const x = (r() - 0.5) * (ROOM - 0.3);
+      const z = (r() - 0.5) * (ROOM - 0.3);
+      if (avoid?.(x, z)) continue;
+      out.push({ name: kinds[Math.floor(r() * kinds.length)], p: [x, 0, z], r: r() * 6.28, s: 0.6 + r() * 0.5 });
+    }
+    return out;
+  }, [seed, count, avoid]);
+  return (
+    <>
+      {items.map((it, i) => (
+        <Model key={i} name={it.name} p={it.p} r={it.r} s={it.s} />
+      ))}
+    </>
+  );
+}
+
+function Fireflies({ still }: { still: boolean }) {
+  const g = useRef<THREE.Group>(null);
+  const flies = useMemo(() => Array.from({ length: 10 }, (_, i) => ({ x: ((i * 47) % 23) / 10 - 1.1, y: 0.3 + ((i * 13) % 9) / 10, z: ((i * 31) % 19) / 10 - 0.9, s: 0.5 + (i % 4) / 4 })), []);
+  useFrame(({ clock }) => {
+    if (!g.current || still) return;
+    const t = clock.elapsedTime;
+    g.current.children.forEach((m, i) => {
+      const f = flies[i];
+      m.position.set(f.x + Math.sin(t * f.s + i) * 0.15, f.y + Math.sin(t * 1.3 * f.s + i * 2) * 0.08, f.z + Math.cos(t * f.s + i) * 0.15);
+      ((m as THREE.Mesh).material as THREE.MeshBasicMaterial).opacity = 0.5 + 0.5 * Math.sin(t * 3 + i * 1.7);
+    });
   });
   return (
-    <mesh ref={mesh} position={[-2.5 + sky.beamLen / 2, 0.02, 0.6]} rotation={[-Math.PI / 2, 0, 0]} scale={[sky.beamLen, 1, 1]}>
-      <planeGeometry args={[1, 1.1]} />
-      <shaderMaterial ref={mat} vertexShader={beamVert} fragmentShader={beamFrag} uniforms={uniforms} transparent blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
-    </mesh>
-  );
-}
-
-// ---------- props ----------
-function Desk({ c, x = 0, z = -1.4, w = 2.4 }: { c: Palette; x?: number; z?: number; w?: number }) {
-  return (
-    <group position={[x, 0, z]}>
-      <Box p={[0, 0.78, 0]} s={[w, 0.08, 1]} c={c.wood} plank />
-      {[-1, 1].map((sx) => [-1, 1].map((sz) => <Box key={`${sx}${sz}`} p={[sx * (w / 2 - 0.08), 0.37, sz * 0.4]} s={[0.07, 0.74, 0.07]} c={c.ink} />))}
-    </group>
-  );
-}
-
-function Monitor({ c, x = 0, z = -1.7, rot = 0, children }: { c: Palette; x?: number; z?: number; rot?: number; children?: React.ReactNode }) {
-  return (
-    <group position={[x, 0.82, z]} rotation={[0, rot, 0]}>
-      <Box p={[0, 0.05, 0]} s={[0.3, 0.04, 0.2]} c={c.ink} />
-      <Box p={[0, 0.25, 0]} s={[0.05, 0.4, 0.05]} c={c.ink} />
-      <Box p={[0, 0.62, 0]} s={[1.1, 0.66, 0.05]} c={c.ink} />
-      <group position={[0, 0.62, 0.03]}>
-        <mesh>
-          <planeGeometry args={[1.02, 0.58]} />
-          <meshBasicMaterial color={c.screen} toneMapped={false} />
+    <group ref={g}>
+      {flies.map((f, i) => (
+        <mesh key={i} position={[f.x, f.y, f.z]}>
+          <sphereGeometry args={[0.012, 8, 6]} />
+          <meshBasicMaterial color="#FFF2A8" transparent toneMapped={false} />
         </mesh>
-        <group position={[0, 0, 0.005]}>{children}</group>
-      </group>
-      {/* screen glow: faint with the room lit, the main light once it's off */}
-      <pointLight position={[0, 0.62, 0.4]} intensity={0.8} distance={2.2} color="#8EA2FF" />
-    </group>
-  );
-}
-
-const Rect = ({ x, y, w, h, c }: { x: number; y: number; w: number; h: number; c: string }) => (
-  <mesh position={[x, y, 0]}>
-    <planeGeometry args={[w, h]} />
-    <meshBasicMaterial color={c} toneMapped={false} />
-  </mesh>
-);
-
-function Chair({ c, z = -0.6, rot = 0 }: { c: Palette; z?: number; rot?: number }) {
-  return (
-    <group position={[0, 0, z]} rotation={[0, rot, 0]}>
-      <Box p={[0, 0.48, 0]} s={[0.6, 0.08, 0.6]} c={c.lapis} />
-      <Box p={[0, 0.85, 0.28]} s={[0.6, 0.7, 0.07]} c={c.lapis} />
-      <Box p={[0, 0.24, 0]} s={[0.07, 0.48, 0.07]} c={c.ink} />
-    </group>
-  );
-}
-
-function Plant({ c, p }: { c: Palette; p: [number, number, number] }) {
-  const leaves: [number, number, number][] = [[0, 0.6, 0], [0.14, 0.72, 0.08], [-0.12, 0.78, -0.1], [0.02, 0.92, 0.04], [-0.1, 0.66, 0.14]];
-  return (
-    <group position={p}>
-      <Box p={[0, 0.2, 0]} s={[0.34, 0.4, 0.34]} c={c.oat} />
-      {leaves.map((l, i) => (
-        <Box key={i} p={l} s={[0.22, 0.22, 0.22]} c={c.plant} />
       ))}
     </group>
   );
 }
 
-// Text drawn to a small canvas and scaled with nearest filtering, so it reads as pixel type.
-// No font worker, so it runs under a strict CSP.
-function Label({ text, size, color, position = [0, 0, 0], maxWidth }: { text: string; size: number; color: string; position?: [number, number, number]; maxWidth?: number }) {
-  const tex = useMemo(() => {
-    const lines = text.split("\n");
-    const px = 16;
-    const lh = px * 1.25;
-    const font = `700 ${px}px ui-monospace, "Courier New", monospace`;
-    const c = document.createElement("canvas");
-    const g = c.getContext("2d")!;
-    g.font = font;
-    const w = Math.ceil(Math.max(...lines.map((l) => g.measureText(l).width))) + 6;
-    c.width = w;
-    c.height = Math.ceil(lh * lines.length) + 2;
-    g.font = font;
-    g.fillStyle = color;
-    g.textAlign = "center";
-    g.textBaseline = "middle";
-    lines.forEach((l, i) => g.fillText(l, w / 2, 1 + lh * (i + 0.5)));
-    const t = new THREE.CanvasTexture(c);
-    t.colorSpace = THREE.SRGBColorSpace;
-    t.magFilter = THREE.NearestFilter;
-    t.generateMipmaps = false;
-    return { t, aspect: w / c.height, lines: lines.length };
-  }, [text, color]);
-  useEffect(() => () => tex.t.dispose(), [tex]);
-  let h = size * 1.3 * tex.lines;
-  let w = h * tex.aspect;
-  if (maxWidth && w > maxWidth) {
-    h *= maxWidth / w;
-    w = maxWidth;
-  }
+// ---------- props built in code ----------
+function useParkBench() {
+  return useMemo(() => {
+    const g = new THREE.Group();
+    const wood = new THREE.MeshStandardMaterial({ color: "#B07A4A", roughness: 0.75 });
+    const iron = new THREE.MeshStandardMaterial({ color: "#2A2D35", roughness: 0.5, metalness: 0.4 });
+    const add = (m: THREE.Material, size: V3, at: V3, rx = 0) => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), m);
+      mesh.position.set(...at);
+      mesh.rotation.x = rx;
+      mesh.castShadow = mesh.receiveShadow = true;
+      g.add(mesh);
+    };
+    const W = 0.78, SEAT = 0.2;
+    for (let i = 0; i < 3; i++) add(wood, [W, 0.022, 0.06], [0, SEAT, 0.07 - i * 0.07]);
+    for (let i = 0; i < 2; i++) add(wood, [W, 0.06, 0.022], [0, SEAT + 0.1 + i * 0.09, -0.1 - i * 0.012], -0.18);
+    for (const x of [-W / 2 + 0.06, W / 2 - 0.06]) {
+      add(iron, [0.025, SEAT, 0.025], [x, SEAT / 2, 0.08]);
+      add(iron, [0.025, SEAT + 0.24, 0.025], [x, (SEAT + 0.24) / 2, -0.1]);
+      add(iron, [0.025, 0.025, 0.24], [x, SEAT - 0.02, -0.01]);
+      add(iron, [0.025, 0.025, 0.2], [x, SEAT + 0.08, 0.0]);
+    }
+    g.updateMatrixWorld(true);
+    return g;
+  }, []);
+}
+
+function ParkBench(props: { p?: V3; r?: number; still: boolean }) {
+  return <SeatedOn obj={useParkBench()} {...props} />;
+}
+
+function Dumbbell({ p, r = 0 }: { p: V3; r?: number }) {
   return (
-    <mesh position={position}>
-      <planeGeometry args={[w, h]} />
-      <meshBasicMaterial map={tex.t} transparent toneMapped={false} depthWrite={false} />
-    </mesh>
+    <group position={p} rotation={[0, r, 0]}>
+      <Box p={[0, 0, 0]} s={[0.2, 0.025, 0.025]} c="#9A9CA4" metal={0.6} rough={0.35} />
+      <Box p={[-0.085, 0, 0]} s={[0.04, 0.09, 0.09]} c="#26272D" />
+      <Box p={[0.085, 0, 0]} s={[0.04, 0.09, 0.09]} c="#26272D" />
+    </group>
   );
 }
 
-// ---------- the person ----------
-type Pose = "sit" | "stand" | "kick" | "stir" | "pace" | "write";
-
-function Person({ c, pose, p = [0, 0, -0.6], rot = Math.PI }: { c: Palette; pose: Pose; p?: [number, number, number]; rot?: number }) {
-  const root = useRef<THREE.Group>(null);
-  const armL = useRef<THREE.Group>(null);
-  const armR = useRef<THREE.Group>(null);
-  const legR = useRef<THREE.Group>(null);
-  const head = useRef<THREE.Group>(null);
-  const sit = pose === "sit";
-
+// Phone on a tripod, recording: the red light blinks.
+function Tripod({ p, r }: { p: V3; r: number }) {
+  const rec = useRef<THREE.Mesh>(null);
   useFrame(({ clock }) => {
-    const t = clock.elapsedTime;
-    if (!root.current || !armL.current || !armR.current || !legR.current || !head.current) return;
-    if (sit) {
-      // typing
-      armL.current.rotation.x = -1.2 + Math.sin(t * 9) * 0.06;
-      armR.current.rotation.x = -1.2 + Math.cos(t * 8) * 0.06;
-      head.current.rotation.x = 0.1 + Math.sin(t * 0.8) * 0.04;
-    } else if (pose === "kick") {
-      legR.current.rotation.x = Math.sin(t * 3) * 0.9;
-      armL.current.rotation.x = -Math.sin(t * 3) * 0.5;
-      armR.current.rotation.x = Math.sin(t * 3) * 0.5;
-    } else if (pose === "stir") {
-      armR.current.rotation.x = -1.1;
-      armR.current.rotation.z = Math.sin(t * 4) * 0.3;
-      head.current.rotation.x = 0.35;
-    } else if (pose === "pace") {
-      root.current.position.x = p[0] + Math.sin(t * 0.9) * 0.9;
-      root.current.rotation.y = rot + (Math.cos(t * 0.9) > 0 ? -Math.PI / 2 : Math.PI / 2);
-      legR.current.rotation.x = Math.sin(t * 6) * 0.5;
-      armL.current.rotation.x = -2.6 + Math.sin(t * 5) * 0.2; // hands on head
-      armR.current.rotation.x = -2.6 + Math.cos(t * 5) * 0.2;
-      head.current.rotation.z = Math.sin(t * 7) * 0.12;
-    } else if (pose === "write") {
-      // marker on the whiteboard, stepping back now and then to look
-      const look = Math.sin(t * 0.5) > 0.6;
-      armR.current.rotation.x = look ? -0.4 : -2.1 + Math.sin(t * 7) * 0.08;
-      armR.current.rotation.z = look ? 0 : Math.sin(t * 3.5) * 0.15;
-      armL.current.rotation.x = look ? -0.9 : 0;
-      head.current.rotation.x = look ? -0.1 : -0.2;
-    } else {
-      head.current.rotation.y = Math.sin(t * 0.6) * 0.3;
-      armR.current.rotation.x = Math.sin(t * 1.2) * 0.1;
+    if (rec.current) rec.current.visible = Math.floor(clock.elapsedTime * 1.5) % 2 === 0;
+  });
+  return (
+    <group position={p} rotation={[0, r, 0]}>
+      {[0, 1, 2].map((i) => (
+        <group key={i} rotation={[0, (i * Math.PI * 2) / 3, 0]}>
+          <Box p={[0, 0.27, 0.08]} s={[0.015, 0.56, 0.015]} c="#1C1F2B" r={[-0.3, 0, 0]} />
+        </group>
+      ))}
+      <Box p={[0, 0.6, 0]} s={[0.025, 0.1, 0.025]} c="#1C1F2B" />
+      <group position={[0, 0.68, 0]}>
+        <Box p={[0, 0, 0]} s={[0.17, 0.09, 0.012]} c="#1C1F2B" />
+        <Glow p={[0, 0, -0.007]} w={0.15} h={0.07} c="#1F44C8" r={[0, Math.PI, 0]} />
+        <mesh ref={rec} position={[-0.055, 0.025, -0.008]} rotation={[0, Math.PI, 0]}>
+          <circleGeometry args={[0.008, 12]} />
+          <meshBasicMaterial color="#FF3B30" toneMapped={false} />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+// The kick, in sync: sample the clip to find the frame where the right foot reaches furthest forward.
+// The ball waits exactly there, leaves on that frame, flies into the net, and rolls back while he resets.
+function Kicker({ p, r, still }: { p: V3; r: number; still: boolean }) {
+  const { model, animations } = useCharacter();
+  const root = useRef<THREE.Group>(null);
+  const ball = useRef<THREE.Mesh>(null);
+  const { actions } = useAnimations(animations, root);
+  const R = 0.055;
+  const info = useMemo(() => {
+    const clip = animations.find((a) => a.name === "attack-kick-right");
+    const dur = clip?.duration ?? 0.5;
+    let best = { t: dur / 2, z: -Infinity, foot: new THREE.Vector3() };
+    for (let k = 0; k <= 48; k++) {
+      const t = (dur * k) / 48;
+      const foot = measurePose(model, clip, t, () => boneAt(model, "leg-right", [0, -0.16, 0.03]));
+      if (foot.z > best.z) best = { t, z: foot.z, foot };
+    }
+    return { dur, contact: best.t, foot: best.foot };
+  }, [model, animations]);
+
+  useEffect(() => {
+    const kick = actions["attack-kick-right"];
+    const idle = actions["idle"];
+    if (!kick || !idle) return;
+    kick.reset().play();
+    kick.paused = true;
+    idle.reset().play();
+    return () => {
+      kick.stop();
+      idle.stop();
+    };
+  }, [actions]);
+
+  useFrame(({ clock }, d) => {
+    const kick = actions["attack-kick-right"];
+    const idle = actions["idle"];
+    const b = ball.current;
+    if (!kick || !idle || !b) return;
+    const SLOW = 0.7; // the clip is quick; play it a little slower so the strike reads
+    const T = 3.4;
+    const kickLen = info.dur / SLOW;
+    const hit = info.contact / SLOW;
+    const c = still ? hit : clock.elapsedTime % T;
+    // body: wind up and strike, ease into idle, ease back into the wind-up before the next cycle
+    const windup = T - 0.4;
+    kick.time = c >= windup ? 0 : Math.min(c * SLOW, info.dur);
+    const wk = c < kickLen + 0.1 ? 1 : c >= windup ? (c - windup) / 0.4 : Math.max(0, 1 - (c - kickLen - 0.1) / 0.3);
+    kick.setEffectiveWeight(wk);
+    idle.setEffectiveWeight(1 - wk);
+    // ball: in his own frame, +z is where he faces, toward the goal
+    const rest = new THREE.Vector3(info.foot.x, R, info.foot.z + R * 0.9);
+    const dist = 1.3;
+    const flight = 0.55, settle = 0.35;
+    if (c < hit) b.position.copy(rest);
+    else if (c < hit + flight) {
+      const f = (c - hit) / flight;
+      b.position.set(rest.x * (1 - f), R + Math.sin(f * Math.PI) * 0.3, rest.z + f * dist);
+      if (!still) b.rotation.x += d * 14;
+    } else if (c < hit + flight + settle) b.position.set(0, R, rest.z + dist);
+    else {
+      const f = Math.min(1, (c - hit - flight - settle) / (windup - 0.15 - hit - flight - settle));
+      const e = 1 - Math.pow(1 - f, 3);
+      b.position.set(0, R, rest.z + dist - e * dist);
+      if (!still && f < 1) b.rotation.x -= d * 8;
     }
   });
 
-  const hip = sit ? 0.52 : 0.82;
   return (
-    <group ref={root} position={p} rotation={[0, rot, 0]}>
-      {/* legs */}
-      <group position={[-0.12, hip, 0]} rotation={[sit ? -Math.PI / 2 : 0, 0, 0]}>
-        <Box p={[0, -0.38, 0]} s={[0.17, 0.76, 0.2]} c={c.ink} />
-      </group>
-      <group ref={legR} position={[0.12, hip, 0]} rotation={[sit ? -Math.PI / 2 : 0, 0, 0]}>
-        <Box p={[0, -0.38, 0]} s={[0.17, 0.76, 0.2]} c={c.ink} />
-      </group>
-      {/* torso: lapis sweater */}
-      <Box p={[0, hip + 0.36, 0]} s={[0.5, 0.72, 0.3]} c={c.lapis} />
-      {/* arms */}
-      <group ref={armL} position={[-0.32, hip + 0.66, 0]}>
-        <Box p={[0, -0.3, 0]} s={[0.13, 0.6, 0.14]} c={c.lapis} />
-        <Box p={[0, -0.64, 0]} s={[0.12, 0.1, 0.12]} c={c.skin} />
-      </group>
-      <group ref={armR} position={[0.32, hip + 0.66, 0]}>
-        <Box p={[0, -0.3, 0]} s={[0.13, 0.6, 0.14]} c={c.lapis} />
-        <Box p={[0, -0.64, 0]} s={[0.12, 0.1, 0.12]} c={c.skin} />
-      </group>
-      {/* block head: hair over the top and back, two pixel eyes on the face (+z) */}
-      <group ref={head} position={[0, hip + 0.98, 0]}>
-        <Box p={[0, 0, 0]} s={[0.42, 0.42, 0.42]} c={c.skin} />
-        <Box p={[0, 0.18, -0.02]} s={[0.46, 0.1, 0.46]} c={c.hair} />
-        <Box p={[0, 0.02, -0.21]} s={[0.46, 0.34, 0.06]} c={c.hair} />
-        {[-1, 1].map((sx) => (
-          <Box key={sx} p={[sx * 0.09, 0.02, 0.215]} s={[0.06, 0.06, 0.01]} c={c.ink} />
-        ))}
+    <group ref={root} position={p} rotation={[0, r, 0]}>
+      <primitive object={model} />
+      <mesh ref={ball} castShadow>
+        <icosahedronGeometry args={[R, 1]} />
+        <meshStandardMaterial color="#F7F7F4" roughness={0.5} flatShading />
+      </mesh>
+    </group>
+  );
+}
+
+function Goal({ c, p }: { c: Palette; p: V3 }) {
+  return (
+    <group position={p}>
+      <Box p={[-0.55, 0.3, 0]} s={[0.035, 0.6, 0.035]} c={c.white} />
+      <Box p={[0.55, 0.3, 0]} s={[0.035, 0.6, 0.035]} c={c.white} />
+      <Box p={[0, 0.6, 0]} s={[1.135, 0.035, 0.035]} c={c.white} />
+      <Box p={[-0.55, 0.3, -0.25]} s={[0.02, 0.6, 0.02]} c={c.white} />
+      <Box p={[0.55, 0.3, -0.25]} s={[0.02, 0.6, 0.02]} c={c.white} />
+      <mesh position={[0, 0.3, -0.25]}>
+        <planeGeometry args={[1.1, 0.6, 10, 6]} />
+        <meshBasicMaterial color={c.white} wireframe transparent opacity={0.5} />
+      </mesh>
+    </group>
+  );
+}
+
+// The screen of a Kenney monitor: a self-lit plane fitted to its bezel.
+function Screen({ p, r = 0, children, c }: { p: V3; r?: number; children?: React.ReactNode; c: Palette }) {
+  return (
+    <group position={p} rotation={[0, r, 0]}>
+      <Model name="computerScreen" />
+      <group position={[0, 0.185, 0.012]}>
+        <Glow p={[0, 0, 0]} w={0.355} h={0.2} c={c.screen} />
+        <group position={[0, 0, 0.002]}>{children}</group>
+        <pointLight position={[0, 0, 0.3]} intensity={0.35} distance={1.4} color="#8EA2FF" />
       </group>
     </group>
+  );
+}
+
+const Candles = ({ c }: { c: Palette }) => (
+  <>
+    {[0.07, 0.1, 0.06, 0.11, 0.13, 0.09, 0.14, 0.12].map((h, i) => (
+      <Glow key={i} p={[-0.14 + i * 0.04, -0.05 + h / 2 + (i % 3) * 0.01, 0]} w={0.018} h={h} c={i % 3 === 2 ? c.red : c.green} />
+    ))}
+  </>
+);
+
+const Timeline = ({ c }: { c: Palette }) => (
+  <>
+    <Glow p={[0, 0.045, 0]} w={0.33} h={0.08} c={c.lapis} />
+    {[0, 1, 2].map((r) => (
+      <Glow key={r} p={[-0.03 + r * 0.04, -0.04 - r * 0.025, 0.001]} w={0.18 - r * 0.035} h={0.018} c={[c.paper, c.green, c.red][r]} />
+    ))}
+    <Glow p={[0.02, -0.05, 0.002]} w={0.004} h={0.1} c={c.paper} />
+  </>
+);
+
+const UIMock = ({ c }: { c: Palette }) => (
+  <>
+    <Glow p={[-0.13, 0, 0]} w={0.07} h={0.18} c={c.lapis} />
+    <Glow p={[0.04, 0.06, 0]} w={0.22} h={0.035} c={c.paper} />
+    <Glow p={[0.0, -0.02, 0]} w={0.13} h={0.08} c={c.paper} />
+    <Glow p={[0.11, -0.02, 0]} w={0.06} h={0.08} c={c.green} />
+  </>
+);
+
+// A desk you can sit at: the desk faces +z, the chair and the sitter face the screen.
+function Workstation({ c, still, screens }: { c: Palette; still: boolean; screens: React.ReactNode }) {
+  return (
+    <>
+      <Model name="desk" p={[0.15, 0, -1.12]} />
+      {screens}
+      <Model name="computerKeyboard" p={[0.15, 0.38, -1.0]} />
+      <Model name="computerMouse" p={[0.38, 0.38, -1.0]} />
+      <Seated name="chairDesk" p={[0.15, 0, -0.62]} r={Math.PI} face={Math.PI} still={still} />
+    </>
   );
 }
 
 // ---------- scenes ----------
-function Candles({ c }: { c: Palette }) {
-  const bars = [0.2, 0.28, 0.18, 0.3, 0.36, 0.26, 0.4, 0.34];
-  return (
-    <>
-      {bars.map((h, i) => (
-        <Rect key={i} x={-0.4 + i * 0.11} y={-0.15 + h / 2 + (i % 3) * 0.03} w={0.05} h={h} c={i % 3 === 2 ? c.red : c.green} />
-      ))}
-    </>
-  );
-}
-
-function Timeline({ c }: { c: Palette }) {
-  return (
-    <>
-      <Rect x={0} y={0.12} w={0.9} h={0.22} c={c.lapis} />
-      {[0, 1, 2].map((r) => (
-        <Rect key={r} x={-0.1 + r * 0.12} y={-0.12 - r * 0.07} w={0.5 - r * 0.1} h={0.05} c={[c.oat, c.green, c.red][r]} />
-      ))}
-      <Rect x={0.05} y={-0.15} w={0.01} h={0.26} c={c.oat} />
-    </>
-  );
-}
-
-function UIMock({ c }: { c: Palette }) {
-  return (
-    <>
-      <Rect x={-0.34} y={0} w={0.22} h={0.5} c={c.lapis} />
-      <Rect x={0.12} y={0.16} w={0.6} h={0.1} c={c.oat} />
-      <Rect x={0.0} y={-0.05} w={0.36} h={0.22} c={c.oat} />
-      <Rect x={0.3} y={-0.05} w={0.16} h={0.22} c={c.green} />
-    </>
-  );
-}
-
-function Ball({ c }: { c: Palette }) {
-  const ref = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
-    if (!ref.current) return;
-    const t = clock.elapsedTime * 3;
-    ref.current.position.y = 0.16 + Math.abs(Math.sin(t)) * 0.9;
-    ref.current.position.z = 0.1 + Math.sin(t * 0.5) * 0.3;
-    ref.current.rotation.x = t;
-  });
-  return (
-    <group ref={ref} position={[0.6, 0.16, 0.1]}>
-      <Box p={[0, 0, 0]} s={[0.28, 0.28, 0.28]} c={c.oat} />
-    </group>
-  );
-}
-
-function Steam({ c }: { c: Palette }) {
-  const g = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
-    g.current?.children.forEach((m, i) => {
-      const t = (clock.elapsedTime * 0.6 + i * 0.33) % 1;
-      m.position.y = 1.15 + t * 0.9;
-      (m as THREE.Mesh).scale.setScalar(0.6 + t);
-      ((m as THREE.Mesh).material as THREE.MeshStandardMaterial).opacity = 1 - t;
-    });
-  });
-  return (
-    <group ref={g} position={[0.55, 0, -1.3]}>
-      {[0, 1, 2].map((i) => (
-        <mesh key={i} position={[(i - 1) * 0.06, 0, 0]}>
-          <boxGeometry args={[0.14, 0.14, 0.14]} />
-          <meshStandardMaterial color={c.oat} transparent />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function Thoughts({ c }: { c: Palette }) {
-  const g = useRef<THREE.Group>(null);
-  useFrame(({ clock }) => {
-    if (g.current) g.current.position.y = 2.35 + Math.sin(clock.elapsedTime * 1.4) * 0.06;
-  });
-  return (
-    <group ref={g} position={[0, 2.35, 0.2]}>
-      <Label text="2027 ?!" size={0.34} color={c.lapis} />
-    </group>
-  );
-}
-
-// Small seeded PRNG, so everyone on the site sees the same room in the same minute.
 function rng(seed: number) {
   let a = seed | 0;
   return () => {
@@ -512,246 +782,311 @@ function rng(seed: number) {
   };
 }
 
-// The brainstorming room quietly rearranges itself every minute: new ideas on the board, props moved.
-function IdeasRoom({ c, minute }: { c: Palette; minute: number }) {
+// The brainstorming room rearranges itself every minute: new notes on the board.
+function IdeasRoom({ c, minute, still }: { c: Palette; minute: number; still: boolean }) {
   const v = useMemo(() => {
     const r = rng(minute * 9973 + 17);
     const pool = [...ideas];
-    const notes = [0, 1, 2].map(() => ({
-      text: pool.splice(Math.floor(r() * pool.length), 1)[0],
-      color: [c.sage, c.butter, c.blush, c.mist][Math.floor(r() * 4)],
-      tilt: (r() - 0.5) * 0.14,
-      dy: (r() - 0.5) * 0.16,
-    }));
-    const chairs: { p: [number, number, number]; rot: number }[] = [
-      { p: [-0.6, 0, 0.6], rot: 0.5 },
-      { p: [0.7, 0, 1.1], rot: -0.7 },
-      { p: [-1.4, 0, -0.3], rot: 1.3 },
-    ];
     return {
-      notes,
-      chair: chairs[Math.floor(r() * chairs.length)],
+      notes: [0, 1, 2].map(() => ({
+        text: pool.splice(Math.floor(r() * pool.length), 1)[0],
+        color: [c.sage, c.butter, c.blush, c.mist][Math.floor(r() * 4)],
+        tilt: (r() - 0.5) * 0.12,
+        dy: (r() - 0.5) * 0.08,
+      })),
       mug: r() > 0.35,
-      books: r() > 0.5,
-      sketches: 1 + Math.floor(r() * 3),
-      papers: Array.from({ length: Math.floor(r() * 5) }, () => [-1.2 + r() * 2.6, -0.4 + r() * 1.9, r() * 3] as const),
     };
   }, [minute, c]);
-
   return (
     <>
-      {/* whiteboard */}
-      <group position={[-0.4, 1.8, -2.47]}>
-        <Box p={[0, 0, 0]} s={[3.3, 1.6, 0.04]} c={c.ink} />
-        <Box p={[0, 0, 0.025]} s={[3.2, 1.5, 0.02]} c={c.oat} />
-        <Label text="IDEAS" size={0.1} color={c.lapis} position={[-1.3, 0.6, 0.04]} />
+      <group position={[-0.2, 0.95, -H + 0.03]}>
+        <Box p={[0, 0, 0]} s={[1.9, 0.95, 0.03]} c="#3A3D48" />
+        <Box p={[0, 0, 0.018]} s={[1.84, 0.89, 0.01]} c={c.white} rough={0.3} />
+        <Label text="Ideas" size={0.06} color={c.lapis} p={[-0.78, 0.36, 0.03]} face="serif" />
         {v.notes.map((n, i) => (
-          <group key={i} position={[-1.05 + i * 1.05, 0.08 + n.dy, 0.04]} rotation={[0, 0, n.tilt]}>
-            <Box p={[0, 0, 0]} s={[0.94, 0.7, 0.01]} c={n.color} />
-            <Label text={n.text} size={0.12} color={c.ink} position={[0, 0, 0.01]} maxWidth={0.84} />
+          <group key={i} position={[-0.6 + i * 0.6, 0.02 + n.dy, 0.028]} rotation={[0, 0, n.tilt]}>
+            <Glow p={[0, 0, 0]} w={0.5} h={0.4} c={n.color} />
+            <Label text={n.text} size={0.055} color={c.ink} p={[0, 0, 0.004]} maxWidth={0.44} />
           </group>
         ))}
-        {/* marker arrows between the notes */}
-        <Box p={[-0.52, -0.5, 0.04]} s={[0.5, 0.03, 0.01]} c={c.lapis} />
-        <Box p={[0.53, -0.5, 0.04]} s={[0.5, 0.03, 0.01]} c={c.lapis} />
-        <Box p={[0.8, -0.5, 0.04]} s={[0.06, 0.12, 0.01]} c={c.lapis} />
-        {/* marker tray */}
-        <Box p={[0, -0.8, 0.06]} s={[1.2, 0.05, 0.1]} c={c.ink} />
+        <Box p={[-0.3, -0.3, 0.03]} s={[0.28, 0.012, 0.004]} c={c.lapis} />
+        <Box p={[0.3, -0.3, 0.03]} s={[0.28, 0.012, 0.004]} c={c.lapis} />
+        <Box p={[0, -0.47, 0.04]} s={[0.7, 0.025, 0.06]} c="#3A3D48" />
       </group>
-
-      <Person c={c} pose="write" p={[1.7, 0, -1.45]} rot={Math.PI + 0.7} />
-
-      {/* sketches pinned on the side wall */}
-      {Array.from({ length: v.sketches }, (_, i) => (
-        <group key={i} position={[-2.48, 1.95 + (i % 2) * 0.12, -1.8 + i * 0.55]} rotation={[0, Math.PI / 2, 0]}>
-          <Box p={[0, 0, 0]} s={[0.42, 0.52, 0.02]} c={c.oat} />
-          <Box p={[0, 0.06, 0.015]} s={[0.26, 0.04, 0.01]} c={c.lapis} />
-          <Box p={[-0.04, -0.06, 0.015]} s={[0.18, 0.04, 0.01]} c={c.ink} />
-        </group>
-      ))}
-
-      <group position={v.chair.p} rotation={[0, v.chair.rot, 0]}>
-        <Chair c={c} z={0} />
-      </group>
-
-      {/* side table */}
-      <group position={[1.8, 0, 1.0]}>
-        <Box p={[0, 0.3, 0]} s={[0.6, 0.6, 0.6]} c={c.wood} plank />
-        {v.mug && <Box p={[0.12, 0.69, 0.1]} s={[0.14, 0.18, 0.14]} c={c.oat} />}
-        {v.books &&
-          [c.lapis, c.red, c.green].map((col, i) => (
-            <Box key={i} p={[-0.1, 0.64 + i * 0.08, -0.08]} s={[0.34, 0.08, 0.24]} c={col} r={[0, i * 0.2, 0]} />
-          ))}
-      </group>
-
-      {v.papers.map(([x, z, ry], i) => (
-        <Box key={i} p={[x, 0.07, z]} s={[0.14, 0.14, 0.14]} c={c.oat} r={[ry, ry * 2, 0]} />
-      ))}
+      <Person clip="interact-right" p={[0.75, 0, -0.95]} r={Math.PI + 0.5} still={still} />
+      <Model name="chair" p={[-0.6, 0, 0.35]} r={0.6} />
+      <Model name="sideTable" p={[0.95, 0, 0.75]} r={-Math.PI / 2} />
+      {v.mug && <Model name="food/mug" p={[0.92, 0.38, 0.7]} s={0.25} />}
+      <Model name="books" p={[1.0, 0.38, 0.85]} r={0.4} />
+      <Model name="pottedPlant" p={[-1.2, 0, -1.2]} />
     </>
   );
 }
 
-function SceneContent({ id, c, minute }: { id: SceneId; c: Palette; minute: number }) {
+function SceneContent({ id, c, minute, on, still }: { id: SceneId; c: Palette; minute: number; on: boolean; still: boolean }) {
   switch (id) {
     case "design":
       return (
         <>
-          <Desk c={c} />
-          <Monitor c={c}><UIMock c={c} /></Monitor>
-          <Chair c={c} />
-          <Person c={c} pose="sit" />
-          {/* type specimens pinned on the wall */}
+          <Model name="rugRectangle" p={[0.1, 0, -0.35]} />
+          <Workstation c={c} still={still} screens={<Screen c={c} p={[0.15, 0.38, -1.25]}><UIMock c={c} /></Screen>} />
+          <Model name="pottedPlant" p={[1.15, 0, -1.2]} />
+          <Model name="bookcaseOpen" p={[-1.3, 0, -0.55]} r={Math.PI / 2} />
+          <Model name="books" p={[-1.3, 0.46, -0.6]} r={Math.PI / 2} />
+          {/* type specimens pinned above the desk */}
           {["Aa", "Rg", "&"].map((g, i) => (
-            <group key={g} position={[-1.6 + i * 0.75, 2.15, -2.44]}>
-              <Box p={[0, 0, 0]} s={[0.6, 0.78, 0.02]} c={i === 1 ? c.lapis : c.oat} />
-              <Label text={g} size={0.34} color={i === 1 ? c.oat : c.ink} position={[0, 0, 0.02]} />
+            <group key={g} position={[-0.35 + i * 0.4, 1.12, -H + 0.012]}>
+              <Glow p={[0, 0, 0]} w={0.3} h={0.38} c={i === 1 ? c.lapis : c.paper} />
+              <Label text={g} size={0.16} color={i === 1 ? c.paper : c.ink} p={[0, 0, 0.004]} face="serif" />
             </group>
           ))}
-          <Plant c={c} p={[1.9, 0, -1.9]} />
         </>
       );
     case "editing":
       return (
         <>
-          <Desk c={c} w={2.8} />
-          <Monitor c={c} x={-0.62} rot={0.18}><Timeline c={c} /></Monitor>
-          <Monitor c={c} x={0.62} rot={-0.18}><Rect x={0} y={0} w={0.96} h={0.52} c={c.lapis} /></Monitor>
-          <Chair c={c} />
-          <Person c={c} pose="sit" />
-          {/* clapperboard */}
-          <group position={[1.9, 0.86, -1.3]} rotation={[0, -0.5, 0]}>
-            <Box p={[0, 0, 0]} s={[0.5, 0.36, 0.04]} c={c.ink} />
-            <Box p={[0, 0.22, 0]} s={[0.5, 0.08, 0.04]} c={c.oat} r={[0, 0, 0.18]} />
+          <Model name="rugRound" p={[0.15, 0, -0.45]} />
+          <Workstation
+            c={c}
+            still={still}
+            screens={
+              <>
+                <Screen c={c} p={[-0.05, 0.38, -1.25]} r={0.18}><Timeline c={c} /></Screen>
+                <Screen c={c} p={[0.37, 0.38, -1.25]} r={-0.18}><Glow p={[0, 0, 0]} w={0.33} h={0.18} c={c.lapis} /></Screen>
+              </>
+            }
+          />
+          <Model name="speaker" p={[-0.45, 0, -1.25]} />
+          <Model name="speaker" p={[0.8, 0, -1.25]} />
+          {/* clapperboard on the wall shelf */}
+          <group position={[1.0, 1.0, -H + 0.03]}>
+            <Box p={[0, 0, 0]} s={[0.26, 0.19, 0.02]} c={c.ink} />
+            <Box p={[0, 0.12, 0]} s={[0.26, 0.04, 0.02]} c={c.paper} r={[0, 0, 0.16]} />
           </group>
         </>
       );
     case "trading":
       return (
         <>
-          <Desk c={c} />
-          <Monitor c={c}><Candles c={c} /></Monitor>
-          <Chair c={c} />
-          <Person c={c} pose="sit" />
-          {/* coffee and a late-night lamp */}
-          <Box p={[0.85, 0.9, -1.2]} s={[0.14, 0.18, 0.14]} c={c.oat} />
-          <group position={[-0.95, 0.82, -1.6]}>
-            <Box p={[0, 0.3, 0]} s={[0.04, 0.6, 0.04]} c={c.ink} />
-            <Box p={[0, 0.64, 0.05]} s={[0.3, 0.18, 0.3]} c={c.lapis} />
-            <pointLight position={[0, 0.5, 0.1]} intensity={2.2} distance={3} color="#FFD9A0" />
+          <Workstation
+            c={c}
+            still={still}
+            screens={
+              <>
+                <Screen c={c} p={[0.15, 0.38, -1.25]}><Candles c={c} /></Screen>
+                <Model name="laptop" p={[-0.08, 0.38, -1.05]} r={0.35} />
+              </>
+            }
+          />
+          <Model name="food/mug" p={[0.42, 0.38, -0.98]} s={0.22} />
+          <group position={[-0.12, 0.38, -1.3]}>
+            <Model name="lampRoundTable" />
+            <Bulb p={[0.03, 0.24, 0]} on={on} intensity={1.2} distance={1.8} size={0.02} />
           </group>
-        </>
-      );
-    case "sports":
-      return (
-        <>
-          <Person c={c} pose="kick" p={[0, 0, 0]} rot={Math.PI * 0.85} />
-          <Ball c={c} />
-          {/* mini goal */}
-          <group position={[0, 0, -2]}>
-            <Box p={[-1.1, 0.6, 0]} s={[0.07, 1.2, 0.07]} c={c.oat} />
-            <Box p={[1.1, 0.6, 0]} s={[0.07, 1.2, 0.07]} c={c.oat} />
-            <Box p={[0, 1.2, 0]} s={[2.27, 0.07, 0.07]} c={c.oat} />
-          </group>
-        </>
-      );
-    case "cinema":
-      return (
-        <>
-          {/* couch */}
-          <group position={[0, 0, 0.9]}>
-            <Box p={[0, 0.3, 0]} s={[2.2, 0.36, 0.9]} c={c.lapis} />
-            <Box p={[0, 0.7, 0.36]} s={[2.2, 0.6, 0.2]} c={c.lapis} />
-          </group>
-          <Person c={c} pose="sit" p={[0.2, 0, 0.75]} rot={Math.PI} />
-          {/* screen on the wall */}
-          <Box p={[0, 1.7, -2.44]} s={[3, 1.6, 0.03]} c={c.oat} />
-          <mesh position={[0, 1.7, -2.42]}>
-            <planeGeometry args={[2.8, 1.4]} />
-            <meshBasicMaterial color={c.screen} toneMapped={false} />
-          </mesh>
-          <Label text="Now showing" size={0.2} color={c.oat} position={[0, 1.7, -2.4]} />
-          {/* projector beam */}
-          <mesh position={[0, 2.1, -0.6]} rotation={[0.2, 0, 0]}>
-            <boxGeometry args={[1.6, 0.9, 3.4]} />
-            <meshBasicMaterial color="#FFF4DA" transparent opacity={0.07} depthWrite={false} />
-          </mesh>
+          <Model name="trashcan" p={[0.85, 0, -1.2]} />
+          <Model name="plantSmall1" p={[1.0, 0, 0.9]} s={2.2} />
         </>
       );
     case "cooking":
       return (
         <>
-          {/* counter and stove */}
-          <Box p={[0, 0.5, -1.5]} s={[3, 1, 0.9]} c={c.oat} />
-          <Box p={[0, 1.02, -1.5]} s={[3, 0.05, 0.92]} c={c.wood} plank />
-          <Box p={[0.55, 1.15, -1.3]} s={[0.5, 0.22, 0.5]} c={c.ink} />
-          <Steam c={c} />
-          <Person c={c} pose="stir" p={[0.2, 0, -0.5]} rot={Math.PI} />
-          <Plant c={c} p={[-1.8, 0, 1.4]} />
+          <Model name="kitchenFridge" p={[-1.22, 0, -1.2]} />
+          <Model name="kitchenCabinet" p={[-0.78, 0, -1.25]} />
+          <Model name="kitchenStove" p={[-0.35, 0, -1.25]} />
+          <Model name="kitchenSink" p={[0.08, 0, -1.25]} />
+          <Model name="kitchenCabinet" p={[0.51, 0, -1.25]} />
+          <Model name="kitchenCabinetUpper" p={[0.08, 0.95, -1.37]} />
+          <Model name="kitchenCabinetUpper" p={[0.51, 0.95, -1.37]} />
+          <Model name="kitchenCoffeeMachine" p={[0.55, 0.45, -1.3]} />
+          <Model name="food/frying-pan" p={[-0.33, 0.45, -1.18]} s={0.28} r={0.6} />
+          <Model name="food/pot-stew" p={[-0.4, 0.45, -1.36]} s={0.26} />
+          <Model name="food/cutting-board" p={[0.5, 0.45, -1.14]} s={0.24} r={Math.PI / 2} />
+          <Person clip="interact-right" p={[-0.3, 0, -0.78]} r={Math.PI} still={still} />
+          <Model name="pottedPlant" p={[1.15, 0, 0.9]} />
+          <Model name="rugRound" p={[0, 0, 0]} />
+        </>
+      );
+    case "cinema":
+      return (
+        <>
+          <Model name="rugRectangle" p={[0, 0, 0]} />
+          <Model name="cabinetTelevision" p={[0, 0, -1.3]} />
+          <Model name="televisionModern" p={[0, 0.31, -1.32]} s={1.6} />
+          <Glow p={[0, 0.31 + 0.39, -1.32 + 0.06 * 1.6 + 0.004]} w={0.98} h={0.55} c={c.screen} />
+          <Label text="Now showing" size={0.07} color={c.paper} p={[0, 0.7, -1.32 + 0.1 + 0.006]} face="serif" />
+          <pointLight position={[0, 0.7, -0.8]} intensity={1.6} distance={3} color="#9DB2FF" />
+          <Model name="tableCoffee" p={[0, 0, -0.2]} />
+          <Seated name="loungeSofa" p={[0, 0, 0.75]} r={Math.PI} face={Math.PI} still={still} />
+          <Model name="speaker" p={[-0.6, 0, -1.3]} />
+          <Model name="speaker" p={[0.6, 0, -1.3]} />
         </>
       );
     case "panic":
       return (
         <>
-          <Desk c={c} x={-0.8} z={-1.6} w={1.8} />
-          <Monitor c={c} x={-0.8} z={-1.9}>
-            <Rect x={0} y={0} w={0.96} h={0.52} c={c.red} />
-          </Monitor>
-          <Person c={c} pose="pace" p={[0.3, 0, 0.4]} rot={Math.PI} />
-          <Thoughts c={c} />
-          {/* crumpled paper */}
-          {[[0.9, 1.1], [1.4, 0.2], [-0.2, 1.4], [1.7, 1.2]].map(([x, z], i) => (
-            <Box key={i} p={[x, 0.07, z]} s={[0.14, 0.14, 0.14]} c={c.oat} r={[i, i * 0.7, 0]} />
+          <Model name="desk" p={[-0.7, 0, -1.12]} />
+          <Screen c={c} p={[-0.7, 0.38, -1.25]}>
+            <Glow p={[0, 0, 0]} w={0.33} h={0.18} c={c.red} />
+          </Screen>
+          <Model name="chairDesk" p={[-0.95, 0, -0.55]} r={Math.PI + 0.7} />
+          <Person clip="walk" p={[0.2, 0, 0.3]} path="pace" still={still} />
+          <Thoughts c={c} still={still} />
+          {[[0.9, 0.9], [0.5, -0.2], [-0.4, 0.9], [1.1, -0.6], [-0.1, 1.15]].map(([x, z], i) => (
+            <mesh key={i} position={[x, 0.035, z]} rotation={[i, i * 0.7, 0]} castShadow>
+              <icosahedronGeometry args={[0.04, 0]} />
+              <meshStandardMaterial color={c.paper} flatShading />
+            </mesh>
           ))}
+          <Model name="cardboardBoxOpen" p={[1.1, 0, -1.15]} />
         </>
       );
     case "ideas":
-      return <IdeasRoom c={c} minute={minute} />;
+      return <IdeasRoom c={c} minute={minute} still={still} />;
+    case "gym":
+      return (
+        <>
+          <mesh position={[0.2, 0.003, 0.1]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+            <planeGeometry args={[1.5, 1.3]} />
+            <meshStandardMaterial color="#5A5D68" roughness={0.95} />
+          </mesh>
+          {/* wall mirror */}
+          <Box p={[0.2, 0.95, -H + 0.02]} s={[1.6, 1.0, 0.02]} c="#2A2C33" />
+          <mesh position={[0.2, 0.95, -H + 0.035]}>
+            <planeGeometry args={[1.52, 0.92]} />
+            <meshStandardMaterial color="#E4ECF8" roughness={0.15} metalness={0.1} />
+          </mesh>
+          {/* bench */}
+          <group position={[0.75, 0, -0.85]}>
+            <Box p={[0, 0.22, 0]} s={[0.75, 0.07, 0.22]} c={c.lapis} rough={0.6} />
+            <Box p={[-0.28, 0.1, 0]} s={[0.05, 0.2, 0.18]} c="#26272D" />
+            <Box p={[0.28, 0.1, 0]} s={[0.05, 0.2, 0.18]} c="#26272D" />
+          </group>
+          {/* rack */}
+          <group position={[-1.25, 0, 0.3]}>
+            <Box p={[0, 0.18, 0]} s={[0.26, 0.03, 0.9]} c="#26272D" />
+            <Box p={[0, 0.38, 0]} s={[0.26, 0.03, 0.9]} c="#26272D" />
+            <Box p={[0, 0.2, -0.43]} s={[0.26, 0.4, 0.03]} c="#26272D" />
+            <Box p={[0, 0.2, 0.43]} s={[0.26, 0.4, 0.03]} c="#26272D" />
+            {[-0.3, -0.05, 0.2].map((z, i) => (
+              <Dumbbell key={i} p={[0, i % 2 ? 0.44 : 0.24, z]} r={Math.PI / 2} />
+            ))}
+          </group>
+          <Dumbbell p={[0.1, 0.045, 0.45]} r={0.4} />
+          {/* push-ups on the mat: the crouch clip's dip-and-rise loop, with an extra press-up bob */}
+          <Person clip="crouch" p={[0.0, 0, 0.0]} r={Math.PI / 5} bob={0.05} still={still} />
+          <Tripod p={[1.0, 0, 0.6]} r={Math.atan2(0 - 1.0, 0 - 0.6)} />
+          <Model name="pottedPlant" p={[1.2, 0, -1.2]} />
+        </>
+      );
+    case "sports":
+      return (
+        <Ground c={c}>
+          {/* pitch markings: the box in front of the goal */}
+          <Glow p={[0.72, 0.004, 0.1]} w={0.02} h={1.5} c={c.white} r={[-Math.PI / 2, 0, 0]} />
+          <Glow p={[-0.5, 0.004, 0.1]} w={0.02} h={1.5} c={c.white} r={[-Math.PI / 2, 0, 0]} />
+          <group position={[1.1, 0, 0.1]} rotation={[0, -Math.PI / 2, 0]}>
+            <Goal c={c} p={[0, 0, 0]} />
+          </group>
+          <Kicker p={[-0.35, 0, 0.1]} r={Math.PI / 2} still={still} />
+          <Model name="tree_oak" p={[-1.15, 0, -1.15]} s={1.15} />
+          <Model name="tree_default" p={[1.2, 0, -1.2]} s={0.9} />
+          <StreetLight p={[-1.25, 0, 1.1]} r={-Math.PI / 4} on={on} />
+          {[-1, 0, 1].map((i) => (
+            <Model key={i} name="fence_simple" p={[i, 0, -1.47]} />
+          ))}
+          <Scatter seed={7} count={14} avoid={(x, z) => x > -0.9 && x < 1.4 && Math.abs(z - 0.1) < 0.75} />
+        </Ground>
+      );
+    case "run":
+      return (
+        <Ground c={c}>
+          <mesh position={[0, 0.003, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+            <ringGeometry args={[0.8, 1.05, 64]} />
+            <meshStandardMaterial color={c.path} roughness={1} />
+          </mesh>
+          <Person clip="sprint" path="loop" still={still} />
+          <Model name="plant_bushLarge" p={[0, 0, 0]} s={1.6} />
+          <Model name="plant_bush" p={[0.25, 0, 0.2]} s={1.2} />
+          <Model name="flower_redA" p={[-0.25, 0, 0.15]} />
+          <Model name="flower_yellowA" p={[0.1, 0, -0.3]} />
+          <Model name="tree_oak" p={[-1.25, 0, -1.25]} />
+          <Model name="tree_default" p={[1.25, 0, -1.25]} s={0.8} />
+          <StreetLight p={[1.25, 0, 0.3]} r={Math.PI / 2} on={on} />
+          <StreetLight p={[-0.3, 0, -1.3]} on={on} />
+          <Scatter seed={11} count={16} avoid={(x, z) => { const d = Math.hypot(x, z); return d > 0.65 && d < 1.2; }} />
+        </Ground>
+      );
+    case "bench":
+      return (
+        <Ground c={c}>
+          <mesh position={[0.2, 0.003, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+            <planeGeometry args={[0.55, ROOM]} />
+            <meshStandardMaterial color={c.path} roughness={1} />
+          </mesh>
+          <ParkBench p={[-0.4, 0, -0.1]} r={Math.PI / 2} still={still} />
+          <StreetLight p={[0.62, 0, -0.35]} r={Math.PI / 2} on={on} />
+          <Model name="tree_oak" p={[-1.05, 0, -1.1]} s={1.3} />
+          <Model name="tree_detailed" p={[1.1, 0, -1.15]} />
+          <Model name="plant_bush" p={[-1.1, 0, 0.6]} s={1.4} />
+          <Model name="plant_bushLarge" p={[1.05, 0, 0.9]} s={1.2} />
+          <Fireflies still={still} />
+          <Scatter seed={23} count={14} avoid={(x) => x > -0.15 && x < 0.55} />
+        </Ground>
+      );
   }
 }
 
-// Fit the whole room to the canvas, whatever its size (the room is ~7.5 units across in iso).
+function Thoughts({ c, still }: { c: Palette; still: boolean }) {
+  const g = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (g.current && !still) g.current.position.y = 1.2 + Math.sin(clock.elapsedTime * 1.4) * 0.03;
+  });
+  return (
+    <group ref={g} position={[0.25, 1.2, 0.4]}>
+      <Label text="2027 ?!" size={0.14} color={c.lapis} face="serif" />
+    </group>
+  );
+}
+
+// Fit the diorama to the canvas, whatever its size.
 function FitZoom() {
   const { camera, size } = useThree();
   useEffect(() => {
-    camera.zoom = Math.min(size.width / 7.6, size.height / 6.4);
-    camera.lookAt(0, 0.9, 0);
+    camera.zoom = Math.min(size.width / 4.7, size.height / 4.0);
+    camera.lookAt(0, 0.45, 0);
     camera.updateProjectionMatrix();
   }, [camera, size]);
   return null;
 }
 
-function Room({ id, c, sky, on, minute }: { id: SceneId; c: Palette; sky: Sky; on: boolean; minute: number }) {
+function Diorama({ id, c, sky, on, minute, still }: { id: SceneId; c: Palette; sky: Sky; on: boolean; minute: number; still: boolean }) {
   const g = useRef<THREE.Group>(null);
+  const outdoor = OUTDOOR.includes(id);
   // Each new scene settles in from slightly below: a small, weighted entrance.
   useEffect(() => {
-    if (g.current) {
-      g.current.position.y = -0.6;
+    if (g.current && !still) {
+      g.current.position.y = -0.35;
       g.current.scale.setScalar(0.94);
     }
-  }, [id]);
+  }, [id, still]);
   useFrame((_, d) => {
     if (!g.current) return;
     g.current.position.y = THREE.MathUtils.damp(g.current.position.y, 0, 5, d);
-    const s = THREE.MathUtils.damp(g.current.scale.x, 1, 5, d);
-    g.current.scale.setScalar(s);
+    g.current.scale.setScalar(THREE.MathUtils.damp(g.current.scale.x, 1, 5, d));
   });
   return (
     <group ref={g}>
-      {/* the room shell: plank floor and two block walls */}
-      <Box p={[0, -0.1, 0]} s={[5, 0.2, 5]} c={c.floor} plank />
-      <Box p={[0, 1.6, -2.55]} s={[5, 3.2, 0.1]} c={c.wall} />
-      <Box p={[-2.55, 1.6, 0]} s={[0.1, 3.2, 5]} c={c.wall2} />
-      <Window c={c} sky={sky} />
-      <WindowLight sky={sky} on={on} />
-      <FloorLamp c={c} on={on} />
-      {/* rug */}
-      <Box p={[0.3, 0.005, 0.2]} s={[2.6, 0.01, 2]} c={c.oat} />
-      <SceneContent id={id} c={c} minute={minute} />
+      {!outdoor && (
+        <>
+          <Shell c={c} sky={sky} />
+          <FloorLamp p={id === "design" || id === "editing" ? [-1.22, 0, -1.22] : [-1.25, 0, 1.2]} on={on} />
+        </>
+      )}
+      <SceneContent id={id} c={c} minute={minute} on={on} still={still} />
     </group>
   );
 }
 
-// Current minute on the wall clock; checked every few seconds.
 function useMinute() {
   const [m, setM] = useState(() => Math.floor(Date.now() / 60000));
   useEffect(() => {
@@ -768,19 +1103,51 @@ export default function StudioRoom({ id, lightsOn = true }: { id: SceneId; light
   const { resolvedTheme } = useTheme();
   const [c, setC] = useState<Palette>(LIGHT);
   useEffect(() => setC(resolvedTheme === "dark" ? DARK : LIGHT), [resolvedTheme]);
-  const camera = useMemo(() => ({ position: [9, 8, 9] as [number, number, number], zoom: 78, near: 0.1, far: 100 }), []);
+  const camera = useMemo(() => ({ position: [9, 7.5, 9] as V3, zoom: 120, near: 0.1, far: 100 }), []);
   const minute = useMinute();
-  // Only the brainstorming room follows the minute clock through the day.
-  const sky = id === "ideas" ? SKY_CYCLE[minute % SKY_CYCLE.length] : SKIES.day;
+  const outdoor = OUTDOOR.includes(id);
+  const sky = SCENE_SKY[id] ?? (id === "ideas" ? SKY_CYCLE[minute % SKY_CYCLE.length] : SKIES.day);
+  const [ready, setReady] = useState(false);
 
   return (
-    <div ref={wrap} className="h-full w-full" role="img" aria-label={`A voxel room showing Sevith in the current scene, with the lights ${lightsOn ? "on" : "off"}`}>
-      <Canvas orthographic flat shadows dpr={[1, 1.75]} frameloop={!inView ? "never" : still ? "demand" : "always"} camera={camera} onCreated={({ camera }) => camera.lookAt(0, 0.9, 0)}>
-        <Lights on={lightsOn} sky={sky} still={still} />
+    <div
+      ref={wrap}
+      className="relative h-full w-full"
+      role="img"
+      aria-label={`A 3D diorama of Sevith in the current scene, with the ${outdoor ? "street light" : "lights"} ${lightsOn ? "on" : "off"}`}
+    >
+      <Canvas
+        orthographic
+        shadows
+        dpr={[1, 2]}
+        frameloop={!inView ? "never" : still ? "demand" : "always"}
+        camera={camera}
+        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
+        onCreated={({ camera }) => camera.lookAt(0, 0.45, 0)}
+      >
+        <SkyLights sky={sky} on={lightsOn} outdoor={outdoor} still={still} />
         <FitZoom />
-        <Room id={id} c={c} sky={sky} on={lightsOn} minute={minute} />
-        <ContactShadows position={[0, -0.21, 0]} opacity={0.25} scale={12} blur={2.4} far={3} />
+        <SoftShadows size={18} samples={12} focus={0.6} />
+        <Suspense fallback={null}>
+          <Diorama id={id} c={c} sky={sky} on={lightsOn} minute={minute} still={still} />
+          <ContactShadows position={[0, 0.012, 0]} opacity={0.4} scale={ROOM} blur={2.2} far={0.7} resolution={1024} />
+          <Ready onReady={() => setReady(true)} />
+        </Suspense>
       </Canvas>
+      {!ready && <StudioSkeleton />}
     </div>
   );
+}
+
+// Mounts only once everything inside its Suspense boundary has loaded.
+function Ready({ onReady }: { onReady: () => void }) {
+  useEffect(onReady, [onReady]);
+  return null;
+}
+
+// Fetch every model up front: switching scenes should never wait on the network.
+// Plain GLB only: no Draco or Meshopt decoders, which would need WASM and the CSP forbids it.
+if (typeof window !== "undefined") {
+  MODELS.forEach((m) => useGLTF.preload(`${M}${m}.glb`, false, false));
+  useGLTF.preload(CHARACTER, false, false);
 }

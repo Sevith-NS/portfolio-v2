@@ -11,6 +11,7 @@ export const stack = (icons: string[]) =>
 export const tintClass: Record<string, string> = {
   lapis: "bg-tint-lapis", sage: "bg-tint-sage", stone: "bg-tint-stone", butter: "bg-tint-butter",
   blush: "bg-tint-blush", mint: "bg-tint-mint", rose: "bg-tint-rose",
+  amber: "bg-tint-amber", garnet: "bg-tint-garnet", clover: "bg-tint-clover",
 };
 
 // Compressed 1280px WebP copies of the screenshots in public/reel (made from the PNGs with ffmpeg).

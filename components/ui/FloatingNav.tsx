@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
 import { usePathname } from "next/navigation";
 import {
   Briefcase,
@@ -19,6 +19,9 @@ import { resumeLink } from "@/data";
 import { ThemeToggle } from "./ThemeToggle";
 import { TransitionLink } from "../transition/TransitionLink";
 
+// Every section on the home page, in scroll order: the counter reads off this.
+const sections = ["top", "projects", "about", "experience", "approach", "off-the-clock", "contact"];
+
 const icons: Record<string, Icon> = {
   Work: Briefcase,
   About: Smiley,
@@ -31,10 +34,15 @@ const icons: Record<string, Icon> = {
 // The active pill fills with lapis and slides between items.
 export const FloatingNav = ({ navItems }: { navItems: { name: string; link: string }[] }) => {
   const [active, setActive] = useState<string>("");
+  const [index, setIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const home = pathname === "/";
   const toggle = useRef<HTMLButtonElement>(null);
+
+  // A hairline that fills across the top as the page runs out.
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 });
 
   const hrefFor = (link: string) => (link.startsWith("#") && !home ? `/${link}` : link);
   const isActive = (link: string) =>
@@ -55,15 +63,23 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
   }, []);
   useEffect(() => setOpen(false), [pathname]);
 
-  // Track which section is in the middle of the screen.
+  // Track which section is in the middle of the screen: it drives both the pill and the counter.
   useEffect(() => {
     if (!home) return;
-    const ids = ["top", ...navItems.filter((n) => n.link.startsWith("#")).map((n) => n.link.slice(1))];
+    const anchors = new Set(navItems.filter((n) => n.link.startsWith("#")).map((n) => n.link));
     const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id === "top" ? "" : `#${e.target.id}`)),
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          const id = e.target.id;
+          const i = sections.indexOf(id);
+          if (i >= 0) setIndex(i);
+          if (id === "top") setActive("");
+          else if (anchors.has(`#${id}`)) setActive(`#${id}`);
+        }),
       { rootMargin: "-45% 0px -50% 0px" }
     );
-    ids.forEach((id) => {
+    sections.forEach((id) => {
       const el = document.getElementById(id);
       if (el) io.observe(el);
     });
@@ -74,14 +90,31 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
 
   return (
     <header className="fixed inset-x-0 top-3 z-50 px-4 md:top-4 md:px-8">
+      {/* Progress line: same scroll, drawn thin. */}
+      <motion.div
+        aria-hidden
+        style={{ scaleX: progress }}
+        className="pointer-events-none fixed inset-x-0 top-0 h-px origin-left bg-accent"
+      />
+
       <div className="mx-auto flex max-w-[64rem] items-center justify-between gap-3">
-        <TransitionLink
-          href={home ? "#top" : "/"}
-          label="Home"
-          className={cn(pill, "px-4 font-serif text-[1.05rem] tracking-[-0.02em] text-ink")}
-        >
-          sevith<span className="text-accent">.</span>
-        </TransitionLink>
+        <div className="flex items-center gap-2">
+          <TransitionLink
+            href={home ? "#top" : "/"}
+            label="Home"
+            className={cn(pill, "px-4 font-serif text-[1.15rem] tracking-[-0.02em] text-ink")}
+          >
+            sevith<span className="text-accent">.</span>
+          </TransitionLink>
+
+          {home && (
+            <p className={cn(pill, "label hidden px-3 text-ink-3 sm:flex")} aria-hidden>
+              {String(index + 1).padStart(2, "0")}
+              <span className="px-1 text-rule">/</span>
+              {String(sections.length).padStart(2, "0")}
+            </p>
+          )}
+        </div>
 
         <nav aria-label="Primary" className="flex items-center gap-1.5">
           <ul className={cn(pill, "hidden gap-0.5 p-1 lg:flex")}>
@@ -102,7 +135,7 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
                     label={item.name}
                     aria-current={on ? "page" : undefined}
                     className={cn(
-                      "relative flex h-8 items-center gap-1.5 rounded-full px-3 font-serif text-[0.9375rem] transition-colors",
+                      "relative flex h-8 items-center gap-1.5 rounded-full px-3 text-[0.875rem] font-medium transition-colors",
                       on ? "text-on-hl" : "text-ink-2 hover:text-ink"
                     )}
                   >
@@ -117,7 +150,7 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
                 href={resumeLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-8 items-center gap-1.5 rounded-full px-3 font-serif text-[0.9375rem] text-ink-2 transition-colors hover:text-ink"
+                className="flex h-8 items-center gap-1.5 rounded-full px-3 text-[0.875rem] font-medium text-ink-2 transition-colors hover:text-ink"
               >
                 <FileText size={15} />
                 résumé

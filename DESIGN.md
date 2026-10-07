@@ -256,7 +256,7 @@ Flat by default, with depth reserved for things that float. Surfaces separate by
 - **Nav float** (`box-shadow: 0 8px 24px -12px rgb(22 27 45 / 0.22)`, with 12px backdrop blur): the floating nav pill; the mobile menu uses `0 16px 40px -20px rgb(22 27 45 / 0.35)`.
 
 ### Named Rules
-**The Three Pieces Rule.** 3D is used for the three signature pieces only: the hero "S" monogram (lapis clear-coat letter, oat clay forms, turns toward the cursor), the film reel (projects as frames on a turning film strip), and the studio room (isometric voxel room with shader-textured blocks and a lights switch, 8 scenes). Each pauses when off screen, caps DPR at 1.75, and respects reduced motion (no drift, no auto-advance, no pointer chase). No fourth 3D object.
+**The Three Pieces Rule.** 3D is used for the three signature pieces only: the hero "S" monogram (lapis clear-coat letter, oat clay forms, turns toward the cursor), the film reel (projects as frames on a turning film strip), and the studio room (isometric voxel room with shader-textured blocks and a lights switch, 10 scenes). Each pauses when off screen, caps DPR at 1.75, and respects reduced motion (no drift, no auto-advance, no pointer chase). No fourth 3D object.
 
 ## Shapes
 

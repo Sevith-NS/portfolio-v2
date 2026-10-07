@@ -1,18 +1,25 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { Libre_Caslon_Text, Nothing_You_Could_Do } from "next/font/google";
+import { Archivo, Instrument_Serif, Nothing_You_Could_Do } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./provider";
 import { TransitionProvider } from "@/components/transition/TransitionProvider";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { Cursor } from "@/components/motion/Cursor";
 
-const serif = Libre_Caslon_Text({
+const serif = Instrument_Serif({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: "400",
   style: ["normal", "italic"],
   variable: "--font-serif",
+  display: "swap",
+});
+// Variable width axis: the wordmark runs expanded, small labels run normal.
+const display = Archivo({
+  subsets: ["latin"],
+  axes: ["wdth"],
+  variable: "--font-display",
   display: "swap",
 });
 const script = Nothing_You_Could_Do({ subsets: ["latin"], weight: "400", variable: "--font-script", display: "swap" });
@@ -36,7 +43,7 @@ export const viewport: Viewport = {
 
 const contract = `
 THESIS: A product builder's portfolio with studio-grade polish: calm white space, warm serif statements, one lapis accent, and motion that feels physical (Lenis scroll, spring cursor, blur-in reveals).
-OWN-WORLD: White by day, lapis-navy by night. Lapis #002DB4 is the only accent. Libre Caslon Text for statements (italic for outcomes), Geist for labels and body, one lapis handwritten note per section. Project plates are soft pastel gradients with the product rising behind frosted glass.
+OWN-WORLD: White by day, lapis-navy by night. Lapis #002DB4 is the only accent. Instrument Serif for statements (italic for outcomes), Archivo expanded for wordmarks and rails, Geist for labels and body, one lapis handwritten note per section. Project plates are soft pastel gradients with the product rising behind frosted glass.
 STORY: Visitor meets a product builder aiming for AI PM and product design roles, scrolls through case plates, sees how Sevith works and who Sevith is off the clock, then emails or downloads the resume.
 FIRST VIEWPORT: Centered serif statement, a lapis scribble crossing it, pill nav with the active item in lapis, a quiet scroll cue.
 FORM: Brief-pinned to the design language of the user's reference (not its content), seed 43f73bd6.
@@ -52,7 +59,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} ${script.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} ${display.variable} ${script.variable}`}
     >
       <body>
         {/* Internal design notes: kept out of production HTML. */}

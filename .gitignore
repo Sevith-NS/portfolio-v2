@@ -12,6 +12,6 @@ out
 next-env.d.ts
 
 # Local design-review captures
-.impeccable/review
+.impeccable
 .impeccable/decision-payload.json
 .next-verify

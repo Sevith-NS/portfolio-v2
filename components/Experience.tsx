@@ -1,13 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useRef, useState } from "react";
+import { AnimatePresence, motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { ArrowUpRight, Plus } from "@phosphor-icons/react";
 import { workExperience } from "@/data";
 import { SectionHeader } from "./SectionHeader";
 
+// The chapter's year, read off the duration string.
+const yearOf = (duration: string) => duration.match(/\d{4}/)?.[0] ?? "";
+
 const Experience = () => {
   const [open, setOpen] = useState<number | null>(1);
+  const rail = useRef<HTMLOListElement>(null);
+  const { scrollYProgress } = useScroll({ target: rail, offset: ["start 75%", "end 60%"] });
+  const railFill = useSpring(scrollYProgress, { stiffness: 90, damping: 26, restDelta: 0.001 });
 
   return (
     <section id="experience" className="mx-auto max-w-page px-4 py-20 md:px-8 md:py-24">
@@ -16,8 +22,11 @@ const Experience = () => {
         note="Two roles, one thread: understand what users need, then get it into their hands."
       />
 
-      {/* Hovering one entry isolates its thread; the rest fall back to graphite. */}
-      <ol className="group/log mt-14 border-t border-rule">
+      {/* The year rail: a hairline down the left, filled in lapis as the chapters go by. */}
+      <ol ref={rail} className="group/log relative mt-14 border-t border-rule md:pl-10">
+        <span aria-hidden className="absolute inset-y-0 left-0 hidden w-px bg-rule md:block">
+          <motion.span style={{ scaleY: railFill }} className="block h-full origin-top bg-accent" />
+        </span>
         {workExperience.map((job) => {
           const isOpen = open === job.id;
           return (
@@ -26,7 +35,10 @@ const Experience = () => {
               className="grid gap-4 border-b border-rule py-8 transition-opacity duration-300 md:grid-cols-12 md:gap-8 md:py-10 [@media(hover:hover)]:group-hover/log:opacity-45 [@media(hover:hover)]:hover:!opacity-100"
             >
               <div className="md:col-span-3">
-                <p className="note">{job.duration}</p>
+                <p aria-hidden className="numeral-outline select-none text-[4.5rem] md:text-[5.75rem]">
+                  {yearOf(job.duration)}
+                </p>
+                <p className="note mt-3">{job.duration}</p>
                 <p className="mt-1 text-lg font-medium text-ink">{job.company}</p>
               </div>
 

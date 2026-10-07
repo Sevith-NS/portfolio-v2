@@ -21,6 +21,9 @@
     --tint-stone: 236 236 234;
     --tint-rose: 244 222 228;
     --tint-mint: 214 238 229;
+    --tint-amber: 246 230 204;
+    --tint-garnet: 248 217 212;
+    --tint-clover: 200 236 208;
     color-scheme: light;
   }
 
@@ -41,6 +44,9 @@
     --tint-stone: 34 38 52;
     --tint-rose: 54 32 48;
     --tint-mint: 20 50 52;
+    --tint-amber: 52 42 26;
+    --tint-garnet: 56 32 30;
+    --tint-clover: 18 50 34;
     color-scheme: dark;
   }
 
@@ -111,6 +117,28 @@ html.lenis, html.lenis body { height: auto; }
 
   .note {
     @apply font-sans text-[0.8125rem] font-medium leading-5 text-ink-3 tabular;
+  }
+
+  /* Small uppercase tracked label with tabular numerals: rails, counters, chapter marks. */
+  .label {
+    @apply font-display text-[0.6875rem] font-semibold uppercase leading-4 tabular;
+    letter-spacing: 0.16em;
+    font-variation-settings: "wdth" 110;
+  }
+
+  /* Expanded Archivo: the wide wordmark voice. */
+  .wordmark {
+    @apply font-display font-semibold uppercase;
+    letter-spacing: -0.02em;
+    font-variation-settings: "wdth" 125;
+  }
+
+  /* An outlined numeral that sits behind a chapter. */
+  .numeral-outline {
+    @apply font-display font-bold leading-none tabular text-transparent;
+    letter-spacing: -0.04em;
+    font-variation-settings: "wdth" 118;
+    -webkit-text-stroke: 1.5px rgb(var(--rule));
   }
 
   .chip {

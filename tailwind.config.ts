@@ -28,12 +28,16 @@ const config = {
           stone: "rgb(var(--tint-stone) / <alpha-value>)",
           rose: "rgb(var(--tint-rose) / <alpha-value>)",
           mint: "rgb(var(--tint-mint) / <alpha-value>)",
+          amber: "rgb(var(--tint-amber) / <alpha-value>)",
+          garnet: "rgb(var(--tint-garnet) / <alpha-value>)",
+          clover: "rgb(var(--tint-clover) / <alpha-value>)",
         },
       },
       fontFamily: {
         sans: ["var(--font-geist-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
         serif: ["var(--font-serif)", "Georgia", "serif"],
+        display: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],
         script: ["var(--font-script)", "cursive"],
       },
       maxWidth: {

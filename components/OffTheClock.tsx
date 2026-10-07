@@ -1,21 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { ArrowRight } from "@phosphor-icons/react";
 import { interests, nowLine } from "@/data";
 import { SectionHeader } from "./SectionHeader";
+import { Marquee } from "./motion/Marquee";
 import { TransitionLink } from "./transition/TransitionLink";
 import { Scribble } from "./ui/Scribble";
 
+// The four voices the site is set in, plus the display face it runs wide.
 const faces = [
-  { name: "Libre Caslon Text", role: "Statements. A classic Caslon, warm in italic.", className: "font-serif", italic: true },
+  { name: "Instrument Serif", role: "Statements. High contrast, made to be set large.", className: "font-serif", italic: true },
+  { name: "Archivo", role: "Wordmarks and rails, run wide on the width axis.", className: "font-display uppercase", wide: true },
   { name: "Geist", role: "Body and labels. Neutral, precise, gets out of the way.", className: "font-sans" },
   { name: "Geist Mono", role: "Notes and numbers.", className: "font-mono" },
   { name: "Nothing You Could Do", role: "Margin scribbles.", className: "font-script" },
 ];
 
 const OffTheClock = () => {
-  const [text, setText] = useState("Curious, precise, warm.");
+  const [text, setText] = useState("Curious?");
   const [size, setSize] = useState(48);
   const [italic, setItalic] = useState(true);
   const now = nowLine.filter((n) => n.value.trim());
@@ -27,21 +30,31 @@ const OffTheClock = () => {
         note="The things that make me a better builder, mostly by accident."
       />
 
-      <div className="mt-12 grid gap-10 lg:grid-cols-12">
-        <div className="lg:col-span-5">
-          <ul className="flex flex-wrap gap-2.5" aria-label="Interests">
-            {interests.map((t) => (
-              <li
-                key={t}
-                className="rounded-full border border-rule bg-paper px-4 py-2 text-[0.9375rem] text-ink transition-colors hover:border-accent hover:text-accent"
-              >
-                {t}
-              </li>
-            ))}
-          </ul>
+      {/* Two bands running against each other, at whatever speed you're scrolling.
+          Full-bleed: the section's gutters would make the band read as a boxed widget. */}
+      <div className="relative left-1/2 mt-12 w-screen -translate-x-1/2 border-y border-rule py-4">
+        <Marquee speed={2.2} label="Interests">
+          {interests.map((t) => (
+            <span key={t} className="wordmark flex items-center gap-8 pr-8 text-[1.6rem] text-ink md:text-[2.4rem]">
+              {t}
+              <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-accent" />
+            </span>
+          ))}
+        </Marquee>
+        <Marquee speed={1.6} reverse className="mt-2">
+          {interests.map((t) => (
+            <span key={t} className="label flex items-center gap-6 pr-6 text-ink-3">
+              {t}
+              <span aria-hidden className="h-px w-8 shrink-0 bg-rule" />
+            </span>
+          ))}
+        </Marquee>
+      </div>
 
+      <div className="mt-12 grid gap-10 lg:grid-cols-12">
+        <div className="lg:sticky lg:top-24 lg:col-span-5 lg:self-start">
           {now.length > 0 && (
-            <dl className="mt-10 space-y-3 border-t border-rule pt-6">
+            <dl className="space-y-3">
               {now.map((n) => (
                 <div key={n.label} className="flex items-baseline gap-4">
                   <dt className="note w-28 shrink-0">{n.label}</dt>
@@ -102,7 +115,7 @@ const OffTheClock = () => {
                 type="button"
                 aria-pressed={italic}
                 onClick={() => setItalic((v) => !v)}
-                className={`h-9 rounded-full border px-3.5 font-serif text-[0.9375rem] italic transition-colors ${
+                className={`h-9 rounded-full border px-3.5 font-serif text-base italic transition-colors ${
                   italic ? "border-accent bg-accent text-on-hl" : "border-rule text-ink-2 hover:border-ink"
                 }`}
               >
@@ -116,7 +129,12 @@ const OffTheClock = () => {
               <li key={f.name} className="border-t border-rule py-5">
                 <p
                   className={`${f.className} break-words leading-tight tracking-[-0.01em] text-ink ${f.italic && italic ? "italic" : ""}`}
-                  style={{ fontSize: `clamp(1.5rem, ${size / 16}rem, 12vw)` }}
+                  style={
+                    {
+                      fontSize: `clamp(1.5rem, ${size / 16}rem, 12vw)`,
+                      ...(f.wide ? { fontVariationSettings: '"wdth" 125' } : null),
+                    } as CSSProperties
+                  }
                 >
                   {text || "Aa"}
                 </p>

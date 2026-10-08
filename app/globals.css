@@ -209,3 +209,42 @@ html.lenis, html.lenis body { height: auto; }
   .has-cursor, .has-cursor a, .has-cursor button { cursor: none; }
   .has-cursor input, .has-cursor textarea { cursor: text; }
 }
+
+/* The side-switch mosaic: chunky tiles snap in on a diagonal sweep, cover the
+   screen while the theme flips behind them, then snap away to reveal the new
+   side. Tile delays come from JS (one per tile); the motion lives here so 700
+   tiles cost 700 divs and no per-frame JS. */
+@keyframes mosaic-in {
+  from { opacity: 0; transform: scale(0.3); }
+  to { opacity: 1; transform: scale(1.06); }
+}
+@keyframes mosaic-out {
+  from { opacity: 1; transform: scale(1.06); }
+  to { opacity: 0; transform: scale(0.3); }
+}
+.mosaic-tile { animation-fill-mode: both; }
+[data-mosaic="in"] .mosaic-tile {
+  animation-name: mosaic-in;
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+[data-mosaic="out"] .mosaic-tile {
+  animation-name: mosaic-out;
+  animation-duration: 200ms;
+  animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+@keyframes mosaic-say-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes mosaic-say-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-12px); }
+}
+[data-mosaic="in"] .mosaic-say {
+  animation: mosaic-say-in 520ms cubic-bezier(0.16, 1, 0.3, 1) calc(420ms + var(--say-delay, 0ms)) both;
+}
+[data-mosaic="out"] .mosaic-say {
+  animation: mosaic-say-out 220ms cubic-bezier(0.76, 0, 0.24, 1) both;
+}

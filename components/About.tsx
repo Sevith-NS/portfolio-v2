@@ -26,7 +26,7 @@ const About = () => {
 
       <Reveal>
         {/* Facet nav: click a label, the headline below swaps. */}
-        <div role="tablist" aria-label="About facets" className="mt-14 flex flex-wrap gap-x-7 gap-y-3 border-b border-rule pb-4">
+        <div role="tablist" aria-label="About facets" className="mt-14 flex flex-wrap gap-x-7 gap-y-3  md:border-b border-rule pb-4">
           {selfPortrait.map((tab, i) => (
             <button
               key={tab.id}

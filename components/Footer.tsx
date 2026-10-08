@@ -1,11 +1,16 @@
 import { ArrowUp, ArrowUpRight, EnvelopeSimple } from "@phosphor-icons/react/dist/ssr";
 import { email, resumeLink, socialMedia } from "@/data";
+import { cn } from "@/lib/utils";
 import { Form } from "./ui/Form";
 import { CopyEmail } from "./ui/CopyEmail";
+import { GlassPaint } from "./ui/GlassPaint";
+
+const wordmark =
+  "select-none whitespace-nowrap text-center font-serif text-[22vw] font-normal leading-[0.8] tracking-[-0.02em] md:text-[15rem] lg:text-[17.5rem]";
 
 const Footer = () => {
   return (
-    <footer id="contact" className="mx-auto max-w-page overflow-hidden px-4 pb-8 pt-20 md:px-8 md:pt-24">
+    <footer id="contact" className="mx-auto max-w-page px-4 pb-8 pt-20 md:px-8 md:pt-24">
       <div className="grid gap-12 border-t border-rule pt-14 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-5">
           <h2 className="section-title">Let&apos;s build something.</h2>
@@ -56,13 +61,12 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* The sign-off: a wordmark set big enough to feel like an end card. */}
-      <p
-        aria-hidden
-        className="mt-20 select-none whitespace-nowrap font-serif text-[22vw] font-normal leading-[0.8] tracking-[-0.02em] text-accent/[0.12] md:text-[15rem] lg:text-[17.5rem]"
-      >
-        sevith.
-      </p>
+      {/* The sign-off: full-bleed, edge to edge. Hover it to wipe the lapis
+          version through, like clearing a circle of fogged glass. */}
+      <div aria-hidden className="relative left-1/2 mt-20 w-screen -translate-x-1/2 overflow-hidden">
+        <p className={cn(wordmark, "text-accent/[0.12]")}>sevith.</p>
+        <GlassPaint className={cn(wordmark, "absolute inset-0 flex items-center justify-center text-accent")}>sevith.</GlassPaint>
+      </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-rule pt-6">
         <p className="note">© {new Date().getFullYear()} Sevith Sadashiva · Bangalore</p>

@@ -24,7 +24,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   const lenis = useLenis();
   const [phase, setPhase] = useState<Phase>("idle");
   const [label, setLabel] = useState("");
-  const [scene, setScene] = useState(1);
+  // const [scene, setScene] = useState(1);
   const pending = useRef<string | null>(null);
   const pushTimer = useRef<number>();
   const safetyTimer = useRef<number>();
@@ -55,7 +55,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
       busy.current = true;
       pending.current = target;
       setLabel(next);
-      setScene((s) => s + 1);
+      // setScene((s) => s + 1);
       setPhase("cover");
       pushTimer.current = window.setTimeout(() => router.push(href), COVER_MS);
       // Never leave the curtain closed, whatever happens to the navigation.
@@ -126,7 +126,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
                 transition={{ delay: 0.3, duration: 0.3 }}
                 className="font-mono text-xs tabular md:text-sm"
               >
-                Scene {String(scene).padStart(2, "0")}
+                {/* Scene {String(scene).padStart(2, "0")} */}
               </motion.p>
             </div>
           </motion.div>

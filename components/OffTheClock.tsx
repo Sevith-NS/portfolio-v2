@@ -30,22 +30,14 @@ const OffTheClock = () => {
         note="The things that make me a better builder, mostly by accident."
       />
 
-      {/* Two bands running against each other, at whatever speed you're scrolling.
-          Full-bleed: the section's gutters would make the band read as a boxed widget. */}
-      <div className="relative left-1/2 mt-12 w-screen -translate-x-1/2 border-y border-rule py-4">
-        <Marquee speed={2.2} label="Interests">
+      {/* One unhurried band, not two racing each other. Stays inside the
+          page's gutters, like every other section. */}
+      <div className="mt-12 border-y border-rule">
+        <Marquee speed={0.55} label="Interests" className="py-5">
           {interests.map((t) => (
-            <span key={t} className="wordmark flex items-center gap-8 pr-8 text-[1.6rem] text-ink md:text-[2.4rem]">
+            <span key={t} className="flex items-center gap-10 pr-10 font-serif text-2xl text-ink md:text-3xl">
               {t}
-              <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-accent" />
-            </span>
-          ))}
-        </Marquee>
-        <Marquee speed={1.6} reverse className="mt-2">
-          {interests.map((t) => (
-            <span key={t} className="label flex items-center gap-6 pr-6 text-ink-3">
-              {t}
-              <span aria-hidden className="h-px w-8 shrink-0 bg-rule" />
+              <span aria-hidden className="size-1 shrink-0 rounded-full bg-ink-3" />
             </span>
           ))}
         </Marquee>

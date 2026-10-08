@@ -219,6 +219,17 @@ function useCharacter() {
   const model = useMemo(() => {
     const o = cloneSkinned(scene);
     shadowAll(o);
+    // The colormap is a flat palette atlas: mipmapped trilinear filtering blends
+    // each tiny swatch into its neighbours once the model is small on screen.
+    // Nearest, no mips, keeps every swatch exact at any distance.
+    o.traverse((m) => {
+      const map = (m as THREE.Mesh).material && ((m as THREE.Mesh).material as THREE.MeshStandardMaterial).map;
+      if (map) {
+        map.minFilter = THREE.NearestFilter;
+        map.generateMipmaps = false;
+        map.needsUpdate = true;
+      }
+    });
     return o;
   }, [scene]);
   return { model, animations };
@@ -972,9 +983,10 @@ function SceneContent({ id, c, minute, on, still }: { id: SceneId; c: Palette; m
             ))}
           </group>
           <Dumbbell p={[0.1, 0.045, 0.45]} r={0.4} />
-          {/* push-ups on the mat: the crouch clip's dip-and-rise loop, with an extra press-up bob */}
-          <Person clip="crouch" p={[0.0, 0, 0.0]} r={Math.PI / 5} bob={0.05} still={still} />
-          <Tripod p={[1.0, 0, 0.6]} r={Math.atan2(0 - 1.0, 0 - 0.6)} />
+          {/* on the bench, facing the tripod that's filming: the same seat-anchored sit pose used everywhere else */}
+          <Person clip="sit" seat={[0.75, 0.255, -0.85]} r={Math.atan2(1.3 - 0.75, -0.3 - -0.85)} still={still} />
+          <Dumbbell p={[0.95, 0.285, -0.78]} r={0.3} />
+          <Tripod p={[1.3, 0, -0.3]} r={Math.atan2(0.75 - 1.3, -0.85 - -0.3)} />
           <Model name="pottedPlant" p={[1.2, 0, -1.2]} />
         </>
       );

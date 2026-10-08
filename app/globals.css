@@ -5,8 +5,8 @@
 /* White by day, lapis-navy by night. Lapis is the one accent. Pastels live only on project plates. */
 @layer base {
   :root {
-    --paper: 255 255 255;
-    --sheet: 247 247 245;
+    --paper: 250 246 237;
+    --sheet: 242 236 222;
     --ink: 17 17 17;
     --ink-2: 71 71 71;
     --ink-3: 110 110 110;
@@ -186,6 +186,22 @@ html.lenis, html.lenis body { height: auto; }
 .scribble[data-on="true"] { mask-position: 0 0; -webkit-mask-position: 0 0; }
 @media (prefers-reduced-motion: reduce) {
   .scribble { mask-image: none; -webkit-mask-image: none; }
+}
+
+/* A solid layer that only shows through a circle of "clear glass" at the
+   cursor, like wiping condensation off a window. Tracks --gx/--gy, set from JS. */
+.glass-paint {
+  mask-image: radial-gradient(220px at var(--gx, 50%) var(--gy, 50%), #000 25%, transparent 72%);
+  -webkit-mask-image: radial-gradient(220px at var(--gx, 50%) var(--gy, 50%), #000 25%, transparent 72%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.glass-paint[data-on="true"] { opacity: 1; }
+@media (hover: none) {
+  .glass-paint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .glass-paint { transition: none; }
 }
 
 /* The custom cursor only exists for fine pointers. */

@@ -16,7 +16,7 @@ export const heroNotes = [
   { when: "Dec 2024", what: "Shipped a real-estate platform at Ceyone" },
   { when: "Mar 2025", what: "Joined Digital.ai, owning product docs" },
   { when: "2025", what: "Led 0-to-1 docs for Ask Release GA" },
-  { when: "Now", what: "Building Flint OS, solo" },
+  { when: "Now", what: "Building Flint OS" },
   { when: "Next", what: "AI PM or product design role", highlight: true },
 ];
 
@@ -51,6 +51,46 @@ export const gridItems = [
   },
 ];
 
+// The About intro as switchable facets, sanvithi.com-style. Drafted from the
+// facts above (gridItems, approach, interests) — edit the copy freely.
+export const selfPortrait = [
+  {
+    id: "who-i-am",
+    label: "Who I am",
+    tag: "who i am",
+    headline: "Product builder working toward AI PM and product design roles, currently a Technical Writer at Digital.ai.",
+    body: "BCA, Christ University. Docs taught me to start from the customer's confusion and work back to the fix.",
+  },
+  {
+    id: "what-i-care-about",
+    label: "What I care about",
+    tag: "what i care about",
+    headline: "Tech and finance, and the overlap between them.",
+    body: "Markets, fonts and type, personal brand, and whatever side project is closest to shipping.",
+  },
+  {
+    id: "what-i-believe-in",
+    label: "What I believe in",
+    tag: "what i believe in",
+    headline: "Start from the customer's confusion, work back to the fix.",
+    body: "Ship in small, reviewable slices. Write while things are still moving. Let what customers report shape the next plan.",
+  },
+  {
+    id: "what-i-can-cook",
+    label: "What I can cook",
+    tag: "what i can cook",
+    headline: "Still building out the kitchen repertoire.",
+    body: "Cooking made the list of things that make me better at this, right under fonts and finance. Ask me in person — edit this once there's a signature dish.",
+  },
+  {
+    id: "whats-up",
+    label: "What I'm upto",
+    tag: "what i'm upto",
+    headline: "Building Flint OS, an AI-powered quant investing platform.",
+    body: "A multi-factor signal engine and risk analytics that explain every trade they suggest. Next: an AI PM or product design role.",
+  },
+];
+
 export const projects = [
   {
     id: 7,
@@ -59,7 +99,7 @@ export const projects = [
     tint: "sage",
     year: "2026",
     outcome: "I'm designing and building a quant investing platform that explains every trade it suggests.",
-    des: "An AI-powered quant investing platform: multi-factor signal engine, VaR/CVaR risk analytics, XGBoost and Prophet forecasts, an event-driven backtester, and a Gemini-powered research assistant.",
+    des: "An AI-powered quant investing platform, multi-factor signal engine, VaR/CVaR risk analytics, XGBoost and Prophet forecasts, an event-driven backtester, and a Gemini-powered research assistant.",
     img: "/flint.png",
     iconLists: ["/next.svg", "/ts.svg", "/tail.svg", "/python.svg", "/gemini.svg"],
     link: "https://github.com/Sevith-NS/algo-trader",
@@ -72,7 +112,7 @@ export const projects = [
     tint: "amber",
     year: "", // TODO: add the year
     outcome: "I built an AI mock-interview coach so students can rehearse placements before the real thing.",
-    des: "An AI mock-interview platform that helps students prepare for placements and internships, with Gemini-generated questions and text-to-speech.",
+    des: "An AI mock-interview platform that helps students prepare for placements and internships, with Google Gemini-generated questions and text-to-speech.",
     img: "/tesseract.png",
     iconLists: ["/re.svg", "/tail.svg", "/javascript.svg", "/next.svg", "/gemini.svg", "/clerk.svg", "/neon.png"],
     link: "https://tesseractai.vercel.app/",
@@ -181,10 +221,10 @@ export const approach = [
     artifact: {
       heading: "Backlog, sorted by customer impact",
       rows: [
-        { tag: "Defect", text: "Kubernetes support versions out of date" },
-        { tag: "Story", text: "AI Assistant: BYOM configuration guide" },
-        { tag: "Story", text: "Deprecation notice for end-of-support versions" },
-        { tag: "Defect", text: "Broken links in plugin reference" },
+        { tag: "Defect", text: "RHEL 8.x and Windows Server 2022 end-of-support" },
+        { tag: "Story", text: "AI Assistant: on-premises install guide" },
+        { tag: "Story", text: "Deploy: Helm OCI registry support" },
+        { tag: "Defect", text: "Standalone MCP Server sunset date missing" },
       ],
     },
   },
@@ -196,10 +236,10 @@ export const approach = [
     artifact: {
       heading: "Sprint update",
       rows: [
-        { tag: "Done", text: "Agent customization guide" },
-        { tag: "Done", text: "LLM guardrails reference" },
-        { tag: "Review", text: "Docker and Kubernetes architecture" },
-        { tag: "Next", text: "Release notes draft" },
+        { tag: "Done", text: "AI Assistant (on-prem) install guide" },
+        { tag: "Done", text: "Release MCP Server: OAuth2 authentication" },
+        { tag: "Review", text: "Deploy on Event (Tech Preview) walkthrough" },
+        { tag: "Next", text: "Kubernetes ingress controller migration guide" },
       ],
     },
   },
@@ -211,10 +251,10 @@ export const approach = [
     artifact: {
       heading: "Release notes",
       rows: [
-        { tag: "New", text: "AI Assistant is generally available" },
-        { tag: "Improved", text: "Updated Kubernetes support matrix" },
-        { tag: "Fixed", text: "Customer-reported install guide issues" },
-        { tag: "Notice", text: "End of support for older versions" },
+        { tag: "New", text: "AI Assistant, formerly Ask Release, is GA" },
+        { tag: "Improved", text: "Release MCP Server now bundled by default" },
+        { tag: "Fixed", text: "Deploy: staged file.Folder artifact handling" },
+        { tag: "Notice", text: "TLS 1.0/1.1 removed JDK 21 and 25 only" },
       ],
     },
   },

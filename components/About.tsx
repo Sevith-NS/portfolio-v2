@@ -1,31 +1,78 @@
+"use client";
+
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
-import { gridItems, heroNotes, ledger } from "@/data";
+import { gridItems, heroNotes, ledger, selfPortrait } from "@/data";
 import { SectionHeader } from "./SectionHeader";
 import { Reveal } from "./motion/Reveal";
 import { TransitionLink } from "./transition/TransitionLink";
+import { Scribble } from "./ui/Scribble";
 
 const item = (id: number) => gridItems.find((g) => g.id === id)!;
+const ease = [0.16, 1, 0.3, 1] as const;
 
 const About = () => {
-  const role = item(1);
-  const interest = item(4);
-  const building = item(5);
   const begin = item(6);
+  const [active, setActive] = useState(0);
+  const current = selfPortrait[active];
 
   return (
     <section id="about" className="mx-auto max-w-page px-4 py-20 md:px-8 md:py-28">
       <SectionHeader
         title="Product judgment, backed by shipping."
-        note="Technical writer by title, product person by habit. Docs taught me to start from the customer's confusion and work back to the fix."
+        note="Technical writer by title, product person by habit. Pick a facet."
       />
 
       <Reveal>
-        <p className="mt-14 max-w-[30ch] font-serif text-[1.9rem] leading-[1.2] tracking-[-0.015em] text-ink md:text-[2.6rem]">
-          {role.title}.
-        </p>
-        <p className="mt-5 max-w-[60ch] text-lg leading-relaxed text-ink-2">
-          {role.description}. {interest.title} {building.title}. Currently pursuing a Product Management certification.
-        </p>
+        {/* Facet nav: click a label, the headline below swaps. */}
+        <div role="tablist" aria-label="About facets" className="mt-14 flex flex-wrap gap-x-7 gap-y-3 border-b border-rule pb-4">
+          {selfPortrait.map((tab, i) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={i === active}
+              aria-controls={`panel-${tab.id}`}
+              onClick={() => setActive(i)}
+              className="label relative pb-3"
+            >
+              <span className={i === active ? "text-accent" : "text-ink-3 transition-colors hover:text-ink"}>{tab.label}</span>
+              {i === active && (
+                <motion.span
+                  layoutId="facet-underline"
+                  className="absolute inset-x-0 -bottom-[17px] h-[2px] bg-accent"
+                  transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative mt-10 min-h-[14rem] md:mt-12 md:min-h-[16rem]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={current.id}
+              id={`panel-${current.id}`}
+              role="tabpanel"
+              initial={{ opacity: 0, y: 16, filter: "blur(8px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -12, filter: "blur(8px)" }}
+              transition={{ duration: 0.5, ease }}
+              className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between"
+            >
+              <div>
+                <p className="max-w-[32ch] font-serif text-[1.9rem] leading-[1.18] tracking-[-0.015em] text-ink md:text-[2.75rem]">
+                  {current.headline}
+                </p>
+                <p className="mt-5 max-w-[58ch] text-lg leading-relaxed text-ink-2">{current.body}</p>
+              </div>
+              <Scribble className="pointer-events-none shrink-0 -rotate-2 text-[2.75rem] sm:text-[3.5rem] lg:pr-4 lg:text-[4.5rem]">
+                {current.tag}
+              </Scribble>
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </Reveal>
 
       {/* The timeline, oldest first, ending at what's next. */}

@@ -19,7 +19,7 @@ import { resumeLink } from "@/data";
 import { ThemeToggle } from "./ThemeToggle";
 import { TransitionLink } from "../transition/TransitionLink";
 
-// Every section on the home page, in scroll order: the counter reads off this.
+// Every section on the home page, in scroll order: drives which nav pill is active.
 const sections = ["top", "projects", "about", "experience", "approach", "off-the-clock", "contact"];
 
 const icons: Record<string, Icon> = {
@@ -34,7 +34,6 @@ const icons: Record<string, Icon> = {
 // The active pill fills with lapis and slides between items.
 export const FloatingNav = ({ navItems }: { navItems: { name: string; link: string }[] }) => {
   const [active, setActive] = useState<string>("");
-  const [index, setIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const home = pathname === "/";
@@ -72,8 +71,6 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
         entries.forEach((e) => {
           if (!e.isIntersecting) return;
           const id = e.target.id;
-          const i = sections.indexOf(id);
-          if (i >= 0) setIndex(i);
           if (id === "top") setActive("");
           else if (anchors.has(`#${id}`)) setActive(`#${id}`);
         }),
@@ -106,14 +103,6 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
           >
             sevith<span className="text-accent">.</span>
           </TransitionLink>
-
-          {home && (
-            <p className={cn(pill, "label hidden px-3 text-ink-3 sm:flex")} aria-hidden>
-              {String(index + 1).padStart(2, "0")}
-              <span className="px-1 text-rule">/</span>
-              {String(sections.length).padStart(2, "0")}
-            </p>
-          )}
         </div>
 
         <nav aria-label="Primary" className="flex items-center gap-1.5">

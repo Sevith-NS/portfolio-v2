@@ -69,7 +69,7 @@ const Footer = () => {
       </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-rule pt-6">
-        <p className="note">© {new Date().getFullYear()} Sevith Sadashiva · Bangalore</p>
+        <p className="note">© sevith sadashiva {new Date().getFullYear()}. all rights reserved. created in bangalore</p>
         <a href="#main" className="note inline-flex items-center gap-1.5 hover:text-ink">
           Back to top <ArrowUp size={13} />
         </a>

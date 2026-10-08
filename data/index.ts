@@ -186,7 +186,7 @@ export const workExperience = [
     company: "Digital.ai",
     duration: "Mar 2025 – Present",
     desc: "Own the docs roadmap for Deploy, Release and TeamForge across 4 major release cycles. Led 0-to-1 content for Ask Release, Digital.ai's GenAI assistant, through its GA launch.",
-    link: "https://docs.digital.ai/release/docs/release-notes/release-notes-release/",
+    link: "https://docs.digital.ai/release/docs/release-notes/release-notes-release",
     points: [
       "Prioritize 300+ user stories and defects across 30+ Agile sprints in Agility.",
       "Defined the information architecture for Ask Release, covering agent customization, LLM guardrails, BYOM and Kubernetes deployment, through GA.",

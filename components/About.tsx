@@ -41,7 +41,7 @@ const About = () => {
               {i === active && (
                 <motion.span
                   layoutId="facet-underline"
-                  className="absolute inset-x-0 -bottom-[17px] h-[2px] bg-accent"
+                  className="absolute inset-x-0 -bottom-[0px] md:-bottom-[12px] lg:-bottom-[17px] h-[2px] bg-accent"
                   transition={{ type: "spring", stiffness: 420, damping: 34 }}
                 />
               )}

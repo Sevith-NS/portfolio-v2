@@ -13,7 +13,6 @@ const Artifact = ({ step, className }: { step: Step; className?: string }) => (
   <div className={cn("rounded-2xl border border-rule bg-sheet p-5 shadow-[0_24px_48px_-32px_rgb(0_0_0/0.35)] md:p-7", className)}>
     <div className="flex items-center justify-between border-b border-rule pb-4">
       <p className="text-[0.9375rem] font-medium text-ink">{step.artifact.heading}</p>
-      <p className="note">Example</p>
     </div>
     <ul className="mt-2">
       {step.artifact.rows.map((row, i) => (

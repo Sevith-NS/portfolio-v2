@@ -1,5 +1,5 @@
 export const resumeLink =
-  "https://drive.google.com/file/d/1VpV84tcSQfn0ey0fELITyGvf4WEAYlgh/view?usp=drive_link";
+  "https://drive.google.com/file/d/11E0TG7xOsdtzW9pANEm7BHBrhDYCTpmT/view?usp=sharing";
 
 export const email = "sevithns@gmail.com";
 
@@ -55,40 +55,40 @@ export const gridItems = [
 // facts above (gridItems, approach, interests) — edit the copy freely.
 export const selfPortrait = [
   {
-    id: "who-i-am",
-    label: "Who I am",
-    tag: "who i am",
-    headline: "Product builder working toward AI PM and product design roles, currently a Technical Writer at Digital.ai.",
-    body: "BCA, Christ University. Docs taught me to start from the customer's confusion and work back to the fix.",
-  },
-  {
-    id: "what-i-care-about",
-    label: "What I care about",
-    tag: "what i care about",
-    headline: "Tech and finance, and the overlap between them.",
-    body: "Markets, fonts and type, personal brand, and whatever side project is closest to shipping.",
-  },
-  {
-    id: "what-i-believe-in",
-    label: "What I believe in",
-    tag: "what i believe in",
-    headline: "Start from the customer's confusion, work back to the fix.",
-    body: "Ship in small, reviewable slices. Write while things are still moving. Let what customers report shape the next plan.",
-  },
-  {
-    id: "what-i-can-cook",
-    label: "What I can cook",
-    tag: "what i can cook",
-    headline: "Still building out the kitchen repertoire.",
-    body: "Cooking made the list of things that make me better at this, right under fonts and finance. Ask me in person — edit this once there's a signature dish.",
-  },
-  {
-    id: "whats-up",
-    label: "What I'm upto",
-    tag: "what i'm upto",
-    headline: "Building Flint OS, an AI-powered quant investing platform.",
-    body: "A multi-factor signal engine and risk analytics that explain every trade they suggest. Next: an AI PM or product design role.",
-  },
+  id: "who-i-am",
+  label: "Who I am",
+  tag: "who i am",
+  headline: "Product builder working toward AI PM and Product Design roles, currently a Technical Writer at Digital.ai.",
+  body: "BCA from Christ University. I write docs for enterprise DevOps products (Deploy, Release, TeamForge) and led content for Ask Release, Digital.ai's GenAI assistant. Docs taught me to start from the customer's confusion and work back to the fix.",
+},
+{
+  id: "what-i-care-about",
+  label: "What I care about",
+  tag: "what i care about",
+  headline: "Tech and finance, and the overlap between them.",
+  body: "Markets, fonts and type, building a personal brand in public, and whatever side project is eating my weekends. I document the journey on Instagram at @bysevith.",
+},
+{
+  id: "what-i-believe-in",
+  label: "What I believe in",
+  tag: "what i believe in",
+  headline: "Start from the customer's confusion, work back to the fix.",
+  body: "Ship in small, reviewable slices. Write while things are still moving. Let what customers report shape the next plan.",
+},
+{
+  id: "what-i-can-cook",
+  label: "What I can cook",
+  tag: "what i can cook",
+  headline: "Docs, products and tools that make complex software easier to use.",
+  body: "Product documentation for enterprise DevOps, GenAI assistant content, and AI-powered products built end to end, from the idea to the interface to the first working version.",
+},
+{
+  id: "whats-up",
+  label: "What I'm upto",
+  tag: "what i'm upto",
+  headline: "Building Flint OS, an AI-powered quant investing platform.",
+  body: "A multi-factor signal engine and risk analytics that explain every trade they suggest. I'm also building Tesseract, an AI mock-interview platform. Next up: an AI PM or product design role.",
+},
 ];
 
 export const projects = [

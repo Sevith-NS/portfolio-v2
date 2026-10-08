@@ -65,8 +65,8 @@ export const selfPortrait = [
   id: "what-i-care-about",
   label: "What I care about",
   tag: "what i care about",
-  headline: "Tech and finance, and the overlap between them.",
-  body: "Markets, fonts and type, building a personal brand in public, and whatever side project is eating my weekends. I document the journey on Instagram at @bysevith.",
+  headline: "Tech, finance, and where the two collide.",
+  body: "I'm into markets, typography, and building a personal brand in public. I love designing intuitive, clean, and aesthetic interfaces that feel as good as they look.",
 },
 {
   id: "what-i-believe-in",

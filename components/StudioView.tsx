@@ -15,7 +15,7 @@ const StudioRoom = dynamic(() => import("./three/StudioRoom"), {
 });
 
 export default function StudioView() {
-  const { index: base, left } = useLiveScene();
+  const { index: base } = useLiveScene();
   // null = follow the live clock; a number = a scene the visitor picked.
   const [manual, setManual] = useState<number | null>(null);
   const [lightsOn, setLightsOn] = useState(true);
@@ -24,8 +24,6 @@ export default function StudioView() {
   const i = manual ?? base ?? 0;
   const step = (d: number) => setManual(((i + d) % n + n) % n);
   const scene = scenes[i];
-  const mm = Math.floor(left / 60000);
-  const ss = String(Math.floor((left % 60000) / 1000)).padStart(2, "0");
 
   return (
     <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
@@ -39,11 +37,6 @@ export default function StudioView() {
             {String(i + 1).padStart(2, "0")}/{String(n).padStart(2, "0")}
           </span>
         </div>
-        {manual === null && (
-          <p aria-hidden className="label pointer-events-none absolute bottom-5 left-5 text-ink-3">
-            Next {mm}:{ss}
-          </p>
-        )}
         <button
           type="button"
           onClick={() => setLightsOn((v) => !v)}
@@ -85,9 +78,11 @@ export default function StudioView() {
             </button>
           )}
         </div>
-        <p className="note mt-4" aria-live="off">
-          {manual === null ? `Live. Next scene in ${mm}:${ss}` : "Browsing scenes. The live room keeps its own clock."}
-        </p>
+        {manual !== null && (
+          <p className="note mt-4" aria-live="off">
+            Browsing scenes. The live room keeps its own clock.
+          </p>
+        )}
 
         <ul className="mt-8 flex flex-wrap gap-2" aria-label="All scenes">
           {scenes.map((s, k) => (

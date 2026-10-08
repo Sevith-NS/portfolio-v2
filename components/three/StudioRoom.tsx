@@ -2,17 +2,16 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { ContactShadows, SoftShadows, useAnimations, useGLTF } from "@react-three/drei";
+import { ContactShadows, RoundedBox, SoftShadows, useGLTF } from "@react-three/drei";
 import { useReducedMotion } from "framer-motion";
 import { useTheme } from "next-themes";
 import * as THREE from "three";
-import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { useInView3D } from "./useInView3D";
 import { ideas, OUTDOOR } from "@/data/studio";
 import { StudioSkeleton } from "./StudioSkeleton";
 
 export type SceneId =
-  | "design" | "editing" | "trading" | "sports" | "gym" | "run" | "cinema" | "cooking" | "panic" | "ideas" | "bench";
+  | "design" | "editing" | "trading" | "sports" | "gym" | "run" | "cinema" | "cooking" | "panic" | "ideas" | "cats";
 
 
 type V3 = [number, number, number];
@@ -29,7 +28,6 @@ const MODELS = [
   "roads/light-curved", "food/frying-pan", "food/pot-stew", "food/mug", "food/cutting-board", "food/plate",
 ] as const;
 type ModelName = (typeof MODELS)[number];
-const CHARACTER = `${M}chars/character-male-a.glb`;
 
 // ---------- palette ----------
 type Palette = {
@@ -58,7 +56,7 @@ const SKIES = {
 const SKY_CYCLE: Sky[] = [SKIES.dawn, SKIES.day, SKIES.golden, SKIES.dusk, SKIES.night];
 
 // Outdoor scenes pick the hour that suits them; the street light matters most once the sun is down.
-const SCENE_SKY: Partial<Record<SceneId, Sky>> = { sports: SKIES.golden, run: SKIES.dusk, bench: SKIES.night };
+const SCENE_SKY: Partial<Record<SceneId, Sky>> = { sports: SKIES.golden, run: SKIES.dusk, cats: SKIES.night };
 
 // ---------- models ----------
 const shadowAll = (o: THREE.Object3D) =>
@@ -130,16 +128,27 @@ function SeatedOn({ obj, p = [0, 0, 0], r = 0, s = 1, still, face }: { obj: THRE
   return (
     <>
       <primitive object={obj} position={p} rotation={[0, r, 0]} scale={s} />
-      <Person clip="sit" seat={at} r={facing} still={still} />
+      <Minifig pose="sit" seat={at} r={facing} still={still} />
     </>
   );
 }
 
+// Every block in the diorama is bevelled rather than a raw cube: the soft edge
+// catches a highlight and stops the whole thing reading as programmer art. The
+// radius is clamped to the thinnest side so slivers don't collapse.
 const Box = ({ p, s, c, r = [0, 0, 0], rough = 0.8, metal = 0, cast = true }: { p: V3; s: V3; c: string; r?: V3; rough?: number; metal?: number; cast?: boolean }) => (
-  <mesh position={p} rotation={r} castShadow={cast} receiveShadow>
-    <boxGeometry args={s} />
+  <RoundedBox
+    args={s}
+    radius={Math.min(0.013, Math.min(s[0], s[1], s[2]) * 0.34)}
+    smoothness={3}
+    creaseAngle={0.5}
+    position={p}
+    rotation={r}
+    castShadow={cast}
+    receiveShadow
+  >
     <meshStandardMaterial color={c} roughness={rough} metalness={metal} />
-  </mesh>
+  </RoundedBox>
 );
 
 // A flat, self-lit rectangle: screen contents, sticky notes, posters.
@@ -209,101 +218,396 @@ function Label({ text, size, color, p = [0, 0, 0], r = [0, 0, 0], maxWidth, face
 }
 
 // ---------- the person ----------
-type Clip =
-  | "idle" | "sit" | "sprint" | "walk" | "attack-kick-right" | "interact-right" | "pick-up" | "holding-both" | "emote-no" | "crouch";
-
-// Kenney's Mini Character A, skinned and animated by its own clips.
-// `path` moves the whole body: a running loop or pacing back and forth.
-function useCharacter() {
-  const { scene, animations } = useGLTF(CHARACTER, false, false);
-  const model = useMemo(() => {
-    const o = cloneSkinned(scene);
-    shadowAll(o);
-    // The colormap is a flat palette atlas: mipmapped trilinear filtering blends
-    // each tiny swatch into its neighbours once the model is small on screen.
-    // Nearest, no mips, keeps every swatch exact at any distance.
-    o.traverse((m) => {
-      const map = (m as THREE.Mesh).material && ((m as THREE.Mesh).material as THREE.MeshStandardMaterial).map;
-      if (map) {
-        map.minFilter = THREE.NearestFilter;
-        map.generateMipmaps = false;
-        map.needsUpdate = true;
-      }
-    });
-    return o;
-  }, [scene]);
-  return { model, animations };
-}
-
-// Pose the model at one moment of a clip on a throwaway mixer, measure, and let go.
-function measurePose<T>(model: THREE.Object3D, clip: THREE.AnimationClip | undefined, t: number, read: () => T): T {
-  const mixer = new THREE.AnimationMixer(model);
-  if (clip) mixer.clipAction(clip).play();
-  mixer.setTime(t);
-  model.updateMatrixWorld(true);
-  const out = read();
-  mixer.stopAllAction();
-  mixer.uncacheRoot(model);
-  return out;
-}
-
-const boneAt = (model: THREE.Object3D, name: string, local: V3 = [0, 0, 0]) => {
-  const b = model.getObjectByName(name);
-  return b ? b.localToWorld(new THREE.Vector3(...local)) : new THREE.Vector3();
+// A mini-figure built out of boxes instead of a kit model: every colour is set
+// right here and every joint is posed in code, so there's no rig or texture
+// atlas in the way. Drawn from a photo: messy black hair, full beard, thick
+// black rectangular frames, light blue shirt.
+const ME = {
+  skin: "#E9BD98",
+  hair: "#17130F",
+  beard: "#241C16",
+  tee: "#1B1B1F",
+  teeTrim: "#2C2C32",
+  jeans: "#3B4B7A",
+  shoe: "#F2F2EE",
+  ink: "#2A2740",
+  eye: "#241E1A",
 };
 
-// Thigh half-thickness: the sitting body rests this far below the hip joints.
-const THIGH = 0.04;
+// Joint heights, measured with the feet at y = 0.
+const HIP_Y = 0.225, SHOULDER_X = 0.115, THIGH_L = 0.095, SHIN_L = 0.095, UPPER_L = 0.085, FORE_L = 0.075;
+// Everything above the hips lives in a group pivoted at the hips, so leaning bends the back.
+const T_SHOULDER = 0.195, T_NECK = 0.212, T_HEAD = 0.222;
+// One kick cycle, and the moment inside it when boot meets ball.
+const KICK_T = 3.4, KICK_HIT = 0.72, BALL_R = 0.055;
 
-function Person({ clip, p = [0, 0, 0], r = 0, path, speed = 1, still, seat, bob }: { clip: Clip; p?: V3; r?: number; path?: "loop" | "pace"; speed?: number; still: boolean; seat?: V3; bob?: number }) {
-  const { model, animations } = useCharacter();
-  // Sitting: where the hips are in the sit pose, so they can be put on the seat's surface.
-  const sitting = !!seat;
-  const hip = useMemo(() => {
-    if (!sitting) return null;
-    const sit = animations.find((a) => a.name === "sit");
-    return measurePose(model, sit, 0, () => boneAt(model, "leg-left").add(boneAt(model, "leg-right")).multiplyScalar(0.5));
-  }, [model, animations, sitting]);
-  if (seat && hip) {
-    const cos = Math.cos(r), sin = Math.sin(r);
-    // hips a touch behind the seat's centre, toward the backrest
-    const bx = seat[0] - sin * 0.02, bz = seat[2] - cos * 0.02;
-    p = [bx - (hip.x * cos + hip.z * sin), seat[1] - (hip.y - THIGH), bz - (-hip.x * sin + hip.z * cos)];
-  }
+type Pose = "idle" | "sit" | "walk" | "run" | "reach" | "play" | "kick";
+
+function Minifig({
+  pose = "idle",
+  p = [0, 0, 0],
+  r = 0,
+  seat,
+  still,
+  path,
+  speed = 1,
+  holds,
+}: {
+  pose?: Pose;
+  p?: V3;
+  r?: number;
+  seat?: V3;
+  still: boolean;
+  path?: "loop" | "pace";
+  speed?: number;
+  holds?: "wand";
+}) {
   const root = useRef<THREE.Group>(null);
-  const { actions } = useAnimations(animations, root);
+  const torso = useRef<THREE.Group>(null);
+  const head = useRef<THREE.Group>(null);
+  const hipL = useRef<THREE.Group>(null), hipR = useRef<THREE.Group>(null);
+  const kneeL = useRef<THREE.Group>(null), kneeR = useRef<THREE.Group>(null);
+  const shoL = useRef<THREE.Group>(null), shoR = useRef<THREE.Group>(null);
+  const elbL = useRef<THREE.Group>(null), elbR = useRef<THREE.Group>(null);
 
-  useEffect(() => {
-    const a = actions[clip];
-    if (!a) return;
-    a.reset().setEffectiveTimeScale(speed).fadeIn(0.25).play();
-    return () => {
-      a.fadeOut(0.25);
-    };
-  }, [actions, clip, speed]);
+  // Sitting rests the hips just above the seat; otherwise the feet stand on the mark.
+  const base: V3 = seat
+    ? [seat[0] - Math.sin(r) * 0.03, seat[1] + 0.02 - HIP_Y, seat[2] - Math.cos(r) * 0.03]
+    : p;
 
   useFrame(({ clock }) => {
-    const g = root.current;
-    if (!g || still) return;
-    const t = clock.elapsedTime;
-    if (path === "loop") {
-      const a = t * 0.9;
-      const R = 0.92;
-      g.position.set(R * Math.cos(a), p[1], R * Math.sin(a));
-      // face the direction of travel (the tangent of the loop), not away from it
-      g.rotation.y = Math.atan2(-Math.sin(a), Math.cos(a));
-    } else if (path === "pace") {
-      const x = Math.sin(t * 0.7) * 0.75;
-      g.position.set(p[0] + x, p[1], p[2]);
-      g.rotation.y = Math.cos(t * 0.7) > 0 ? Math.PI / 2 : -Math.PI / 2;
-    } else if (bob) {
-      g.position.set(p[0], p[1] + Math.abs(Math.sin(t * 2.4)) * bob, p[2]);
+    const t = still ? 0 : clock.elapsedTime * speed;
+    // Every angle reads "forward is positive"; the signs are flipped when applied.
+    let hl = 0, hr = 0, kl = 0.04, kr = 0.04, sl = 0, sr = 0, el = 0.12, er = 0.12;
+    let spread = 0.09, lean = 0, lift = 0, nod = 0, turn = 0;
+
+    switch (pose) {
+      case "sit": {
+        hl = hr = 1.45;
+        kl = kr = 1.35;
+        sl = sr = 0.22;
+        el = er = 0.45;
+        spread = 0.13;
+        lean = -0.05;
+        nod = 0.05;
+        lift = Math.sin(t * 1.5) * 0.004;
+        turn = Math.sin(t * 0.5) * 0.08;
+        break;
+      }
+      case "walk": {
+        const w = Math.sin(t * 3.4);
+        hl = w * 0.42; hr = -w * 0.42;
+        kl = 0.06 + Math.max(0, -w) * 0.55;
+        kr = 0.06 + Math.max(0, w) * 0.55;
+        sl = -w * 0.3; sr = w * 0.3;
+        el = er = 0.26;
+        lift = Math.abs(Math.cos(t * 3.4)) * 0.01;
+        break;
+      }
+      case "run": {
+        const w = Math.sin(t * 7.2);
+        hl = w * 0.78; hr = -w * 0.78;
+        kl = 0.3 + Math.max(0, -w) * 0.95;
+        kr = 0.3 + Math.max(0, w) * 0.95;
+        sl = -w * 0.62; sr = w * 0.62;
+        el = er = 1.0;
+        lean = 0.2;
+        lift = Math.abs(Math.cos(t * 7.2)) * 0.02;
+        break;
+      }
+      case "reach": {
+        sr = 1.1 + Math.sin(t * 1.8) * 0.13;
+        er = 0.5;
+        sl = 0.16; el = 0.32;
+        spread = 0.11;
+        lean = 0.07;
+        nod = 0.12;
+        break;
+      }
+      case "play": {
+        // Sitting on the bed, trailing the wand so the cats have something to chase.
+        hl = hr = 1.4;
+        kl = 1.3; kr = 1.18;
+        sr = 0.64 + Math.sin(t * 2.6) * 0.2;
+        er = 0.16 + Math.sin(t * 2.6 + 0.7) * 0.1;
+        sl = 0.3; el = 0.55;
+        spread = 0.14;
+        lean = 0.05;
+        nod = 0.17;
+        turn = Math.sin(t * 1.1) * 0.13;
+        break;
+      }
+      case "kick": {
+        // The strike runs on the wall clock, so the ball can follow the same timeline.
+        const c = still ? KICK_HIT : clock.elapsedTime % KICK_T;
+        const wind = 0.5, strike = KICK_HIT + 0.06;
+        if (c < wind) hr = -0.45 * Math.sin((c / wind) * Math.PI * 0.5);
+        else if (c < strike) hr = -0.45 + 1.07 * ((c - wind) / (strike - wind));
+        else if (c < 1.15) hr = 0.62 - 0.42 * ((c - strike) / (1.15 - strike));
+        else hr = 0.2 * Math.max(0, 1 - (c - 1.15) / 0.6);
+        kr = Math.max(0.03, -hr * 0.5);
+        hl = -hr * 0.12; kl = 0.12;
+        sl = hr * 0.5; sr = -hr * 0.35;
+        el = 0.35; er = 0.25;
+        spread = 0.15;
+        lean = -hr * 0.12;
+        break;
+      }
+      default: {
+        lift = Math.sin(t * 1.5) * 0.006;
+        turn = Math.sin(t * 0.6) * 0.1;
+      }
     }
+
+    const g = root.current;
+    if (g) {
+      if (path === "loop") {
+        const a = t * 0.9, R = 0.92;
+        g.position.set(R * Math.cos(a), base[1] + lift, R * Math.sin(a));
+        g.rotation.y = Math.atan2(-Math.sin(a), Math.cos(a));
+      } else if (path === "pace") {
+        g.position.set(base[0] + Math.sin(t * 0.7) * 0.75, base[1] + lift, base[2]);
+        g.rotation.y = Math.cos(t * 0.7) > 0 ? Math.PI / 2 : -Math.PI / 2;
+      } else {
+        g.position.set(base[0], base[1] + lift, base[2]);
+        g.rotation.y = r;
+      }
+    }
+    if (hipL.current) hipL.current.rotation.x = -hl;
+    if (hipR.current) hipR.current.rotation.x = -hr;
+    if (kneeL.current) kneeL.current.rotation.x = kl;
+    if (kneeR.current) kneeR.current.rotation.x = kr;
+    if (shoL.current) { shoL.current.rotation.x = -sl; shoL.current.rotation.z = -spread; }
+    if (shoR.current) { shoR.current.rotation.x = -sr; shoR.current.rotation.z = spread; }
+    if (elbL.current) elbL.current.rotation.x = -el;
+    if (elbR.current) elbR.current.rotation.x = -er;
+    if (torso.current) torso.current.rotation.x = -lean;
+    if (head.current) { head.current.rotation.x = -nod; head.current.rotation.y = turn; }
+  });
+
+  const leg = (side: 1 | -1, hip: React.RefObject<THREE.Group>, knee: React.RefObject<THREE.Group>) => (
+    <group ref={hip} position={[0.045 * side, HIP_Y, 0]}>
+      <Box p={[0, -THIGH_L / 2, 0]} s={[0.07, THIGH_L, 0.078]} c={ME.jeans} />
+      <group ref={knee} position={[0, -THIGH_L, 0]}>
+        <Box p={[0, -SHIN_L / 2, 0]} s={[0.064, SHIN_L, 0.07]} c={ME.jeans} />
+        <Box p={[0, -SHIN_L - 0.018, 0.016]} s={[0.075, 0.036, 0.11]} c={ME.shoe} rough={0.6} />
+      </group>
+    </group>
+  );
+
+  // Short sleeve, then bare arm: the right forearm carries the tattoo.
+  const arm = (side: 1 | -1, sho: React.RefObject<THREE.Group>, elb: React.RefObject<THREE.Group>, hand?: React.ReactNode, tattoo = false) => (
+    <group ref={sho} position={[SHOULDER_X * side, T_SHOULDER, 0]}>
+      <Box p={[0, -0.021, 0]} s={[0.058, 0.046, 0.064]} c={ME.tee} />
+      <Box p={[0, -0.064, 0]} s={[0.048, 0.044, 0.054]} c={ME.skin} />
+      <group ref={elb} position={[0, -UPPER_L, 0]}>
+        <Box p={[0, -FORE_L / 2, 0]} s={[0.046, FORE_L, 0.05]} c={ME.skin} />
+        {tattoo && (
+          <>
+            <Box p={[0, -0.027, 0]} s={[0.049, 0.022, 0.053]} c={ME.ink} cast={false} />
+            <Box p={[0, -0.051, 0]} s={[0.049, 0.011, 0.053]} c={ME.ink} cast={false} />
+          </>
+        )}
+        <Box p={[0, -FORE_L - 0.023, 0.004]} s={[0.05, 0.046, 0.055]} c={ME.skin} />
+        {hand}
+      </group>
+    </group>
+  );
+
+  const wand = holds === "wand" && (
+    <group position={[0, -0.105, 0.016]} rotation={[0.8, 0, 0]}>
+      <Box p={[0, 0, 0.15]} s={[0.008, 0.008, 0.3]} c="#6B4A2E" />
+      <Box p={[0, 0, 0.318]} s={[0.03, 0.03, 0.055]} c="#E8705E" />
+    </group>
+  );
+
+  return (
+    <group ref={root} position={base} rotation={[0, r, 0]}>
+      {leg(-1, hipL, kneeL)}
+      {leg(1, hipR, kneeR)}
+      <group ref={torso} position={[0, HIP_Y, 0]}>
+        <Box p={[0, 0.03, 0]} s={[0.17, 0.08, 0.1]} c={ME.jeans} />
+        <Box p={[0, 0.115, 0]} s={[0.19, 0.1, 0.11]} c={ME.tee} />
+        <Box p={[0, 0.172, 0]} s={[0.205, 0.062, 0.115]} c={ME.tee} />
+        <Box p={[0, 0.2, 0]} s={[0.105, 0.022, 0.095]} c={ME.teeTrim} />
+        <Box p={[0, T_NECK, 0]} s={[0.055, 0.042, 0.055]} c={ME.skin} />
+        {arm(-1, shoL, elbL)}
+        {arm(1, shoR, elbR, wand, true)}
+
+        <group ref={head} position={[0, T_HEAD, 0]}>
+          <Box p={[0, 0.093, 0]} s={[0.16, 0.17, 0.152]} c={ME.skin} />
+          {/* full beard: under the chin, round the jaw and up the cheeks to the sideburns */}
+          <Box p={[0, 0.032, 0.0]} s={[0.158, 0.034, 0.15]} c={ME.beard} />
+          <Box p={[0, 0.05, 0.064]} s={[0.128, 0.062, 0.032]} c={ME.beard} />
+          <Box p={[0.073, 0.082, 0.012]} s={[0.024, 0.105, 0.128]} c={ME.beard} />
+          <Box p={[-0.073, 0.082, 0.012]} s={[0.024, 0.105, 0.128]} c={ME.beard} />
+          <Box p={[0.058, 0.064, 0.062]} s={[0.046, 0.042, 0.03]} c={ME.beard} />
+          <Box p={[-0.058, 0.064, 0.062]} s={[0.046, 0.042, 0.03]} c={ME.beard} />
+          {/* nose, eyes and brows */}
+          <Box p={[0, 0.096, 0.082]} s={[0.024, 0.03, 0.016]} c={ME.skin} cast={false} />
+          <Box p={[0.034, 0.109, 0.074]} s={[0.018, 0.016, 0.01]} c={ME.eye} cast={false} />
+          <Box p={[-0.034, 0.109, 0.074]} s={[0.018, 0.016, 0.01]} c={ME.eye} cast={false} />
+          <Box p={[0.035, 0.129, 0.073]} s={[0.044, 0.011, 0.014]} c={ME.hair} cast={false} />
+          <Box p={[-0.035, 0.129, 0.073]} s={[0.044, 0.011, 0.014]} c={ME.hair} cast={false} />
+          {/* a lot of messy hair: top, fringe, sides, and all the way round the back */}
+          <Box p={[0, 0.19, -0.004]} s={[0.188, 0.08, 0.172]} c={ME.hair} />
+          <Box p={[0, 0.172, 0.072]} s={[0.176, 0.046, 0.034]} c={ME.hair} />
+          <Box p={[0.084, 0.142, -0.012]} s={[0.02, 0.072, 0.146]} c={ME.hair} />
+          <Box p={[-0.084, 0.142, -0.012]} s={[0.02, 0.072, 0.146]} c={ME.hair} />
+          <Box p={[0, 0.118, -0.082]} s={[0.174, 0.126, 0.028]} c={ME.hair} />
+          <Box p={[0, 0.056, -0.074]} s={[0.152, 0.058, 0.024]} c={ME.hair} />
+          <Box p={[0.052, 0.218, 0.022]} s={[0.078, 0.052, 0.086]} c={ME.hair} r={[0.22, 0.32, 0.26]} />
+          <Box p={[-0.048, 0.221, -0.018]} s={[0.082, 0.05, 0.082]} c={ME.hair} r={[-0.16, -0.28, -0.22]} />
+          <Box p={[0.004, 0.208, -0.062]} s={[0.092, 0.048, 0.07]} c={ME.hair} r={[0.26, 0.08, 0.06]} />
+        </group>
+      </group>
+    </group>
+  );
+}
+
+// ---------- the cats ----------
+// Four of them, each with its own temperament wired straight into the frame loop.
+type CatKind = "orange" | "grey" | "patch" | "white";
+const CATS: Record<CatKind, { fur: string; belly: string; mark: string; ear: string }> = {
+  orange: { fur: "#E0A063", belly: "#F7EEE2", mark: "#C27F42", ear: "#E9B295" },
+  grey: { fur: "#9BA2AB", belly: "#C8CDD3", mark: "#858C95", ear: "#C7A3A3" },
+  patch: { fur: "#F4F1EA", belly: "#FFFFFF", mark: "#99A0A9", ear: "#EDC0C0" },
+  white: { fur: "#F8F6F1", belly: "#FFFFFF", mark: "#E7E3DB", ear: "#F3C7C7" },
+};
+
+function Cat({ kind, p, r = 0, s = 1, still }: { kind: CatKind; p: V3; r?: number; s?: number; still: boolean }) {
+  const c = CATS[kind];
+  const root = useRef<THREE.Group>(null);
+  const body = useRef<THREE.Group>(null);
+  const head = useRef<THREE.Group>(null);
+  const tail = useRef<THREE.Group>(null);
+  const earL = useRef<THREE.Group>(null);
+  const earR = useRef<THREE.Group>(null);
+  const legs = useRef<THREE.Group>(null);
+  const eyes = useRef<THREE.Group>(null);
+
+  useFrame(({ clock }) => {
+    const t = still ? 0 : clock.elapsedTime;
+    let adv = 0, dx = 0, dy = 0, yaw = 0, crouch = 0, breathe = 1;
+    let swish = 0, tailLift = 0, earBack = 0, tuck = 1, blink = 1, nod = 0, absYaw: number | null = null;
+
+    switch (kind) {
+      case "orange": {
+        // Rowdy: winds up, wiggles, pounces, trots back and does it again.
+        const T = 3.4, u = (t % T) / T;
+        if (u < 0.52) {
+          crouch = -0.026;
+          yaw = Math.sin(t * 13) * 0.07;
+        } else if (u < 0.68) {
+          const f = (u - 0.52) / 0.16;
+          adv = f * 0.26;
+          dy = Math.sin(f * Math.PI) * 0.085;
+          crouch = -0.006;
+        } else {
+          const f = (u - 0.68) / 0.32;
+          adv = 0.26 * (1 - f);
+          dy = Math.abs(Math.sin(f * 9)) * 0.012;
+        }
+        swish = Math.sin(t * 7) * 0.65;
+        tailLift = 0.4;
+        break;
+      }
+      case "grey": {
+        // Cowardly: flattened, trembling, and flinching backwards every few seconds.
+        crouch = -0.036 + Math.sin(t * 17) * 0.0013;
+        earBack = -1.15;
+        tailLift = -0.9;
+        swish = Math.sin(t * 1.4) * 0.08;
+        yaw = Math.sin(t * 0.8) * 0.13;
+        const T = 5.5, u = (t % T) / T;
+        if (u < 0.1) {
+          const f = u / 0.1;
+          adv = -Math.sin(f * Math.PI) * 0.07;
+          dy = Math.sin(f * Math.PI) * 0.01;
+        }
+        break;
+      }
+      case "patch": {
+        // The girl: loafed, breathing slowly, with the occasional slow blink.
+        crouch = -0.046;
+        tuck = 0.16;
+        breathe = 1 + Math.sin(t * 1.3) * 0.045;
+        swish = Math.sin(t * 0.55) * 0.24;
+        tailLift = 0.12;
+        nod = Math.sin(t * 0.7) * 0.06;
+        const b = (t % 4.2) / 4.2;
+        blink = b > 0.96 ? 0.12 : 1;
+        break;
+      }
+      case "white": {
+        // The daughter: zoomies in a figure of eight, tail straight up.
+        const a = t * 1.5;
+        dx = Math.sin(a) * 0.3;
+        adv = Math.sin(a * 2) * 0.18;
+        dy = Math.abs(Math.sin(t * 8)) * 0.018;
+        absYaw = Math.atan2(Math.cos(a) * 0.3, Math.cos(a * 2) * 0.36);
+        tailLift = 1.42;
+        swish = Math.sin(t * 6) * 0.14;
+        break;
+      }
+    }
+
+    const g = root.current;
+    if (g) {
+      // "adv" is forward along the way the cat is pointed; dx is sideways.
+      const cos = Math.cos(r), sin = Math.sin(r);
+      g.position.set(p[0] + sin * adv + cos * dx, p[1] + dy, p[2] + cos * adv - sin * dx);
+      g.rotation.y = absYaw ?? r + yaw;
+    }
+    if (body.current) {
+      body.current.position.y = crouch;
+      body.current.scale.y = breathe;
+    }
+    if (head.current) head.current.rotation.x = nod;
+    if (tail.current) { tail.current.rotation.x = tailLift; tail.current.rotation.y = swish; }
+    if (earL.current) earL.current.rotation.x = earBack;
+    if (earR.current) earR.current.rotation.x = earBack;
+    if (legs.current) legs.current.scale.y = tuck;
+    if (eyes.current) eyes.current.scale.y = blink;
   });
 
   return (
-    <group ref={root} position={p} rotation={[0, r, 0]}>
-      <primitive object={model} />
+    <group ref={root} position={p} rotation={[0, r, 0]} scale={s}>
+      {/* legs sit outside the body group so crouching lowers the cat, not its feet */}
+      <group ref={legs}>
+        {([[-0.027, 0.052], [0.027, 0.052], [-0.03, -0.058], [0.03, -0.058]] as const).map(([x, z], i) => (
+          <Box key={i} p={[x, 0.029, z]} s={[0.022, 0.058, 0.025]} c={c.fur} rough={0.95} />
+        ))}
+      </group>
+      <group ref={body}>
+        <Box p={[0, 0.095, -0.03]} s={[0.086, 0.072, 0.1]} c={c.fur} rough={0.95} />
+        <Box p={[0, 0.093, 0.045]} s={[0.076, 0.066, 0.072]} c={c.fur} rough={0.95} />
+        <Box p={[0, 0.066, 0.064]} s={[0.058, 0.038, 0.05]} c={c.belly} rough={0.95} />
+        {kind === "orange" &&
+          [0.012, -0.028, -0.068].map((z, i) => (
+            <Box key={i} p={[0, 0.129, z]} s={[0.074, 0.012, 0.016]} c={c.mark} rough={0.95} cast={false} />
+          ))}
+        <group ref={tail} position={[0, 0.112, -0.079]}>
+          <Box p={[0, 0, -0.047]} s={[0.016, 0.016, 0.094]} c={c.fur} rough={0.95} />
+          <Box p={[0, 0, -0.1]} s={[0.014, 0.014, 0.032]} c={kind === "orange" ? c.mark : c.fur} rough={0.95} />
+        </group>
+        <group ref={head} position={[0, 0.152, 0.086]}>
+          <Box p={[0, 0, 0]} s={[0.07, 0.064, 0.062]} c={c.fur} rough={0.95} />
+          {kind === "patch" && <Box p={[0, 0.034, -0.004]} s={[0.054, 0.014, 0.052]} c={c.mark} rough={0.95} cast={false} />}
+          <Box p={[0, -0.015, 0.036]} s={[0.036, 0.026, 0.018]} c={c.belly} rough={0.95} cast={false} />
+          <Box p={[0, -0.008, 0.047]} s={[0.012, 0.009, 0.006]} c={c.ear} rough={0.7} cast={false} />
+          <group ref={earR} position={[0.023, 0.036, -0.006]}>
+            <Box p={[0, 0.016, 0]} s={[0.024, 0.034, 0.012]} c={c.fur} rough={0.95} />
+          </group>
+          <group ref={earL} position={[-0.023, 0.036, -0.006]}>
+            <Box p={[0, 0.016, 0]} s={[0.024, 0.034, 0.012]} c={c.fur} rough={0.95} />
+          </group>
+          <group ref={eyes}>
+            <Box p={[0.017, 0.008, 0.032]} s={[0.01, 0.013, 0.005]} c="#2A2622" cast={false} />
+            <Box p={[-0.017, 0.008, 0.032]} s={[0.01, 0.013, 0.005]} c="#2A2622" cast={false} />
+          </group>
+        </group>
+      </group>
     </group>
   );
 }
@@ -543,61 +847,7 @@ function Scatter({ seed, count, avoid }: { seed: number; count: number; avoid?: 
   );
 }
 
-function Fireflies({ still }: { still: boolean }) {
-  const g = useRef<THREE.Group>(null);
-  const flies = useMemo(() => Array.from({ length: 10 }, (_, i) => ({ x: ((i * 47) % 23) / 10 - 1.1, y: 0.3 + ((i * 13) % 9) / 10, z: ((i * 31) % 19) / 10 - 0.9, s: 0.5 + (i % 4) / 4 })), []);
-  useFrame(({ clock }) => {
-    if (!g.current || still) return;
-    const t = clock.elapsedTime;
-    g.current.children.forEach((m, i) => {
-      const f = flies[i];
-      m.position.set(f.x + Math.sin(t * f.s + i) * 0.15, f.y + Math.sin(t * 1.3 * f.s + i * 2) * 0.08, f.z + Math.cos(t * f.s + i) * 0.15);
-      ((m as THREE.Mesh).material as THREE.MeshBasicMaterial).opacity = 0.5 + 0.5 * Math.sin(t * 3 + i * 1.7);
-    });
-  });
-  return (
-    <group ref={g}>
-      {flies.map((f, i) => (
-        <mesh key={i} position={[f.x, f.y, f.z]}>
-          <sphereGeometry args={[0.012, 8, 6]} />
-          <meshBasicMaterial color="#FFF2A8" transparent toneMapped={false} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
 // ---------- props built in code ----------
-function useParkBench() {
-  return useMemo(() => {
-    const g = new THREE.Group();
-    const wood = new THREE.MeshStandardMaterial({ color: "#B07A4A", roughness: 0.75 });
-    const iron = new THREE.MeshStandardMaterial({ color: "#2A2D35", roughness: 0.5, metalness: 0.4 });
-    const add = (m: THREE.Material, size: V3, at: V3, rx = 0) => {
-      const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), m);
-      mesh.position.set(...at);
-      mesh.rotation.x = rx;
-      mesh.castShadow = mesh.receiveShadow = true;
-      g.add(mesh);
-    };
-    const W = 0.78, SEAT = 0.2;
-    for (let i = 0; i < 3; i++) add(wood, [W, 0.022, 0.06], [0, SEAT, 0.07 - i * 0.07]);
-    for (let i = 0; i < 2; i++) add(wood, [W, 0.06, 0.022], [0, SEAT + 0.1 + i * 0.09, -0.1 - i * 0.012], -0.18);
-    for (const x of [-W / 2 + 0.06, W / 2 - 0.06]) {
-      add(iron, [0.025, SEAT, 0.025], [x, SEAT / 2, 0.08]);
-      add(iron, [0.025, SEAT + 0.24, 0.025], [x, (SEAT + 0.24) / 2, -0.1]);
-      add(iron, [0.025, 0.025, 0.24], [x, SEAT - 0.02, -0.01]);
-      add(iron, [0.025, 0.025, 0.2], [x, SEAT + 0.08, 0.0]);
-    }
-    g.updateMatrixWorld(true);
-    return g;
-  }, []);
-}
-
-function ParkBench(props: { p?: V3; r?: number; still: boolean }) {
-  return <SeatedOn obj={useParkBench()} {...props} />;
-}
-
 function Dumbbell({ p, r = 0 }: { p: V3; r?: number }) {
   return (
     <group position={p} rotation={[0, r, 0]}>
@@ -634,78 +884,38 @@ function Tripod({ p, r }: { p: V3; r: number }) {
   );
 }
 
-// The kick, in sync: sample the clip to find the frame where the right foot reaches furthest forward.
-// The ball waits exactly there, leaves on that frame, flies into the net, and rolls back while he resets.
+// The kick, in sync: the leg and the ball run off the same clock, so the ball
+// leaves on the frame the boot reaches it, flies into the net, and rolls back
+// while he resets for the next one.
 function Kicker({ p, r, still }: { p: V3; r: number; still: boolean }) {
-  const { model, animations } = useCharacter();
-  const root = useRef<THREE.Group>(null);
   const ball = useRef<THREE.Mesh>(null);
-  const { actions } = useAnimations(animations, root);
-  const R = 0.055;
-  const info = useMemo(() => {
-    const clip = animations.find((a) => a.name === "attack-kick-right");
-    const dur = clip?.duration ?? 0.5;
-    let best = { t: dur / 2, z: -Infinity, foot: new THREE.Vector3() };
-    for (let k = 0; k <= 48; k++) {
-      const t = (dur * k) / 48;
-      const foot = measurePose(model, clip, t, () => boneAt(model, "leg-right", [0, -0.16, 0.03]));
-      if (foot.z > best.z) best = { t, z: foot.z, foot };
-    }
-    return { dur, contact: best.t, foot: best.foot };
-  }, [model, animations]);
-
-  useEffect(() => {
-    const kick = actions["attack-kick-right"];
-    const idle = actions["idle"];
-    if (!kick || !idle) return;
-    kick.reset().play();
-    kick.paused = true;
-    idle.reset().play();
-    return () => {
-      kick.stop();
-      idle.stop();
-    };
-  }, [actions]);
+  // Where the boot arrives at full extension, measured from the hips.
+  const REST = (THIGH_L + SHIN_L) * Math.sin(0.62) + 0.1;
 
   useFrame(({ clock }, d) => {
-    const kick = actions["attack-kick-right"];
-    const idle = actions["idle"];
     const b = ball.current;
-    if (!kick || !idle || !b) return;
-    const SLOW = 0.7; // the clip is quick; play it a little slower so the strike reads
-    const T = 3.4;
-    const kickLen = info.dur / SLOW;
-    const hit = info.contact / SLOW;
-    const c = still ? hit : clock.elapsedTime % T;
-    // body: wind up and strike, ease into idle, ease back into the wind-up before the next cycle
-    const windup = T - 0.4;
-    kick.time = c >= windup ? 0 : Math.min(c * SLOW, info.dur);
-    const wk = c < kickLen + 0.1 ? 1 : c >= windup ? (c - windup) / 0.4 : Math.max(0, 1 - (c - kickLen - 0.1) / 0.3);
-    kick.setEffectiveWeight(wk);
-    idle.setEffectiveWeight(1 - wk);
-    // ball: in his own frame, +z is where he faces, toward the goal
-    const rest = new THREE.Vector3(info.foot.x, R, info.foot.z + R * 0.9);
-    const dist = 1.3;
-    const flight = 0.55, settle = 0.35;
-    if (c < hit) b.position.copy(rest);
-    else if (c < hit + flight) {
-      const f = (c - hit) / flight;
-      b.position.set(rest.x * (1 - f), R + Math.sin(f * Math.PI) * 0.3, rest.z + f * dist);
+    if (!b) return;
+    const c = still ? KICK_HIT : clock.elapsedTime % KICK_T;
+    const dist = 1.25, flight = 0.55, settle = 0.3;
+    if (c < KICK_HIT) b.position.set(0, BALL_R, REST);
+    else if (c < KICK_HIT + flight) {
+      const f = (c - KICK_HIT) / flight;
+      b.position.set(0, BALL_R + Math.sin(f * Math.PI) * 0.28, REST + f * dist);
       if (!still) b.rotation.x += d * 14;
-    } else if (c < hit + flight + settle) b.position.set(0, R, rest.z + dist);
+    } else if (c < KICK_HIT + flight + settle) b.position.set(0, BALL_R, REST + dist);
     else {
-      const f = Math.min(1, (c - hit - flight - settle) / (windup - 0.15 - hit - flight - settle));
+      const f = Math.min(1, (c - KICK_HIT - flight - settle) / (KICK_T - 0.45 - KICK_HIT - flight - settle));
       const e = 1 - Math.pow(1 - f, 3);
-      b.position.set(0, R, rest.z + dist - e * dist);
+      b.position.set(0, BALL_R, REST + dist * (1 - e));
       if (!still && f < 1) b.rotation.x -= d * 8;
     }
   });
 
   return (
-    <group ref={root} position={p} rotation={[0, r, 0]}>
-      <primitive object={model} />
+    <group position={p} rotation={[0, r, 0]}>
+      <Minifig pose="kick" still={still} />
       <mesh ref={ball} castShadow>
-        <icosahedronGeometry args={[R, 1]} />
+        <icosahedronGeometry args={[BALL_R, 1]} />
         <meshStandardMaterial color="#F7F7F4" roughness={0.5} flatShading />
       </mesh>
     </group>
@@ -824,7 +1034,7 @@ function IdeasRoom({ c, minute, still }: { c: Palette; minute: number; still: bo
         <Box p={[0.3, -0.3, 0.03]} s={[0.28, 0.012, 0.004]} c={c.lapis} />
         <Box p={[0, -0.47, 0.04]} s={[0.7, 0.025, 0.06]} c="#3A3D48" />
       </group>
-      <Person clip="interact-right" p={[0.75, 0, -0.95]} r={Math.PI + 0.5} still={still} />
+      <Minifig pose="reach" p={[0.75, 0, -0.95]} r={Math.PI + 0.5} still={still} />
       <Model name="chair" p={[-0.6, 0, 0.35]} r={0.6} />
       <Model name="sideTable" p={[0.95, 0, 0.75]} r={-Math.PI / 2} />
       {v.mug && <Model name="food/mug" p={[0.92, 0.38, 0.7]} s={0.25} />}
@@ -912,7 +1122,7 @@ function SceneContent({ id, c, minute, on, still }: { id: SceneId; c: Palette; m
           <Model name="food/frying-pan" p={[-0.33, 0.45, -1.18]} s={0.28} r={0.6} />
           <Model name="food/pot-stew" p={[-0.4, 0.45, -1.36]} s={0.26} />
           <Model name="food/cutting-board" p={[0.5, 0.45, -1.14]} s={0.24} r={Math.PI / 2} />
-          <Person clip="interact-right" p={[-0.3, 0, -0.78]} r={Math.PI} still={still} />
+          <Minifig pose="reach" p={[-0.3, 0, -0.78]} r={Math.PI} still={still} />
           <Model name="pottedPlant" p={[1.15, 0, 0.9]} />
           <Model name="rugRound" p={[0, 0, 0]} />
         </>
@@ -940,7 +1150,7 @@ function SceneContent({ id, c, minute, on, still }: { id: SceneId; c: Palette; m
             <Glow p={[0, 0, 0]} w={0.33} h={0.18} c={c.red} />
           </Screen>
           <Model name="chairDesk" p={[-0.95, 0, -0.55]} r={Math.PI + 0.7} />
-          <Person clip="walk" p={[0.2, 0, 0.3]} path="pace" still={still} />
+          <Minifig pose="walk" p={[0.2, 0, 0.3]} path="pace" still={still} />
           <Thoughts c={c} still={still} />
           {[[0.9, 0.9], [0.5, -0.2], [-0.4, 0.9], [1.1, -0.6], [-0.1, 1.15]].map(([x, z], i) => (
             <mesh key={i} position={[x, 0.035, z]} rotation={[i, i * 0.7, 0]} castShadow>
@@ -984,7 +1194,7 @@ function SceneContent({ id, c, minute, on, still }: { id: SceneId; c: Palette; m
           </group>
           <Dumbbell p={[0.1, 0.045, 0.45]} r={0.4} />
           {/* on the bench, facing the tripod that's filming: the same seat-anchored sit pose used everywhere else */}
-          <Person clip="sit" seat={[0.75, 0.255, -0.85]} r={Math.atan2(1.3 - 0.75, -0.3 - -0.85)} still={still} />
+          <Minifig pose="sit" seat={[0.75, 0.255, -0.85]} r={Math.atan2(1.3 - 0.75, -0.3 - -0.85)} still={still} />
           <Dumbbell p={[0.95, 0.285, -0.78]} r={0.3} />
           <Tripod p={[1.3, 0, -0.3]} r={Math.atan2(0.75 - 1.3, -0.85 - -0.3)} />
           <Model name="pottedPlant" p={[1.2, 0, -1.2]} />
@@ -1016,7 +1226,7 @@ function SceneContent({ id, c, minute, on, still }: { id: SceneId; c: Palette; m
             <ringGeometry args={[0.8, 1.05, 64]} />
             <meshStandardMaterial color={c.path} roughness={1} />
           </mesh>
-          <Person clip="sprint" path="loop" still={still} />
+          <Minifig pose="run" path="loop" still={still} />
           <Model name="plant_bushLarge" p={[0, 0, 0]} s={1.6} />
           <Model name="plant_bush" p={[0.25, 0, 0.2]} s={1.2} />
           <Model name="flower_redA" p={[-0.25, 0, 0.15]} />
@@ -1028,22 +1238,43 @@ function SceneContent({ id, c, minute, on, still }: { id: SceneId; c: Palette; m
           <Scatter seed={11} count={16} avoid={(x, z) => { const d = Math.hypot(x, z); return d > 0.65 && d < 1.2; }} />
         </Ground>
       );
-    case "bench":
+    case "cats":
       return (
-        <Ground c={c}>
-          <mesh position={[0.2, 0.003, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-            <planeGeometry args={[0.55, ROOM]} />
-            <meshStandardMaterial color={c.path} roughness={1} />
-          </mesh>
-          <ParkBench p={[-0.4, 0, -0.1]} r={Math.PI / 2} still={still} />
-          <StreetLight p={[0.62, 0, -0.35]} r={Math.PI / 2} on={on} />
-          <Model name="tree_oak" p={[-1.05, 0, -1.1]} s={1.3} />
-          <Model name="tree_detailed" p={[1.1, 0, -1.15]} />
-          <Model name="plant_bush" p={[-1.1, 0, 0.6]} s={1.4} />
-          <Model name="plant_bushLarge" p={[1.05, 0, 0.9]} s={1.2} />
-          <Fireflies still={still} />
-          <Scatter seed={23} count={14} avoid={(x) => x > -0.15 && x < 0.55} />
-        </Ground>
+        <>
+          {/* the bed: frame, mattress, duvet over the foot, pillows at the head */}
+          <group position={[0.1, 0, -0.62]}>
+            <Box p={[0, 0.135, 0]} s={[1.3, 0.13, 1.6]} c="#8A6A4E" />
+            {([[-0.58, 0.72], [0.58, 0.72], [-0.58, -0.72], [0.58, -0.72]] as const).map(([x, z], i) => (
+              <Box key={i} p={[x, 0.035, z]} s={[0.075, 0.07, 0.075]} c="#6E543D" />
+            ))}
+            <Box p={[0, 0.235, 0]} s={[1.26, 0.078, 1.56]} c="#F3EFE6" rough={0.95} />
+            <Box p={[0, 0.3, 0.28]} s={[1.28, 0.058, 0.96]} c="#2742A6" rough={0.95} />
+            <Box p={[0, 0.302, -0.19]} s={[1.28, 0.05, 0.08]} c="#1B3080" rough={0.95} cast={false} />
+            <Box p={[0, 0.41, -0.84]} s={[1.3, 0.56, 0.07]} c="#8A6A4E" />
+            <Box p={[-0.31, 0.308, -0.62]} s={[0.52, 0.09, 0.3]} c="#FBFAF7" rough={0.95} />
+            <Box p={[0.33, 0.308, -0.62]} s={[0.52, 0.09, 0.3]} c="#FBFAF7" rough={0.95} />
+          </group>
+
+          {/* him, sitting back against the pillows, trailing the wand */}
+          <Minifig pose="play" holds="wand" seat={[-0.05, 0.274, -1.0]} r={0.32} still={still} />
+
+          {/* the orange one starts it, the daughter does laps, the girl loafs, the grey one hides */}
+          <Cat kind="orange" p={[0.42, 0.33, -0.42]} r={-2.2} s={0.95} still={still} />
+          <Cat kind="white" p={[0.16, 0.33, -0.26]} s={0.88} still={still} />
+          <Cat kind="patch" p={[-0.2, 0.274, -0.92]} r={1.35} s={0.95} still={still} />
+          <Cat kind="grey" p={[0.58, 0.33, -0.04]} r={0.5} s={0.95} still={still} />
+
+          {/* a nightstand that keeps the room warm after dark */}
+          <Model name="sideTable" p={[-0.95, 0, -1.2]} r={Math.PI / 2} />
+          <group position={[-0.95, 0.38, -1.2]}>
+            <Model name="lampRoundTable" />
+            <Bulb p={[0.03, 0.24, 0]} on={on} intensity={1.6} distance={2.2} size={0.022} />
+          </group>
+          <Model name="books" p={[-0.9, 0.38, -0.98]} r={0.3} />
+          <Model name="rugRound" p={[0.65, 0, 0.75]} />
+          <Model name="pottedPlant" p={[1.2, 0, -1.2]} />
+          <Model name="pillowBlue" p={[-1.05, 0, 0.25]} r={0.6} />
+        </>
       );
   }
 }
@@ -1161,5 +1392,4 @@ function Ready({ onReady }: { onReady: () => void }) {
 // Plain GLB only: no Draco or Meshopt decoders, which would need WASM and the CSP forbids it.
 if (typeof window !== "undefined") {
   MODELS.forEach((m) => useGLTF.preload(`${M}${m}.glb`, false, false));
-  useGLTF.preload(CHARACTER, false, false);
 }

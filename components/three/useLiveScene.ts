@@ -9,15 +9,11 @@ const clockIndex = () => Math.floor(Date.now() / SCENE_MS) % scenes.length;
 // `index` is null until mounted, so server and client markup agree.
 export function useLiveScene() {
   const [index, setIndex] = useState<number | null>(null);
-  const [left, setLeft] = useState(SCENE_MS);
   useEffect(() => {
-    const tick = () => {
-      setIndex(clockIndex());
-      setLeft(SCENE_MS - (Date.now() % SCENE_MS));
-    };
+    const tick = () => setIndex(clockIndex());
     tick();
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
   }, []);
-  return { index, left };
+  return { index };
 }

@@ -5,12 +5,12 @@
 /* White by day, lapis-navy by night. Lapis is the one accent. Pastels live only on project plates. */
 @layer base {
   :root {
-    --paper: 250 246 237;
-    --sheet: 242 236 222;
+    --paper: 243 238 228;
+    --sheet: 233 224 209;
     --ink: 17 17 17;
     --ink-2: 71 71 71;
     --ink-3: 110 110 110;
-    --rule: 232 232 230;
+    --rule: 226 219 206;
     --hl: 0 45 180;
     --on-hl: 255 255 255;
     --accent: 0 45 180;

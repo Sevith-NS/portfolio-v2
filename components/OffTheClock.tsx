@@ -64,7 +64,7 @@ const OffTheClock = () => {
           >
             <div>
               <p className="font-serif text-3xl font-normal tracking-[-0.02em]">Visit the studio</p>
-              <p className="mt-1.5 max-w-[34ch] text-on-hl/80">A little 3D room of what I&apos;m up to. It changes every five minutes.</p>
+              <p className="mt-1.5 max-w-[34ch] text-on-hl/80">A little 3D room of what I&apos;m up to. It changes while you&apos;re away.</p>
             </div>
             <span className="grid size-12 shrink-0 place-items-center rounded-full bg-on-hl text-accent transition-transform duration-300 group-hover:translate-x-1">
               <ArrowRight size={20} />

@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-
 import { approach } from "@/data";
 import { cn } from "@/lib/utils";
 import { SectionHeader } from "./SectionHeader";
+import { Copy } from "./ui/Copy";
 
 type Step = (typeof approach)[number];
 
@@ -66,7 +67,9 @@ const Approach = () => {
               )}
             >
               <h3 className="text-3xl font-semibold tracking-[-0.03em] text-ink md:text-4xl">{step.title}</h3>
-              <p className="mt-4 max-w-[52ch] leading-relaxed text-ink-2 md:text-lg md:leading-relaxed">{step.des}</p>
+              <p className="mt-4 max-w-[52ch] leading-relaxed text-ink-2 md:text-lg md:leading-relaxed">
+                <Copy text={step.des} />
+              </p>
               <p className="mt-5 text-sm text-ink">
                 <span className="text-ink-3">In practice: </span>
                 {step.proof}

@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "creative-portfolio-resume": {
+      "source": "paramchoudhary/resumeskills",
+      "sourceType": "github",
+      "skillPath": "skills/creative-portfolio-resume/SKILL.md",
+      "computedHash": "30fcef14a0360ad6f34135c58c118bbbe0eee93646d1ae3873d793a27db995c0"
+    }
+  }
+}

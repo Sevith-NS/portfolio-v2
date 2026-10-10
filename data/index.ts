@@ -6,6 +6,7 @@ export const email = "sevithns@gmail.com";
 export const navItems = [
   { name: "Work", link: "#projects" },
   { name: "About", link: "#about" },
+  { name: "Story", link: "/story" },
   { name: "Experience", link: "#experience" },
   { name: "Studio", link: "/studio" },
   { name: "Contact", link: "#contact" },
@@ -17,7 +18,7 @@ export const heroNotes = [
   { when: "Mar 2025", what: "Joined Digital.ai, owning product docs" },
   { when: "2025", what: "Led 0-to-1 docs for Ask Release GA" },
   { when: "Now", what: "Building Flint OS" },
-  { when: "Next", what: "AI PM or product design role", highlight: true },
+  { when: "Next", what: "A team that wants all three", highlight: true },
 ];
 
 // Every number here comes from the resume.
@@ -31,7 +32,7 @@ export const ledger = [
 export const gridItems = [
   {
     id: 1,
-    title: "Product builder aiming for AI PM and product design roles, currently a Technical Writer at Digital.ai",
+    title: "Product engineer who designs, defines and ships the whole product. Technical Writer at Digital.ai by title.",
     description: "BCA, Christ University",
   },
   {
@@ -46,7 +47,7 @@ export const gridItems = [
   },
   {
     id: 6,
-    title: "Talent meets opportunity. Shall we begin?",
+    title: "You scrolled this far. Might as well say hello.",
     description: "",
   },
 ];
@@ -58,36 +59,36 @@ export const selfPortrait = [
   id: "who-i-am",
   label: "Who I am",
   tag: "who i am",
-  headline: "Product builder working toward AI PM and Product Design roles, currently a Technical Writer at Digital.ai.",
-  body: "BCA from Christ University. I write docs for enterprise DevOps products (Deploy, Release, TeamForge) and led content for Ask Release, Digital.ai's GenAI assistant. Docs taught me to start from the customer's confusion and work back to the fix.",
+  headline: "Product engineer by practice. Technical Writer by title. The practice is the honest answer.",
+  body: "*BCA, Christ University.* I write the docs for enterprise DevOps products — *Deploy, Release, TeamForge* — and led content for *Ask Release*, Digital.ai's GenAI assistant, through *GA*. Documentation turns out to be product work in disguise: you start from the *customer's confusion* and work back to the fix.",
 },
 {
   id: "what-i-care-about",
   label: "What I care about",
   tag: "what i care about",
   headline: "Tech, finance, and where the two collide.",
-  body: "I'm into markets, typography, and building a personal brand in public. I love designing intuitive, clean, and aesthetic interfaces that feel as good as they look.",
+  body: "*Markets*, *typography*, and building a personal brand in public. I design *clean, intuitive interfaces* that feel as good as they look — and I will happily rewrite one label six times to get there.",
 },
 {
   id: "what-i-believe-in",
   label: "What I believe in",
   tag: "what i believe in",
   headline: "Start from the customer's confusion, work back to the fix.",
-  body: "Ship in small, reviewable slices. Write while things are still moving. Let what customers report shape the next plan.",
+  body: "*Ship in small, reviewable slices.* Write while things are still moving. Let what customers *actually report* shape the next plan, not what we hoped they would say.",
 },
 {
   id: "what-i-can-cook",
   label: "What I can cook",
   tag: "what i can cook",
   headline: "Docs, products and tools that make complex software easier to use.",
-  body: "Product documentation for enterprise DevOps, GenAI assistant content, and AI-powered products built end to end, from the idea to the interface to the first working version.",
+  body: "*Product documentation* for enterprise DevOps, *GenAI assistant* content, and *AI products built end to end* — idea, interface, first working version. The cooking is literal too, but that is a different section.",
 },
 {
   id: "whats-up",
   label: "What I'm upto",
   tag: "what i'm upto",
   headline: "Building Flint OS, an AI-powered quant investing platform.",
-  body: "A multi-factor signal engine and risk analytics that explain every trade they suggest. I'm also building Tesseract, an AI mock-interview platform. Next up: an AI PM or product design role.",
+  body: "A *multi-factor signal engine* and *risk analytics* that explain every trade they suggest. Also *Tesseract*, an AI mock-interview coach. Next up: a team that wants *one person doing all three* — ideally with better problems than my own.",
 },
 ];
 
@@ -185,14 +186,14 @@ export const workExperience = [
     title: "Technical Writer (Product Documentation)",
     company: "Digital.ai",
     duration: "Mar 2025 – Present",
-    desc: "Own the docs roadmap for Deploy, Release and TeamForge across 4 major release cycles. Led 0-to-1 content for Ask Release, Digital.ai's GenAI assistant, through its GA launch.",
+    desc: "Own the *docs roadmap* for Deploy, Release and TeamForge. Led *0-to-1 content* for Ask Release, Digital.ai's *GenAI assistant*, through its *GA launch*.",
     link: "https://docs.digital.ai/release/docs/release-notes/release-notes-release",
     points: [
-      "Prioritize 300+ user stories and defects across 30+ Agile sprints in Agility.",
-      "Defined the information architecture for Ask Release, covering agent customization, LLM guardrails, BYOM and Kubernetes deployment, through GA.",
-      "Write release notes for every GA and monthly maintenance release, plus deprecation and support-matrix communications.",
-      "Closed the customer feedback loop on 50+ reported defects with engineering and product.",
-      "Shipped MCP integration guides and Copilot/Claude agent instructions, plus content-QA automation scripts.",
+      "Prioritize *300+ user stories and defects* across *30+ Agile sprints* in Agility.",
+      "Defined the *information architecture* for Ask Release — agent customization, *LLM guardrails*, BYOM and Kubernetes deployment — through GA.",
+      "Write *release notes* for every GA and monthly maintenance release, plus deprecation and support-matrix communications.",
+      "Closed the *customer feedback loop* on *50+ reported defects* with engineering and product.",
+      "Shipped *MCP integration guides* and Copilot/Claude agent instructions, plus content-QA automation scripts.",
     ],
     decision: "Led 0-to-1 content for AI Assistant through GA",
   },
@@ -201,11 +202,11 @@ export const workExperience = [
     title: "Software Developer Intern",
     company: "Ceyone Marketing",
     duration: "Dec 2024 – Mar 2025",
-    desc: "Built a responsive real-estate platform in React, TypeScript, Tailwind and Zustand with Google Maps integration, improving user engagement by 30%.",
+    desc: "Built a responsive *real-estate platform* in React, TypeScript, Tailwind and Zustand with Google Maps, lifting *user engagement 30%*.",
     link: "https://www.onlyvillas.in/",
     points: [
-      "Translated business requirements into a responsive real-estate platform; iterative UI/UX changes lifted engagement 30%.",
-      "Built the frontend in React, TypeScript, Tailwind and Zustand with Google Maps and Places APIs; reusable components cut dev time 10%.",
+      "Translated business requirements into a responsive real-estate platform; iterative *UI/UX changes lifted engagement 30%*.",
+      "Built the frontend in React, TypeScript, Tailwind and Zustand with Google Maps and Places APIs; *reusable components cut dev time 10%*.",
     ],
     decision: "Engagement up 30%",
   },
@@ -216,7 +217,7 @@ export const approach = [
   {
     phase: "Phase 1",
     title: "Planning & Strategy",
-    des: "Start with the customer, not the feature. I read support tickets, defect reports and feedback, then frame the problem and prioritize the backlog with engineering and product before anything gets built.",
+    des: "*Start with the customer, not the feature.* I read support tickets, defect reports and feedback, then frame the problem and *prioritize the backlog* with engineering and product before anything gets built.",
     proof: "300+ user stories and defects prioritized in Agility",
     artifact: {
       heading: "Backlog, sorted by customer impact",
@@ -231,7 +232,7 @@ export const approach = [
   {
     phase: "Phase 2",
     title: "Development & Progress Update",
-    des: "Build in small, reviewable slices and keep everyone updated. I work sprint by sprint with engineers, write while features are still moving, and flag gaps early rather than at release.",
+    des: "*Build in small, reviewable slices*, and keep everyone updated. I work sprint by sprint with engineers, write while features are still moving, and *flag gaps early* rather than at release.",
     proof: "30+ sprints, 0-to-1 content for AI Assistant",
     artifact: {
       heading: "Sprint update",
@@ -246,7 +247,7 @@ export const approach = [
   {
     phase: "Phase 3",
     title: "Deployment & Launch",
-    des: "Launch is where learning starts. I ship the release notes, support matrices and end-of-support communications, then route what customers report straight back into the next plan.",
+    des: "*Launch is where the learning starts.* I ship the release notes, support matrices and end-of-support communications, then route what customers report *straight back into the next plan*.",
     proof: "4 major release cycles, AI Assistant GA",
     artifact: {
       heading: "Release notes",

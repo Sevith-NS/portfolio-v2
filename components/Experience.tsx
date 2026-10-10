@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useScroll, useSpring, useTransform } from "fra
 import { ArrowUpRight, Plus } from "@phosphor-icons/react";
 import { workExperience } from "@/data";
 import { SectionHeader } from "./SectionHeader";
+import { Copy } from "./ui/Copy";
 
 // The chapter's year, read off the duration string.
 const yearOf = (duration: string) => duration.match(/\d{4}/)?.[0] ?? "";
@@ -46,7 +47,9 @@ const Experience = () => {
                 <h3 className="text-2xl font-semibold leading-tight tracking-[-0.02em] text-ink md:text-[1.75rem]">
                   {job.title}
                 </h3>
-                <p className="mt-3 max-w-[60ch] leading-relaxed text-ink-2">{job.desc}</p>
+                <p className="mt-3 max-w-[60ch] leading-relaxed text-ink-2">
+                  <Copy text={job.desc} />
+                </p>
 
                 <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2">
                   <button
@@ -88,7 +91,7 @@ const Experience = () => {
                       {job.points.map((p) => (
                         <li key={p} className="flex gap-3 pt-3 text-[0.9375rem] leading-relaxed text-ink-2 first:pt-5">
                           <span aria-hidden className="mt-[0.7em] h-px w-3 shrink-0 bg-ink-3" />
-                          {p}
+                          <Copy text={p} />
                         </li>
                       ))}
                     </motion.ul>

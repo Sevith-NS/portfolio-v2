@@ -119,6 +119,17 @@ html.lenis, html.lenis body { height: auto; }
     @apply font-sans text-[0.8125rem] font-medium leading-5 text-ink-3 tabular;
   }
 
+  /* Keyword emphasis in prose: bold ink with a soft lapis rule under it. The
+     quiet cousin of .hl, which stays reserved for decisions. */
+  .key {
+    @apply font-semibold text-ink;
+    text-decoration-line: underline;
+    text-decoration-color: rgb(var(--accent) / 0.45);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.2em;
+    text-decoration-skip-ink: auto;
+  }
+
   /* Small uppercase tracked label with tabular numerals: rails, counters, chapter marks. */
   .label {
     @apply font-display text-[0.6875rem] font-semibold uppercase leading-4 tabular;

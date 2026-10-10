@@ -7,6 +7,7 @@ import { gridItems, heroNotes, ledger, selfPortrait } from "@/data";
 import { SectionHeader } from "./SectionHeader";
 import { Reveal } from "./motion/Reveal";
 import { TransitionLink } from "./transition/TransitionLink";
+import { Copy } from "./ui/Copy";
 import { Scribble } from "./ui/Scribble";
 
 const item = (id: number) => gridItems.find((g) => g.id === id)!;
@@ -65,7 +66,16 @@ const About = () => {
                 <p className="max-w-[32ch] font-serif text-[1.9rem] leading-[1.18] tracking-[-0.015em] text-ink md:text-[2.75rem]">
                   {current.headline}
                 </p>
-                <p className="mt-5 max-w-[58ch] text-lg leading-relaxed text-ink-2">{current.body}</p>
+                <p className="mt-5 max-w-[58ch] text-lg leading-relaxed text-ink-2">
+                  <Copy text={current.body} />
+                </p>
+                <TransitionLink
+                  href="/story"
+                  label="Story"
+                  className="mt-6 inline-flex items-center gap-1.5 text-[0.9375rem] font-medium text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent"
+                >
+                  Read the long version <ArrowRight size={14} />
+                </TransitionLink>
               </div>
               <Scribble className="pointer-events-none shrink-0 -rotate-2 text-[2.75rem] sm:text-[3.5rem] lg:pr-4 lg:text-[4.5rem]">
                 {current.tag}

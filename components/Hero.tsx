@@ -3,13 +3,14 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight, EnvelopeSimple, Mouse } from "@phosphor-icons/react";
 import { email, resumeLink } from "@/data";
+import { Copy } from "./ui/Copy";
 import { Scribble } from "./ui/Scribble";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
 // Centered serif statement, a lapis handwritten note crossing it, and a quiet cue to scroll.
 const Hero = () => {
-  const words = "Product builder who designs, defines and ships thoughtful AI products.".split(" ");
+  const words = "Product engineer who designs, defines and ships the whole product.".split(" ");
   return (
     <section id="top" className="relative mx-auto flex min-h-[100dvh] max-w-[64rem] flex-col items-center justify-center px-4 pb-16 pt-28 text-center md:px-8">
       <motion.p
@@ -49,8 +50,7 @@ const Hero = () => {
         transition={{ duration: 0.8, delay: 0.8, ease }}
         className="mt-28 max-w-[52ch] text-[1.0625rem] leading-relaxed text-ink-2 sm:mt-32"
       >
-        Technical Writer at Digital.ai, aiming for AI PM and product design roles. I led content for a GenAI launch by day, and
-        design and build AI products end to end on my own time.
+        <Copy text="*Digital.ai* pays me to be a Technical Writer; the work is product work. I defined the *information architecture* for an enterprise *GenAI product* and took it through *GA* — then I go home and design, build and ship *AI products end to end*. *Design, product and code are not three jobs to me.*" />
       </motion.p>
 
       <motion.div

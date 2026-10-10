@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     template: "%s · Sevith Sadashiva",
   },
   description:
-    "Product builder in Bangalore: I design, define and ship AI products. Technical Writer at Digital.ai, aspiring AI PM and product designer.",
+    "Product engineer in Bangalore: I design the interface, define the product and ship the code. Technical Writer at Digital.ai, building AI products end to end.",
   icons: ["/1.svg"],
 };
 
@@ -44,7 +44,7 @@ export const viewport: Viewport = {
 const contract = `
 THESIS: A product builder's portfolio with studio-grade polish: calm white space, warm serif statements, one lapis accent, and motion that feels physical (Lenis scroll, spring cursor, blur-in reveals).
 OWN-WORLD: White by day, lapis-navy by night. Lapis #002DB4 is the only accent. Instrument Serif for statements (italic for outcomes), Archivo expanded for wordmarks and rails, Geist for labels and body, one lapis handwritten note per section. Project plates are soft pastel gradients with the product rising behind frosted glass.
-STORY: Visitor meets a product builder aiming for AI PM and product design roles, scrolls through case plates, sees how Sevith works and who Sevith is off the clock, then emails or downloads the resume.
+STORY: Visitor meets a product engineer who does the design, the product definition and the build himself, scrolls through case plates, sees how Sevith works and who Sevith is off the clock, then emails or downloads the resume.
 FIRST VIEWPORT: Centered serif statement, a lapis scribble crossing it, pill nav with the active item in lapis, a quiet scroll cue.
 FORM: Brief-pinned to the design language of the user's reference (not its content), seed 43f73bd6.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

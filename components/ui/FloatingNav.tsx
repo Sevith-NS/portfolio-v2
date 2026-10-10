@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
 import { usePathname } from "next/navigation";
 import {
+  BookOpen,
   Briefcase,
   Cube,
   EnvelopeSimple,
@@ -25,6 +26,7 @@ const sections = ["top", "projects", "about", "experience", "approach", "off-the
 const icons: Record<string, Icon> = {
   Work: Briefcase,
   About: Smiley,
+  Story: BookOpen,
   Experience: Path,
   Studio: Cube,
   Contact: EnvelopeSimple,

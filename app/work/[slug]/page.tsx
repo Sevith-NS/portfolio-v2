@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { FloatingNav } from "@/components/ui/FloatingNav";
 import { TransitionLink } from "@/components/transition/TransitionLink";
 import { Reveal } from "@/components/motion/Reveal";
+import { Copy } from "@/components/ui/Copy";
+import { dev, live, Prompt } from "@/components/ui/Prompt";
 import Footer from "@/components/Footer";
 
 export const dynamicParams = false;
@@ -19,16 +21,30 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
 }
 
 // Drafted, unconfirmed copy is tagged in development only, so it can be reviewed before shipping.
-const dev = process.env.NODE_ENV === "development";
 const Text = ({ b, className }: { b: Block; className?: string }) => (
   <span className={className}>
-    {b.text}
+    <Copy text={b.text} />
     {dev && b.draft && (
       <span className="ml-2 inline-block rounded-full border border-dashed border-accent px-2 align-middle text-[0.625rem] font-semibold text-accent">
         confirm
       </span>
     )}
   </span>
+);
+
+const Bullets = ({ blocks, mark = "bg-accent" }: { blocks: Block[]; mark?: string }) => (
+  <ul className="space-y-5">
+    {blocks.map((b) =>
+      b.todo ? (
+        <Prompt key={b.text} b={b} />
+      ) : (
+        <li key={b.text} className="flex gap-4 text-lg leading-relaxed text-ink-2">
+          <span aria-hidden className={cn("mt-[0.8em] h-px w-5 shrink-0", mark)} />
+          <Text b={b} />
+        </li>
+      )
+    )}
+  </ul>
 );
 
 const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
@@ -51,8 +67,14 @@ export default function CasePage({ params }: { params: { slug: string } }) {
   const c = getCase(params.slug);
   if (!p || !c) notFound();
   const next = projects[(index + 1) % projects.length];
-  const live = p.link.includes("github.com") ? "View code" : "Visit live site";
+  const link = p.link.includes("github.com") ? "View code" : "Visit live site";
   const facts = [p.title, c.status, ...(p.year ? [p.year] : [])];
+
+  const process = live(c.process);
+  const insights = live(c.insights);
+  const wins = live(c.wins);
+  const misses = live(c.misses);
+  const why = live([c.why]);
 
   return (
     <main id="main" className="relative">
@@ -80,7 +102,7 @@ export default function CasePage({ params }: { params: { slug: string } }) {
             ))}
           </ul>
           <a href={p.link} target="_blank" rel="noopener noreferrer" className="btn btn-primary mt-8">
-            {live} <ArrowUpRight size={16} />
+            {link} <ArrowUpRight size={16} />
           </a>
 
           <div className="relative mx-auto mt-14 aspect-[16/10] max-w-[60rem] overflow-hidden rounded-t-[1.5rem] border border-b-0 border-white/40 bg-paper/40 shadow-[0_40px_80px_-40px_rgb(0_0_0/0.45)] backdrop-blur-sm md:aspect-[16/9]">
@@ -123,30 +145,64 @@ export default function CasePage({ params }: { params: { slug: string } }) {
             <Text b={c.problem} />
           </p>
         </Row>
+
+        {process.length > 0 && (
+          <Row label="How I worked">
+            <Bullets blocks={process} />
+          </Row>
+        )}
+
         <Row label="What I built">
-          <ul className="space-y-5">
-            {c.approach.map((b) => (
-              <li key={b.text} className="flex gap-4 text-lg leading-relaxed text-ink-2">
-                <span aria-hidden className="mt-[0.8em] h-px w-5 shrink-0 bg-accent" />
-                <Text b={b} />
-              </li>
-            ))}
-          </ul>
+          <Bullets blocks={c.approach} />
         </Row>
+
+        {insights.length > 0 && (
+          <Row label="What changed the design">
+            <Bullets blocks={insights} />
+          </Row>
+        )}
+
         <Row label="Decisions">
-          <ul className="space-y-5">
-            {c.decisions.map((b) => (
-              <li key={b.text} className="flex gap-4 text-lg leading-relaxed text-ink-2">
-                <span aria-hidden className="mt-[0.8em] h-px w-5 shrink-0 bg-accent" />
-                <Text b={b} />
-              </li>
-            ))}
-          </ul>
+          <Bullets blocks={c.decisions} />
         </Row>
-        <Row label="Outcome">
+
+        {wins.length + misses.length > 0 && (
+          <Row label="Wins and misses">
+            <div className="grid gap-10 sm:grid-cols-2 sm:gap-8">
+              {wins.length > 0 && (
+                <div>
+                  <p className="label mb-4 text-accent">What worked</p>
+                  <Bullets blocks={wins} />
+                </div>
+              )}
+              {misses.length > 0 && (
+                <div>
+                  <p className="label mb-4 text-ink-3">What didn&apos;t</p>
+                  <Bullets blocks={misses} mark="bg-ink-3" />
+                </div>
+              )}
+            </div>
+          </Row>
+        )}
+
+        <Row label="Where it landed">
           <p className="max-w-[60ch] font-serif text-2xl leading-snug text-ink md:text-[1.75rem]">
             <Text b={c.outcome} />
           </p>
+          {why.length > 0 &&
+            (c.why.todo ? (
+              <div className="mt-8 max-w-[60ch]">
+                <p className="label mb-3 text-ink-3">Why this was the right answer</p>
+                <Prompt b={c.why} as="div" />
+              </div>
+            ) : (
+              <div className="mt-8 max-w-[60ch]">
+                <p className="label mb-3 text-ink-3">Why this was the right answer</p>
+                <p className="text-lg leading-relaxed text-ink-2">
+                  <Text b={c.why} />
+                </p>
+              </div>
+            ))}
         </Row>
 
         <Reveal>

@@ -2,18 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-/* White by day, lapis-navy by night. Lapis is the one accent. Pastels live only on project plates. */
+/* AFTER HOURS. Two colours per mode, nothing else. Light: oat page, black
+   text, lapis (#002DB4) for everything that highlights. Dark: near-black page,
+   white text, a brighter lapis for the same jobs (#2F5BFF for fills, #809BFF
+   where it has to be read as small text). Lapis fills carry white text. No
+   orange, no pastels, no neon. See ART-DIRECTION.md. */
 @layer base {
   :root {
-    --paper: 243 238 228;
-    --sheet: 237 229 216;
-    --ink: 17 17 17;
-    --ink-2: 71 71 71;
-    --ink-3: 110 110 110;
-    --rule: 226 219 206;
+    --paper: 239 233 222;
+    --sheet: 247 243 236;
+    --ink: 26 22 18;
+    --ink-2: 78 70 61;
+    --ink-3: 112 103 92;
+    --rule: 221 212 198;
     --hl: 0 45 180;
-    --on-hl: 255 255 255;
+    --on-hl: 252 250 246;
     --accent: 0 45 180;
+    /* The highlight colour (it was the lamp's orange; now lapis), and the shadow. */
+    --lamp: 0 45 180;
+    --deep: 20 34 100;
     --tint-sage: 213 227 218;
     --tint-butter: 234 241 198;
     --tint-blush: 245 225 218;
@@ -28,30 +35,34 @@
   }
 
   .dark {
-    --paper: 9 13 30;
-    --sheet: 17 23 46;
-    --ink: 242 242 240;
-    --ink-2: 190 192 200;
-    --ink-3: 150 154 170;
-    --rule: 36 44 74;
-    --hl: 128 155 255;
-    --on-hl: 9 13 30;
+    --paper: 10 11 14;
+    --sheet: 19 21 27;
+    --ink: 242 238 230;
+    --ink-2: 176 172 164;
+    --ink-3: 125 123 119;
+    --rule: 38 41 50;
+    --hl: 47 91 255;
+    --on-hl: 252 250 246;
     --accent: 128 155 255;
-    --tint-sage: 28 48 44;
-    --tint-butter: 44 50 30;
-    --tint-blush: 56 38 40;
-    --tint-lapis: 26 38 88;
-    --tint-stone: 34 38 52;
-    --tint-rose: 54 32 48;
-    --tint-mint: 20 50 52;
-    --tint-amber: 52 42 26;
-    --tint-garnet: 56 32 30;
-    --tint-clover: 18 50 34;
+    --lamp: 47 91 255;
+    --deep: 26 40 120;
+    --tint-sage: 24 34 32;
+    --tint-butter: 36 34 24;
+    --tint-blush: 44 30 30;
+    --tint-lapis: 22 28 56;
+    --tint-stone: 26 28 34;
+    --tint-rose: 42 26 34;
+    --tint-mint: 18 36 36;
+    --tint-amber: 44 30 20;
+    --tint-garnet: 48 24 26;
+    --tint-clover: 16 36 26;
     color-scheme: dark;
   }
 
   html {
     -webkit-text-size-adjust: 100%;
+    /* Glows reach past their boxes on purpose; the page itself never may. */
+    overflow-x: clip;
   }
 
   body {
@@ -97,8 +108,35 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
 
+@keyframes lamp-breathe {
+  0%, 100% { opacity: 0.88; }
+  30% { opacity: 1; }
+  60% { opacity: 0.93; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lamp-breathe { animation: none; }
+}
+
+/* Grain on everything, as one fixed layer, so texture never changes at a
+   section edge. Static and blend-free, so it costs nothing while scrolling. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>");
+}
+
+/* Archivo run wide: the geometric all-caps voice (the Azonix / Stretch Pro
+   register, without the extra font file). */
+@layer utilities {
+  .font-wide { font-variation-settings: "wdth" 125; }
+}
+
 @layer components {
-  /* The lapis marker: a solid band that sweeps in behind the key phrase. */
+  /* The marker: a band of lamp orange that sweeps in behind the key phrase. */
   .hl {
     background-image: linear-gradient(rgb(var(--hl)), rgb(var(--hl)));
     background-repeat: no-repeat;
@@ -119,12 +157,12 @@ html.lenis, html.lenis body { height: auto; }
     @apply font-sans text-[0.8125rem] font-medium leading-5 text-ink-3 tabular;
   }
 
-  /* Keyword emphasis in prose: bold ink with a soft lapis rule under it. The
+  /* Keyword emphasis in prose: bold ink with a coral rule under it. The
      quiet cousin of .hl, which stays reserved for decisions. */
   .key {
     @apply font-semibold text-ink;
     text-decoration-line: underline;
-    text-decoration-color: rgb(var(--accent) / 0.45);
+    text-decoration-color: rgb(var(--lamp) / 0.8);
     text-decoration-thickness: 1.5px;
     text-underline-offset: 0.2em;
     text-decoration-skip-ink: auto;
@@ -161,8 +199,50 @@ html.lenis, html.lenis body { height: auto; }
       transition-[transform,background-color,color,border-color] duration-200 ease-out
       active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
   }
-  .btn-primary { @apply bg-accent text-on-hl hover:bg-accent/90; }
-  .btn-ghost { @apply border border-rule text-ink hover:border-ink bg-paper; }
+  /* Primary is lit: warm ink that catches the lamp on hover. */
+  .btn-primary { @apply bg-ink text-paper hover:bg-lamp hover:text-on-hl; }
+  .btn-ghost { @apply border border-rule bg-paper/40 text-ink backdrop-blur-sm hover:border-ink; }
+
+  /* The lamp: one hot core low on the left with a steep falloff, a faint maroon
+     shadow opposite, and a cinema vignette. Gradients, not blurred blobs, so the
+     falloff can be controlled and the rest of the frame stays properly dark. */
+  .lamp-light {
+    background:
+      radial-gradient(38rem 30rem at 6% 96%, rgb(var(--lamp) / 0.42), rgb(var(--lamp) / 0.12) 45%, transparent 72%),
+      radial-gradient(70rem 40rem at 0% 100%, rgb(var(--lamp) / 0.08), transparent 70%);
+  }
+  /* The same lamp, but set on the seam between the hero and the section after
+     it, so one light spills across both instead of stopping at a box edge. */
+  .lamp-wash {
+    background:
+      radial-gradient(44rem 38rem at 4% 100svh, rgb(var(--lamp) / 0.4), rgb(var(--lamp) / 0.12) 45%, transparent 72%),
+      radial-gradient(80rem 60rem at 0% 100svh, rgb(var(--lamp) / 0.07), transparent 70%);
+  }
+  /* The lamp for a tall section: raised to two-thirds height so a fade at the
+     bottom edge (.fade-bottom) softens the spill without killing the bulb. */
+  .lamp-raised {
+    background:
+      radial-gradient(40rem 34rem at 4% 64%, rgb(var(--lamp) / 0.4), rgb(var(--lamp) / 0.12) 45%, transparent 72%),
+      radial-gradient(70rem 50rem at 0% 64%, rgb(var(--lamp) / 0.07), transparent 70%);
+  }
+  .lamp-shadow {
+    background: radial-gradient(40rem 32rem at 100% 0%, rgb(var(--deep) / 0.22), transparent 65%);
+  }
+  /* A real bulb isn't perfectly steady. Slow, low amplitude, off for reduced motion. */
+  .lamp-breathe { animation: lamp-breathe 9s ease-in-out infinite; }
+  /* For a lamp that lives inside one section: it fades out before the section
+     ends, so the light never stops at a hard edge. */
+  .fade-bottom {
+    -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent);
+    mask-image: linear-gradient(to bottom, #000 72%, transparent);
+  }
+  .glow-soft {
+    -webkit-mask-image: radial-gradient(closest-side, #000 35%, transparent);
+    mask-image: radial-gradient(closest-side, #000 35%, transparent);
+  }
+  .vignette {
+    background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(0 0 0 / 0.35) 100%);
+  }
 
   /* Film grain for colour fields: a tiny SVG noise tile, not a scrolling filter. */
   .grain::after {
@@ -179,24 +259,6 @@ html.lenis, html.lenis body { height: auto; }
 @media (prefers-reduced-motion: reduce) {
   .hl { transition: none; }
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-}
-
-/* Handwritten lapis annotation, written on with a left-to-right mask wipe. */
-.scribble {
-  font-family: var(--font-script), cursive;
-  color: rgb(var(--accent));
-  line-height: 1;
-  mask-image: linear-gradient(90deg, #000 45%, transparent 55%);
-  mask-size: 240% 100%;
-  mask-position: 100% 0;
-  -webkit-mask-image: linear-gradient(90deg, #000 45%, transparent 55%);
-  -webkit-mask-size: 240% 100%;
-  -webkit-mask-position: 100% 0;
-  transition: mask-position 1.6s cubic-bezier(0.65, 0, 0.35, 1), -webkit-mask-position 1.6s cubic-bezier(0.65, 0, 0.35, 1);
-}
-.scribble[data-on="true"] { mask-position: 0 0; -webkit-mask-position: 0 0; }
-@media (prefers-reduced-motion: reduce) {
-  .scribble { mask-image: none; -webkit-mask-image: none; }
 }
 
 /* A solid layer that only shows through a circle of "clear glass" at the
@@ -221,30 +283,9 @@ html.lenis, html.lenis body { height: auto; }
   .has-cursor input, .has-cursor textarea { cursor: text; }
 }
 
-/* The side-switch mosaic: chunky tiles snap in on a diagonal sweep, cover the
-   screen while the theme flips behind them, then snap away to reveal the new
-   side. Tile delays come from JS (one per tile); the motion lives here so 700
-   tiles cost 700 divs and no per-frame JS. */
-@keyframes mosaic-in {
-  from { opacity: 0; transform: scale(0.3); }
-  to { opacity: 1; transform: scale(1.06); }
-}
-@keyframes mosaic-out {
-  from { opacity: 1; transform: scale(1.06); }
-  to { opacity: 0; transform: scale(0.3); }
-}
-.mosaic-tile { animation-fill-mode: both; }
-[data-mosaic="in"] .mosaic-tile {
-  animation-name: mosaic-in;
-  animation-duration: 220ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-}
-[data-mosaic="out"] .mosaic-tile {
-  animation-name: mosaic-out;
-  animation-duration: 200ms;
-  animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
-}
-
+/* The side-switch pixel dissolve draws on a canvas (ThemeToggle.tsx). Only the
+   creed's entrance and exit live here: it lands once the screen is nearly
+   covered and leaves before the pixels start dropping away. */
 @keyframes mosaic-say-in {
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
@@ -254,7 +295,7 @@ html.lenis, html.lenis body { height: auto; }
   to { opacity: 0; transform: translateY(-12px); }
 }
 [data-mosaic="in"] .mosaic-say {
-  animation: mosaic-say-in 520ms cubic-bezier(0.16, 1, 0.3, 1) calc(420ms + var(--say-delay, 0ms)) both;
+  animation: mosaic-say-in 520ms cubic-bezier(0.16, 1, 0.3, 1) calc(2900ms + var(--say-delay, 0ms)) both;
 }
 [data-mosaic="out"] .mosaic-say {
   animation: mosaic-say-out 220ms cubic-bezier(0.76, 0, 0.24, 1) both;

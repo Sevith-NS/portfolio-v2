@@ -20,6 +20,8 @@ const config = {
         hl: "rgb(var(--hl) / <alpha-value>)",
         "on-hl": "rgb(var(--on-hl) / <alpha-value>)",
         accent: "rgb(var(--accent) / <alpha-value>)",
+        lamp: "rgb(var(--lamp) / <alpha-value>)",
+        deep: "rgb(var(--deep) / <alpha-value>)",
         tint: {
           sage: "rgb(var(--tint-sage) / <alpha-value>)",
           butter: "rgb(var(--tint-butter) / <alpha-value>)",
@@ -37,8 +39,9 @@ const config = {
         sans: ["var(--font-geist-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
         serif: ["var(--font-serif)", "Georgia", "serif"],
+        // Archivo on its width axis: the wide geometric caps voice.
+        wide: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],
-        script: ["var(--font-script)", "cursive"],
       },
       maxWidth: {
         page: "1240px",

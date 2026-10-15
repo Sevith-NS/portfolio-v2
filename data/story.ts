@@ -1,165 +1,124 @@
-// The /story page: the long version of who Sevith is, for people who clicked
-// past the work. Headlines carry the credibility, asides carry the personality.
+// The /story page: the long version, for people who clicked past the work.
+// Headlines carry the credibility, captions carry the personality (Q7: the
+// jokes land after a scroll). Every fact traces to the intake in
+// ART-DIRECTION.md or the resume; nothing is invented.
 //
-// Same two review flags as data/work.ts: `todo: true` is a prompt written to
-// Sevith, shown only in development and stripped from production.
-// Copy convention: *a phrase in asterisks* renders bold with a lapis underline.
+// `todo: true` marks a prompt written to Sevith, not copy. It shows as a dashed
+// card in development and is stripped from production entirely.
+// *A phrase in asterisks* renders bold with a soft underline (ui/Copy).
 
 import type { Block } from "./work";
 
-// Drop a photo at public/story/ and put the path here. While it's empty the page
-// runs text-only rather than showing a broken frame.
-export const portrait = {
-  src: "",
-  alt: "Sevith Sadashiva",
-  caption: "me, pretending the deadline isn't today",
-};
-
 export const opening = {
+  photo: { src: "/story/rainy-hike.webp", alt: "Sevith from behind in a black rain jacket, hood up, facing storm clouds over green hills" },
   kicker: "My story",
-  headline: "I make complicated software make sense, then I go home and build more of it.",
-  standfirst:
-    "I'm *Sevith* — *product engineer* in *Bangalore*. I design the interface, define the product and write the code, which is three job descriptions and one person. By day that is *Digital.ai*, where I own documentation for enterprise DevOps products and took a *GenAI assistant through its GA launch*. By night it is my own *AI products*, end to end, because apparently I don't own a television.",
-  words: ["curious", "precise", "warm"],
-  scribble: "the long version",
+  headline: "The long version.",
+  standfirst: "For the people who scrolled past the work and thought: okay, but who is this guy?",
 };
 
-// The skimmable bio. Four lines, for the recruiter who has 40 seconds.
+export const hello = {
+  photo: { src: "/story/pool-table.webp", alt: "Sevith in a dark shirt and sunglasses, standing by a pool table under amber blinds", caption: "Lining up the shot. Missed it, obviously." },
+  headline: "Hi, I'm Sevith.",
+  body: "*Product engineer* in *Bangalore*. I design the interface, decide what the product should actually do, and write the code. One person, no handoff. Self-taught on the design side, which means everything I learn goes straight into something real, usually around 2am.",
+};
+
+// For the recruiter with forty seconds.
 export const short: Block[] = [
-  { text: "*BCA, Christ University.* Then straight into shipping." },
-  { text: "Two years in: one *real-estate platform* as a developer, one *enterprise GenAI launch* as the person who made it understandable." },
-  { text: "On my own time, two AI products built solo — *Flint OS* and *Tesseract AI* — from the idea through the interface to the first working version." },
-  { text: "What I am after: a team that wants *one person who can design it, define it and build it*. Three job descriptions, one person, no handoff." },
+  { text: "*Self-taught designer.* BCA from Christ University." },
+  { text: "I design it, decide what it does, and build it. *One person, no handoff.*" },
+  { text: "Built *Polaris* and *Tesseract AI* solo, from the idea to a working product." },
+  { text: "Open to *freelance and full-time*. Startups, small businesses, anyone who wants it clean." },
 ];
 
-// How I got here. The career beats are on record; the reason behind them isn't.
 export const chapters: { when: string; title: string; body: Block }[] = [
   {
-    when: "Before all this",
-    title: "Where it started",
+    when: "As a kid",
+    title: "Wow. I want to build that.",
     body: {
-      text: "The origin story. What actually got you into building things — a game you modded, a site you broke, a spreadsheet that got out of hand? Two or three sentences, in your voice. This is the part people remember, and it's the one thing a resume can never carry.",
-      todo: true,
+      text: "I'd land on a sleek, modern website and just stare at it. *I want to build something like this when I grow up.* That's the whole origin story. Turns out you're allowed to just go and do it.",
     },
   },
   {
     when: "Christ University",
     title: "BCA, and a lot of side quests",
     body: {
-      text: "What the degree gave you, and what you had to go get yourself. If most of what you use now was learnt outside the syllabus, say so — it reads as drive, not as a complaint.",
+      text: "What the degree gave you, and what you had to go and get yourself. If most of what you use now was learnt outside the syllabus, say so. It reads as drive, not a complaint.",
       todo: true,
     },
   },
   {
-    when: "Dec 2024 — Mar 2025",
-    title: "Ceyone Marketing: my first real users",
+    when: "Dec 2024 to Mar 2025",
+    title: "First real users",
     body: {
-      text: "Built a *real-estate platform* in React, TypeScript and Tailwind, with Google Maps wired in. Iterating on the UI lifted engagement *30%* — the first time I watched a design call move a number instead of just an opinion.",
+      text: "Built a *real-estate platform* at Ceyone in React, TypeScript and Tailwind. Iterating on the UI lifted engagement *30%*, the first time I watched a design call move a number instead of just an opinion.",
     },
   },
   {
-    when: "Mar 2025 — now",
-    title: "Digital.ai: documentation as a product",
+    when: "Mar 2025 to now",
+    title: "The day job",
     body: {
-      text: "I own the docs for *Deploy, Release and TeamForge*, and I led *0-to-1 content for Ask Release*, Digital.ai's GenAI assistant, all the way to *GA*. Writing docs turns out to be product work wearing a disguise: you start from the customer's confusion and work back to the fix.",
+      text: "Technical Writer at Digital.ai. I own the docs for enterprise DevOps products and took a *GenAI assistant's* content through *GA*. It taught me the most useful habit I have: start from the customer's confusion and work back to the fix.",
     },
   },
   {
     when: "Now",
-    title: "Building Flint OS, and done apologising for the title",
+    title: "Building after hours",
     body: {
-      text: "*Flint OS* is an AI-powered quant investing platform that has to explain every trade it suggests. *Tesseract AI* is a mock-interview coach I built because I needed one. Next: somewhere that wants *all three* in one person.",
+      text: "*Polaris*, which reads what you own across brokers and gives you a paper desk to test every idea before real money moves. *Tesseract AI*, a mock-interview coach I built because I needed one. Next: a team, or a client, that wants all three jobs done by one person.",
     },
   },
 ];
 
-// What I actually do, in three honest buckets.
-export const craft: { title: string; body: string; note: string }[] = [
-  {
-    title: "Define it",
-    body: "Start from the customer's confusion, not the feature list. Read the tickets, the defects and the feedback, frame the problem, then prioritize with engineering and product. *300+ user stories and defects* across *30+ Agile sprints*.",
-    note: "the unglamorous half of product",
-  },
-  {
-    title: "Design it",
-    body: "Clean, intuitive interfaces that feel as good as they look. I care about *type, spacing and motion* at a level most people would describe as a problem. I would describe it as the job.",
-    note: "certified type nerd",
-  },
-  {
-    title: "Build it",
-    body: "*Next.js, TypeScript, Tailwind, Python.* Enough to take a product from an empty folder to something you can actually use — which keeps my design calls honest, because I'm the one who has to implement them.",
-    note: "no handoff, no excuses",
-  },
-];
-
-export const credentials: { label: string; value: string; detail: string; link?: string; todo?: boolean }[] = [
-  {
-    label: "Education",
-    value: "BCA, Christ University",
-    detail: "Bangalore",
-  },
-  {
-    label: "Current role",
-    value: "Technical Writer, Product Documentation",
-    detail: "Digital.ai · Mar 2025 – present",
-    link: "https://docs.digital.ai/release/docs/release-notes/release-notes-release",
-  },
-  {
-    label: "Previously",
-    value: "Software Developer Intern",
-    detail: "Ceyone Marketing · Dec 2024 – Mar 2025",
-    link: "https://www.onlyvillas.in/",
-  },
-  {
-    label: "Certification",
-    value: "Google UX Design Certificate",
-    detail:
-      "Confirm this before it ships: finished or in progress, and when? Add any others worth listing here too — this entry is the only guess on the page.",
-    todo: true,
-  },
-];
-
-// The three I'd want someone to look at, in order.
-export const notable: { title: string; line: string; href: string; external?: boolean }[] = [
-  {
-    title: "Ask Release, Digital.ai",
-    line: "I defined the information architecture for a *GenAI assistant* — agent customization, LLM guardrails, BYOM, Kubernetes deployment — and took the content through *GA*.",
-    href: "https://docs.digital.ai/release/docs/release-notes/release-notes-release",
-    external: true,
-  },
-  {
-    title: "Flint OS",
-    line: "An *AI quant investing platform* that explains every trade it suggests. Signal engine, risk analytics, a backtester, and a desk of agents that argue before they commit.",
-    href: "/work/flint-os",
-  },
-  {
-    title: "Tesseract AI",
-    line: "An *AI mock-interview coach*. I built it for my own placements, then a recruiter told me how confident I sounded. Still my favourite bug report.",
-    href: "/work/tesseract-ai",
-  },
-];
-
-export const passions = {
-  headline: "Off the clock, mostly on purpose",
-  body:
-    "*Sports* and the *gym*, because the screen can wait. *Video editing* and *cinema*, which is where the obsession with timing comes from. *Fonts and type*, which is where the obsession with everything else comes from. *Markets and finance*, which turned into Flint. *Cooking*, following the recipe roughly. And building a *personal brand* in public, which is a fancy way of saying I overthink my own portfolio.",
-  scribble: "and sometimes panicking about the future",
+export const learning = {
+  photo: { src: "/story/ux-notes.webp", alt: "Handwritten notes from the Google UX Design course, on inclusive design and case studies" },
+  kicker: "Visibly in progress",
+  headline: "Still learning. On purpose.",
+  body: "I'm a self-taught designer, so I learn something and ship it into a real project the same week. Last up: the *Google UX Design* course. These are my actual notes. The right-hand page says *tell a story* and *be concise*, which is, coincidentally, what this page is trying to do.",
 };
 
-// Four cats, from data/studio.ts. Names unknown; the personalities are not.
-export const cats: { who: string; line: string; todo?: boolean }[] = [
-  { who: "The orange one", line: "Rowdy, notorious, starts every fight. Crouches, wiggles, pounces." },
-  { who: "The grey one", line: "A coward with excellent survival instincts. Flinches at doors." },
-  { who: "The white one with the grey patch", line: "The girl. Soft, chill, loafs, slow-blinks. The adult in the room." },
-  { who: "The white one", line: "Her daughter. Zoomies in a figure of eight, tail straight up, no regard for furniture." },
-  {
-    who: "Their names",
-    line: "I know what your cats are like, not what they're called. Drop the four names in and this section gets a lot funnier.",
-    todo: true,
-  },
-];
+export const offClock = {
+  kicker: "Off the clock",
+  headline: "Goated taste in everything.",
+  body: "Music, art, food, fits. Not everyone has great taste. I'm just saying it out loud.",
+  photos: [
+    { src: "/story/beach.webp", alt: "Sevith at the beach in a white tank top and loose white trousers", caption: "Overspends on fits. Zero regrets." },
+    { src: "/story/goa.webp", alt: "Sevith in a green shirt walking down a colourful street in Goa, drinking coffee", caption: "Goa. Coffee in one hand, main-character energy in the other." },
+    { src: "/story/climbing.webp", alt: "Sevith on a climbing wall, mid-route", caption: "Always exploring. Always finds the way back down." },
+    { src: "/story/touching-grass.webp", alt: "Sevith lying face-down in tall grass on a misty hillside", caption: "Chronically online guy, touching grass. Documented, obviously." },
+  ],
+  kitchen: "Best thing I make isn't on GitHub: *peri peri fried chicken with mac and cheese.*",
+  memes: { src: "/story/memes.webp", alt: "A grid of saved workplace memes", caption: "Full-time online meme collector. This is a small sample. I have a problem." },
+};
+
+export const cats = {
+  kicker: "The team",
+  headline: "Four cats. Zero personal space.",
+  body: "When I'm stuck, I watch a film or go and irritate one of these four. It works more often than it should. For the record, I'm half Simba, half Cream.",
+  members: [
+    { name: "Simba", src: "/cats/me-and-simba.webp", alt: "Sevith holding Simba, an orange cat, over his shoulder", line: "Orange, rowdy, starts every fight. Explores everything and always finds his way home." },
+    { name: "Cream", src: "/cats/cream.webp", alt: "Cream, a small white cat, lying on a path covered in yellow petals", line: "Pearl's daughter. A cute little white monster. If it's on the floor, Cream did it." },
+    { name: "Pearl", src: "/cats/pearl.webp", alt: "Pearl, a white cat with a grey patch on her head, looking up in warm light", line: "The adult in the room. Loafs, slow-blinks, judges quietly." },
+    { name: "Ash", src: "/cats/ash.webp", alt: "Ash, a grey cat with amber eyes", line: "A coward with excellent survival instincts. Flinches at doors." },
+  ],
+};
+
+export const history = {
+  kicker: "On paper",
+  headline: "The resume bit.",
+  credentials: [
+    { label: "Education", value: "BCA, Christ University", detail: "Bangalore" },
+    { label: "Day job", value: "Technical Writer", detail: "Digital.ai · Mar 2025 – present" },
+    { label: "Before that", value: "Software Developer Intern", detail: "Ceyone Marketing · Dec 2024 – Mar 2025" },
+    {
+      label: "Certification",
+      value: "Google UX Design Certificate",
+      detail: "Finished or in progress, and when? Confirm before this ships. It's the only line on the page I couldn't verify.",
+      todo: true,
+    },
+  ] as { label: string; value: string; detail: string; todo?: boolean }[],
+};
 
 export const signoff = {
-  line: "That's the long version. The short one is that I like building things that make sense, and I'd like to do it somewhere with better problems than my own.",
-  scribble: "still reading? let's talk",
+  line: "At 14 I wanted to be rich af. Now I want people to land on something I built and go *wow*. Honestly, the two aren't unrelated.",
+  motto: "Gotta stack up the Gandhis for a Porsche 911 GT3 RS.",
 };

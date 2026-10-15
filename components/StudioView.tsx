@@ -1,106 +1,86 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Lightbulb } from "@phosphor-icons/react";
-import { OUTDOOR, scenes } from "@/data/studio";
-import { cn } from "@/lib/utils";
+import { ArrowUpRight, Cat as CatIcon, Lightbulb } from "@phosphor-icons/react";
 import { StudioSkeleton } from "./three/StudioSkeleton";
-import { useLiveScene } from "./three/useLiveScene";
+import type { Hotspot } from "./three/Room";
+import { catNote } from "./EasterEggs";
+import { usePageTransition } from "./transition/TransitionProvider";
 
-const StudioRoom = dynamic(() => import("./three/StudioRoom"), {
-  ssr: false,
-  loading: () => <StudioSkeleton />,
-});
+const Room = dynamic(() => import("./three/Room"), { ssr: false, loading: () => <StudioSkeleton /> });
+
+// What each thing in the room says when you point at it.
+const HINTS: Record<Hotspot, string> = {
+  lamp: "The lamp. Click to switch it.",
+  monitor: "Polaris, still cooking. Click to open.",
+  cream: "Cream. Don't. (She will.)",
+};
+
+const btn =
+  "inline-flex h-10 items-center gap-2 rounded-full border border-rule bg-paper px-4 font-mono text-[0.75rem] uppercase tracking-[0.1em] text-ink transition-colors hover:border-ink";
 
 export default function StudioView() {
-  const { index: base } = useLiveScene();
-  // null = follow the live clock; a number = a scene the visitor picked.
-  const [manual, setManual] = useState<number | null>(null);
-  const [lightsOn, setLightsOn] = useState(true);
+  const [lampOn, setLampOn] = useState(true);
+  const [chaos, setChaos] = useState(0);
+  const [hint, setHint] = useState<Hotspot | null>(null);
+  const { navigate } = usePageTransition();
 
-  const n = scenes.length;
-  const i = manual ?? base ?? 0;
-  const step = (d: number) => setManual(((i + d) % n + n) % n);
-  const scene = scenes[i];
+  // Cream does laps and the mug goes over: when she's clicked, or when "cream" is typed anywhere.
+  const cream = () => {
+    setChaos((n) => n + 1);
+    catNote("Cream was here. Sorry about the mug.");
+  };
+  useEffect(() => {
+    const go = () => setChaos((n) => n + 1);
+    window.addEventListener("cream", go);
+    return () => window.removeEventListener("cream", go);
+  }, []);
+
+  const pick = (h: Hotspot) => {
+    if (h === "lamp") setLampOn((v) => !v);
+    else if (h === "cream") cream();
+    else navigate("/work/polaris", "Polaris");
+  };
 
   return (
-    <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
-      <div className="relative aspect-square overflow-hidden rounded-[2px] border border-rule bg-sheet lg:col-span-8 lg:aspect-[4/3]">
-        {base !== null && <StudioRoom id={scene.id} lightsOn={lightsOn} />}
-        {/* The HUD: pixel type in the corners, like a handheld's status bar. */}
-        <div aria-hidden className="label pointer-events-none absolute left-4 top-4 flex items-center gap-2 rounded-[2px] border border-rule bg-paper px-3 py-1.5 text-ink">
-          <span className={cn("size-2", manual === null ? "animate-pulse bg-accent" : "bg-ink-3")} />
-          {manual === null ? "Live" : "Paused"}
-          <span className="text-ink-3">
-            {String(i + 1).padStart(2, "0")}/{String(n).padStart(2, "0")}
-          </span>
+    <div>
+      <div className="relative aspect-square overflow-hidden rounded-[1.75rem] border border-rule bg-sheet sm:aspect-[4/3] lg:aspect-[16/10]">
+        <Room lampOn={lampOn} chaos={chaos} onHover={setHint} onPick={pick} />
+
+        {/* What's under the pointer, in the corner like a caption. */}
+        <div aria-hidden className="pointer-events-none absolute bottom-4 left-4 right-4 flex justify-start">
+          <AnimatePresence>
+            {hint && (
+              <motion.p
+                key={hint}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="rounded-full border border-rule bg-paper/90 px-4 py-2 font-mono text-[0.75rem] uppercase tracking-[0.1em] text-ink backdrop-blur-md"
+              >
+                {HINTS[hint]}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
-        <button
-          type="button"
-          onClick={() => setLightsOn((v) => !v)}
-          aria-pressed={lightsOn}
-          className="btn btn-ghost absolute right-4 top-4 !h-9 !px-3.5 text-sm"
-        >
-          <Lightbulb size={16} weight={lightsOn ? "fill" : "regular"} />
-          {OUTDOOR.includes(scene.id) ? (lightsOn ? "Street light off" : "Street light on") : lightsOn ? "Lights off" : "Lights on"}
-        </button>
       </div>
 
-      <div className="lg:col-span-4">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={scene.id}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <h2 className="font-serif text-4xl font-normal tracking-[-0.02em] text-ink md:text-5xl">{scene.title}</h2>
-            <p className="mt-4 max-w-[36ch] text-lg leading-relaxed text-ink-2">{scene.note}</p>
-            <p className="label mt-4 text-ink-3">
-              Scene {String(i + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}
-            </p>
-          </motion.div>
-        </AnimatePresence>
-
-        <div className="mt-8 flex items-center gap-3">
-          <button type="button" onClick={() => step(-1)} className="btn btn-ghost !px-3.5" aria-label="Previous scene">
-            <ArrowLeft size={16} />
-          </button>
-          <button type="button" onClick={() => step(1)} className="btn btn-ghost !px-3.5" aria-label="Next scene">
-            <ArrowRight size={16} />
-          </button>
-          {manual !== null && (
-            <button type="button" onClick={() => setManual(null)} className="text-sm text-ink-2 underline decoration-rule underline-offset-4 hover:text-ink">
-              Back to live
-            </button>
-          )}
-        </div>
-        {manual !== null && (
-          <p className="note mt-4" aria-live="off">
-            Browsing scenes. The live room keeps its own clock.
-          </p>
-        )}
-
-        <ul className="mt-8 flex flex-wrap gap-2" aria-label="All scenes">
-          {scenes.map((s, k) => (
-            <li key={s.id}>
-              <button
-                type="button"
-                onClick={() => setManual(k === base ? null : k)}
-                aria-current={k === i}
-                className={cn(
-                  "rounded-[2px] border px-3 py-1.5 text-xs transition-colors",
-                  k === i ? "border-accent bg-accent text-on-hl" : "border-rule text-ink-2 hover:border-ink hover:text-ink"
-                )}
-              >
-                {s.title}
-              </button>
-            </li>
-          ))}
-        </ul>
+      {/* Everything you can click in the room, as plain buttons too: keyboard,
+          screen readers and phones get the same room. */}
+      <div className="mt-6 flex flex-wrap items-center gap-2.5">
+        <button type="button" className={btn} aria-pressed={lampOn} onClick={() => setLampOn((v) => !v)}>
+          <Lightbulb size={15} weight={lampOn ? "fill" : "regular"} className="text-accent" />
+          {lampOn ? "Lamp off" : "Lamp on"}
+        </button>
+        <button type="button" className={btn} onClick={cream}>
+          <CatIcon size={15} className="text-accent" /> Bother Cream
+        </button>
+        <button type="button" className={btn} onClick={() => pick("monitor")}>
+          <ArrowUpRight size={15} className="text-accent" /> What&apos;s on the screen
+        </button>
       </div>
     </div>
   );

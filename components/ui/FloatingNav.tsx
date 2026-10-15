@@ -21,7 +21,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { TransitionLink } from "../transition/TransitionLink";
 
 // Every section on the home page, in scroll order: drives which nav pill is active.
-const sections = ["top", "projects", "about", "experience", "approach", "off-the-clock", "contact"];
+const sections = ["top", "intro", "projects", "approach", "contact"];
 
 const icons: Record<string, Icon> = {
   Work: Briefcase,
@@ -33,7 +33,7 @@ const icons: Record<string, Icon> = {
 };
 
 // Pill navigation: a name pill on the left, a cluster of icon pills on the right.
-// The active pill fills with lapis and slides between items.
+// The active pill fills with the lamp orange and slides between items.
 export const FloatingNav = ({ navItems }: { navItems: { name: string; link: string }[] }) => {
   const [active, setActive] = useState<string>("");
   const [open, setOpen] = useState(false);
@@ -93,7 +93,7 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
       <motion.div
         aria-hidden
         style={{ scaleX: progress }}
-        className="pointer-events-none fixed inset-x-0 top-0 h-px origin-left bg-accent"
+        className="pointer-events-none fixed inset-x-0 top-0 h-px origin-left bg-lamp"
       />
 
       <div className="mx-auto flex max-w-[64rem] items-center justify-between gap-3">
@@ -103,7 +103,7 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
             label="Home"
             className={cn(pill, "px-4 font-serif text-[1.15rem] tracking-[-0.02em] text-ink")}
           >
-            sevith<span className="text-accent">.</span>
+            sevith<span className="text-lamp">.</span>
           </TransitionLink>
         </div>
 
@@ -117,7 +117,7 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
                   {on && (
                     <motion.span
                       layoutId="nav-pill"
-                      className="absolute inset-0 rounded-full bg-accent"
+                      className="absolute inset-0 rounded-full bg-lamp"
                       transition={{ type: "spring", stiffness: 420, damping: 34 }}
                     />
                   )}
@@ -185,8 +185,8 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
                     label={item.name}
                     onClick={() => setOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 rounded-2xl px-4 py-3.5 font-serif text-xl",
-                      isActive(item.link) ? "bg-accent text-on-hl" : "text-ink hover:bg-sheet"
+                      "flex items-center gap-3 rounded-2xl px-4 py-3.5 font-wide text-lg font-semibold uppercase",
+                      isActive(item.link) ? "bg-lamp text-on-hl" : "text-ink hover:bg-sheet"
                     )}
                   >
                     <Ic size={18} weight={isActive(item.link) ? "fill" : "regular"} />
@@ -200,7 +200,7 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
                 href={resumeLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 rounded-2xl px-4 py-3.5 font-serif text-xl text-ink hover:bg-sheet"
+                className="flex items-center gap-3 rounded-2xl px-4 py-3.5 font-wide text-lg font-semibold uppercase text-ink hover:bg-sheet"
               >
                 <FileText size={18} />
                 résumé

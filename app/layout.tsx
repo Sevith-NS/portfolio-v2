@@ -1,17 +1,20 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { Archivo, Instrument_Serif, Nothing_You_Could_Do } from "next/font/google";
+import { Archivo, Bodoni_Moda } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./provider";
 import { TransitionProvider } from "@/components/transition/TransitionProvider";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { Cursor } from "@/components/motion/Cursor";
+import { EasterEggs } from "@/components/EasterEggs";
 
-const serif = Instrument_Serif({
+// Statements only. Extreme contrast, set large: film credits, not a newspaper.
+const serif = Bodoni_Moda({
   subsets: ["latin"],
-  weight: "400",
   style: ["normal", "italic"],
+  // next/font has no metric overrides for Bodoni Moda; skip the fallback shim.
+  adjustFontFallback: false,
   variable: "--font-serif",
   display: "swap",
 });
@@ -22,7 +25,6 @@ const display = Archivo({
   variable: "--font-display",
   display: "swap",
 });
-const script = Nothing_You_Could_Do({ subsets: ["latin"], weight: "400", variable: "--font-script", display: "swap" });
 
 export const metadata: Metadata = {
   title: {
@@ -36,7 +38,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
+    { media: "(prefers-color-scheme: light)", color: "#EFE9DE" },
     { media: "(prefers-color-scheme: dark)", color: "#090D1E" },
   ],
 };
@@ -59,14 +61,14 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} ${display.variable} ${script.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} ${display.variable}`}
     >
       <body>
         {/* Internal design notes: kept out of production HTML. */}
         {process.env.NODE_ENV === "development" && <div hidden dangerouslySetInnerHTML={{ __html: `<!--${contract}-->` }} />}
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-on-hl"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-lamp focus:px-4 focus:py-2 focus:text-on-hl"
         >
           Skip to content
         </a>
@@ -75,6 +77,7 @@ export default function RootLayout({
             <TransitionProvider>{children}</TransitionProvider>
           </SmoothScroll>
           <Cursor />
+          <EasterEggs />
         </ThemeProvider>
       </body>
     </html>

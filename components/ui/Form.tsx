@@ -85,7 +85,7 @@ export function Form() {
   });
 
   return (
-    <div className="relative rounded-2xl border border-rule bg-sheet p-5 md:p-8">
+    <div className="relative rounded-2xl border border-rule bg-paper p-5 md:p-8">
       <AnimatePresence mode="wait" initial={false}>
         {status === "sent" ? (
           <motion.div

@@ -1,83 +1,84 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowUpRight, EnvelopeSimple, Mouse } from "@phosphor-icons/react";
-import { email, resumeLink } from "@/data";
-import { Copy } from "./ui/Copy";
-import { Scribble } from "./ui/Scribble";
+import { useRef } from "react";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { ArrowDown, ArrowRight, EnvelopeSimple } from "@phosphor-icons/react";
+import { email } from "@/data";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-// Centered serif statement, a lapis handwritten note crossing it, and a quiet cue to scroll.
+// The first five seconds: what I offer and my name, nothing moving until it has
+// been read. Lit by one warm lamp low on the left, its shadow falling right in
+// maroon, the whole frame under grain. See ART-DIRECTION.md.
 const Hero = () => {
-  const words = "Product engineer who designs, defines and ships the whole product.".split(" ");
+  const reduce = useReducedMotion();
+  // On the way out the words fall behind the page: they move at half the scroll
+  // speed and fade, instead of sliding off with everything else.
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const sinkY = useTransform(scrollYProgress, [0, 1], [0, 220]);
+  const sinkO = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const enter = (delay: number) =>
+    reduce
+      ? {}
+      : {
+          initial: { opacity: 0, y: 14, filter: "blur(8px)" },
+          animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+          transition: { duration: 1.1, delay, ease },
+        };
+
   return (
-    <section id="top" className="relative mx-auto flex min-h-[100dvh] max-w-[64rem] flex-col items-center justify-center px-4 pb-16 pt-28 text-center md:px-8">
-      <motion.p
-        initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
-        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        transition={{ duration: 0.8, ease }}
-        className="text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-accent"
-      >
-        Sevith Sadashiva · Bangalore
-      </motion.p>
+    <section ref={ref} id="top" className="relative isolate flex min-h-[100dvh] items-center justify-center overflow-hidden px-4 pb-20 pt-28 md:px-8">
+      {/* The lamp itself lives on the page, straddling this section's bottom edge
+          (see app/page.tsx). Only its shadow, top right, belongs to the hero. */}
+      <div aria-hidden className="lamp-shadow pointer-events-none absolute inset-0 -z-10" />
 
-      <h1 className="relative mt-7 max-w-[18ch] font-serif text-[2.6rem] leading-[1.08] tracking-[-0.02em] text-ink sm:text-6xl md:text-[4.1rem]">
-        {words.map((w, i) => (
-          <span key={i}>
-            <motion.span
-              className="inline-block"
-              initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.9, delay: 0.15 + i * 0.045, ease }}
-            >
-              {w}
-            </motion.span>
-            {i < words.length - 1 && " "}
-          </span>
-        ))}
-        <Scribble
-          delay={1100}
-          className="pointer-events-none absolute -bottom-16 right-0 -rotate-6 text-[3rem] sm:-bottom-20 sm:-right-6 sm:text-[4.4rem] md:-right-16 md:text-[5.2rem]"
-        >
-          hi, i&apos;m sevith
-        </Scribble>
-      </h1>
+      <motion.div style={reduce ? undefined : { y: sinkY, opacity: sinkO }} className="mx-auto flex max-w-[68rem] flex-col items-center text-center">
+        <motion.p {...enter(0)} className="flex items-center gap-3 font-mono text-[0.75rem] uppercase tracking-[0.18em] text-ink-3">
+          <span>Sevith Sadashiva</span>
+          <span aria-hidden className="h-px w-6 bg-lamp" />
+          <span>Bangalore</span>
+        </motion.p>
 
-      <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.8, ease }}
-        className="mt-28 max-w-[52ch] text-[1.0625rem] leading-relaxed text-ink-2 sm:mt-32"
-      >
-        <Copy text="*Digital.ai* pays me to be a Technical Writer; the work is product work. I defined the *information architecture* for an enterprise *GenAI product* and took it through *GA* — then I go home and design, build and ship *AI products end to end*. *Design, product and code are not three jobs to me.*" />
-      </motion.p>
+        <h1 className="mt-8 font-wide text-[clamp(2.1rem,7.4vw,6.25rem)] font-semibold uppercase leading-[0.98] tracking-[-0.01em] text-ink">
+          <motion.span {...enter(0.1)} className="block">
+            I design it,
+          </motion.span>
+          <motion.span {...enter(0.22)} className="block">
+            then I{" "}
+            <span className="font-serif text-[1.08em] font-normal normal-case italic tracking-[-0.02em] text-lamp">actually</span>
+          </motion.span>
+          <motion.span {...enter(0.34)} className="block">
+            build it.
+          </motion.span>
+        </h1>
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.95, ease }}
-        className="mt-8 flex flex-wrap items-center justify-center gap-3"
-      >
-        <a href={resumeLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
-          Résumé <ArrowUpRight size={15} />
-        </a>
-        <a href={`mailto:${email}`} className="btn btn-ghost">
-          <EnvelopeSimple size={16} /> {email}
-        </a>
+        <motion.p {...enter(0.55)} className="mt-9 max-w-[40ch] text-[1.0625rem] leading-relaxed text-ink-2 md:text-lg">
+          Product engineer. The interface, the product calls and the code. One person, no handoff.
+        </motion.p>
+
+        <motion.div {...enter(0.7)} className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <a href="#projects" className="btn btn-primary" data-cursor="See the work">
+            See the work <ArrowRight size={16} />
+          </a>
+          <a href={`mailto:${email}`} className="btn btn-ghost">
+            <EnvelopeSimple size={16} /> Say hi
+          </a>
+        </motion.div>
       </motion.div>
 
       <motion.a
         href="#projects"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.6, duration: 0.8 }}
-        className="mt-16 flex flex-col items-center gap-2 text-[0.9375rem] font-medium text-ink-3 hover:text-ink"
+        aria-label="Scroll to the work"
+        initial={reduce ? undefined : { opacity: 0 }}
+        animate={reduce ? undefined : { opacity: 1 }}
+        transition={{ delay: 1.6, duration: 1 }}
+        className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-ink-3 hover:text-ink"
       >
-        <motion.span animate={{ y: [0, 4, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
-          <Mouse size={22} />
+        <motion.span animate={reduce ? undefined : { y: [0, 5, 0] }} transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}>
+          <ArrowDown size={16} />
         </motion.span>
-        scroll to see work
+        scroll
       </motion.a>
     </section>
   );

@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { approach } from "@/data";
 import { cn } from "@/lib/utils";
-import { SectionHeader } from "./SectionHeader";
+import { Reveal } from "./motion/Reveal";
 import { Copy } from "./ui/Copy";
 
 type Step = (typeof approach)[number];
@@ -27,7 +27,7 @@ const Artifact = ({ step, className }: { step: Step; className?: string }) => (
           <span
             className={cn(
               "w-[4.75rem] shrink-0 rounded-full border px-2 py-0.5 text-center font-mono text-[0.6875rem]",
-              i === 0 ? "border-transparent bg-hl text-on-hl" : "border-rule text-ink-2"
+              i === 0 ? "border-transparent bg-lamp text-on-hl" : "border-rule text-ink-2"
             )}
           >
             {row.tag}
@@ -51,10 +51,15 @@ const Approach = () => {
 
   return (
     <section id="approach" className="mx-auto max-w-page px-4 py-20 md:px-8 md:py-24">
-      <SectionHeader
-        title="How I work."
-        note="Three phases I run on every release, with the kind of working document each one produces."
-      />
+      <Reveal className="mx-auto max-w-[48rem] text-center">
+        <p className="font-mono text-[0.75rem] uppercase tracking-[0.18em] text-accent">How I build</p>
+        <h2 className="mt-5 font-wide text-[clamp(2rem,5vw,4rem)] font-semibold uppercase leading-[1] tracking-[-0.01em] text-ink">
+          Problem. Design. Build.
+        </h2>
+        <p className="mx-auto mt-6 max-w-[44ch] text-lg leading-relaxed text-ink-2">
+          Same three steps every time, shown on my own products.
+        </p>
+      </Reveal>
 
       <div ref={ref} className="mt-14 grid gap-8 md:grid-cols-12">
         <ol className="md:col-span-6">
@@ -66,12 +71,13 @@ const Approach = () => {
                 active === i ? "md:opacity-100" : "md:opacity-35"
               )}
             >
-              <h3 className="text-3xl font-semibold tracking-[-0.03em] text-ink md:text-4xl">{step.title}</h3>
+              <p className="font-mono text-[0.75rem] uppercase tracking-[0.18em] text-accent">{step.phase}</p>
+              <h3 className="mt-3 font-wide text-2xl font-semibold uppercase tracking-[-0.01em] text-ink md:text-[2.1rem]">{step.title}</h3>
               <p className="mt-4 max-w-[52ch] leading-relaxed text-ink-2 md:text-lg md:leading-relaxed">
                 <Copy text={step.des} />
               </p>
               <p className="mt-5 text-sm text-ink">
-                <span className="text-ink-3">In practice: </span>
+                <span className="font-mono text-[0.75rem] uppercase tracking-[0.12em] text-accent">In practice </span>
                 {step.proof}
               </p>
               <Artifact step={step} className="mt-8 md:hidden" />

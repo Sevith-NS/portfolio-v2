@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 // Pause WebGL work while a canvas is off screen.
-export function useInView3D(ref: React.RefObject<Element>, margin = "200px") {
+export function useInView3D(ref: React.RefObject<Element | null>, margin = "200px") {
   const [inView, setInView] = useState(false);
   useEffect(() => {
     const el = ref.current;

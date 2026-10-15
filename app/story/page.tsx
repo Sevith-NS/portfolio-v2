@@ -1,251 +1,262 @@
 import type { Metadata } from "next";
-import { ArrowRight, ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
-import { interests, navItems } from "@/data";
-import { cats, chapters, craft, credentials, notable, opening, passions, portrait, short, signoff } from "@/data/story";
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { navItems } from "@/data";
+import { cats, chapters, hello, history, learning, offClock, opening, short, signoff } from "@/data/story";
 import { FloatingNav } from "@/components/ui/FloatingNav";
 import { TransitionLink } from "@/components/transition/TransitionLink";
 import { Reveal } from "@/components/motion/Reveal";
 import { Copy } from "@/components/ui/Copy";
-import { Scribble } from "@/components/ui/Scribble";
 import { live, Prompt } from "@/components/ui/Prompt";
+import { TypeSpecimen } from "@/components/TypeSpecimen";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "My story",
   description:
-    "The long version: how Sevith Sadashiva got from a BCA at Christ University to owning docs for an enterprise GenAI launch, and building AI products on the side.",
+    "The long version: a self-taught designer and product engineer in Bangalore, his work, his habits, and his four cats.",
 };
 
-const Band = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <Reveal className="grid gap-4 border-t border-rule py-12 md:grid-cols-12 md:gap-8 md:py-16">
-    <h2 className="font-serif text-2xl tracking-[-0.02em] text-ink md:col-span-4 md:text-3xl">{label}</h2>
-    <div className="md:col-span-8">{children}</div>
-  </Reveal>
-);
+// Kicker, wide all-caps title, optional line under it. The same header every
+// section on the site uses, so the long page still reads as one voice.
+function Head({ kicker, title, body, align = "center" }: { kicker: string; title: string; body?: string; align?: "center" | "left" }) {
+  const c = align === "center";
+  return (
+    <div className={c ? "mx-auto max-w-[46rem] text-center" : "max-w-[40rem]"}>
+      <p className="font-mono text-[0.75rem] uppercase tracking-[0.18em] text-accent">{kicker}</p>
+      <h2 className="mt-5 font-wide text-[clamp(1.9rem,4.6vw,3.6rem)] font-semibold uppercase leading-[1.02] tracking-[-0.01em] text-ink [text-wrap:balance]">
+        {title}
+      </h2>
+      {body && (
+        <p className={`mt-6 max-w-[48ch] text-lg leading-relaxed text-ink-2 ${c ? "mx-auto" : ""}`}>
+          <Copy text={body} />
+        </p>
+      )}
+    </div>
+  );
+}
+
+// A photo with a mono caption under it. Square corners would read as a stock
+// grid; these are prints.
+function Print({ src, alt, caption, className = "", tilt = 0 }: { src: string; alt: string; caption?: string; className?: string; tilt?: number }) {
+  return (
+    <figure className={`group ${className}`}>
+      <div
+        className="overflow-hidden rounded-[1.1rem] shadow-[0_30px_60px_-35px_rgb(0_0_0/0.7)] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:![transform:rotate(0deg)_scale(1.015)]"
+        style={{ transform: `rotate(${tilt}deg)` }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt={alt} loading="lazy" className="block h-auto w-full" />
+      </div>
+      {caption && <figcaption className="mt-4 font-mono text-[0.6875rem] uppercase leading-relaxed tracking-[0.12em] text-ink-3">{caption}</figcaption>}
+    </figure>
+  );
+}
+
+const section = "mx-auto max-w-page px-4 py-24 md:px-8 md:py-32";
 
 export default function StoryPage() {
-  const certs = live(credentials);
   const chapterList = live(chapters.map((c) => ({ ...c, todo: c.body.todo })));
-  const catList = live(cats);
+  const credentials = live(history.credentials);
 
   return (
     <main id="main" className="relative">
       <FloatingNav navItems={navItems} />
 
-      {/* The opening: portrait on the left when there is one, the statement always. */}
-      <section className="mx-auto max-w-page px-4 pb-10 pt-32 md:px-8 md:pt-40">
-        <div className="grid items-end gap-10 md:grid-cols-12 md:gap-8">
-          {portrait.src && (
-            <Reveal className="md:col-span-5">
-              <figure className="relative overflow-hidden rounded-[1.75rem] bg-tint-lapis">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={portrait.src} alt={portrait.alt} className="aspect-[4/5] w-full object-cover" />
-              </figure>
-              <figcaption className="note mt-3">{portrait.caption}</figcaption>
-            </Reveal>
-          )}
-
-          <Reveal className={portrait.src ? "md:col-span-7" : "md:col-span-10"}>
-            <p className="label text-accent">{opening.kicker}</p>
-            <h1 className="section-title mt-4">{opening.headline}</h1>
-            <p className="mt-6 max-w-[56ch] text-lg leading-relaxed text-ink-2">
-              <Copy text={opening.standfirst} />
-            </p>
-            <ul className="mt-7 flex flex-wrap gap-2">
-              {opening.words.map((w) => (
-                <li key={w} className="chip">
-                  {w}
-                </li>
-              ))}
-            </ul>
-            <Scribble className="mt-6 -rotate-2 text-[2.5rem] md:text-[3.25rem]">{opening.scribble}</Scribble>
+      {/* Opening: one cinematic frame, edge to edge. The page colour rises up
+          from the bottom so the photo dissolves into the rest of the story. */}
+      <section className="relative isolate flex min-h-[88svh] items-end overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={opening.photo.src} alt={opening.photo.alt} className="absolute inset-0 -z-20 size-full object-cover object-[50%_40%]" />
+        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-paper via-paper/55 to-paper/10" />
+        <div className="mx-auto w-full max-w-page px-4 pb-16 text-center md:px-8 md:pb-24">
+          <Reveal>
+            <p className="font-mono text-[0.75rem] uppercase tracking-[0.18em] text-accent">{opening.kicker}</p>
+            <h1 className="mt-5 font-wide text-[clamp(2.6rem,9vw,7.5rem)] font-semibold uppercase leading-[0.95] tracking-[-0.01em] text-ink">
+              {opening.headline}
+            </h1>
+            <p className="mx-auto mt-6 max-w-[40ch] text-lg leading-relaxed text-ink-2">{opening.standfirst}</p>
           </Reveal>
         </div>
       </section>
 
-      <div className="mx-auto max-w-page px-4 md:px-8">
+      {/* Hello: the one place on the site with a proper photo of my face (Q100). */}
+      <section className={section}>
+        <div className="grid items-center gap-14 md:grid-cols-12 md:gap-10">
+          <Reveal className="mx-auto w-full max-w-[22rem] md:col-span-5 md:mx-0 md:max-w-none">
+            <Print {...hello.photo} tilt={-2} />
+          </Reveal>
+          <Reveal delay={0.08} className="text-center md:col-span-6 md:col-start-7 md:text-left">
+            <h2 className="font-wide text-[clamp(2.2rem,5vw,4rem)] font-semibold uppercase leading-[1] tracking-[-0.01em] text-ink">{hello.headline}</h2>
+            <p className="mx-auto mt-7 max-w-[46ch] text-lg leading-relaxed text-ink-2 md:mx-0">
+              <Copy text={hello.body} />
+            </p>
+          </Reveal>
+        </div>
+
         {/* For the recruiter with forty seconds. */}
+        <Reveal className="mx-auto mt-20 max-w-[52rem] rounded-[1.75rem] border border-rule bg-sheet p-7 md:mt-28 md:p-10">
+          <p className="font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-accent">The short version</p>
+          <ul className="mt-6 space-y-4">
+            {short.map((b) => (
+              <li key={b.text} className="flex gap-4 text-lg leading-relaxed text-ink-2">
+                <span aria-hidden className="mt-[0.8em] h-px w-5 shrink-0 bg-ink-3" />
+                <Copy text={b.text} />
+              </li>
+            ))}
+          </ul>
+        </Reveal>
+      </section>
+
+      {/* How I got here: a timeline down the middle of the page. */}
+      <section className={section}>
         <Reveal>
-          <div className="rounded-[1.75rem] bg-sheet p-7 md:p-10">
-            <p className="label text-ink-3">The short version</p>
-            <ul className="mt-5 space-y-4">
-              {short.map((b) => (
-                <li key={b.text} className="flex gap-4 text-lg leading-relaxed text-ink-2">
-                  <span aria-hidden className="mt-[0.8em] h-px w-5 shrink-0 bg-accent" />
-                  <Copy text={b.text} />
-                </li>
-              ))}
-            </ul>
-          </div>
+          <Head kicker="How I got here" title="From 'wow' to shipping." />
         </Reveal>
-
-        <Band label="How I got here">
-          <ol className="space-y-0">
-            {chapterList.map((c) => (
-              <li key={c.title} className="grid gap-2 border-b border-rule py-7 first:pt-0 last:border-0 sm:grid-cols-4 sm:gap-6">
-                <p className="note sm:pt-1">{c.when}</p>
-                <div className="sm:col-span-3">
-                  <h3 className="text-xl font-semibold tracking-[-0.015em] text-ink">{c.title}</h3>
-                  {c.body.todo ? (
-                    <div className="mt-3">
-                      <Prompt b={c.body} as="div" />
-                    </div>
-                  ) : (
-                    <p className="mt-2.5 max-w-[62ch] leading-relaxed text-ink-2">
-                      <Copy text={c.body.text} />
-                    </p>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ol>
-        </Band>
-
-        <Band label="What I actually do">
-          <ul className="grid gap-8 sm:grid-cols-3 sm:gap-6">
-            {craft.map((c) => (
-              <li key={c.title}>
-                <h3 className="font-serif text-[1.75rem] italic tracking-[-0.02em] text-ink">{c.title}</h3>
-                <p className="mt-3 text-[0.9375rem] leading-relaxed text-ink-2">
-                  <Copy text={c.body} />
-                </p>
-                <Scribble className="mt-4 -rotate-2 text-[1.5rem]">{c.note}</Scribble>
-              </li>
-            ))}
-          </ul>
-        </Band>
-
-        <Band label="Credentials">
-          <dl className="grid gap-x-8 gap-y-7 sm:grid-cols-2">
-            {certs.map((c) => (
-              <div key={c.value}>
-                <dt className="note">{c.label}</dt>
-                {c.todo ? (
-                  <>
-                    <dd className="mt-1 text-lg leading-snug text-ink">{c.value}</dd>
-                    <dd className="mt-3">
-                      <Prompt b={{ text: c.detail }} as="div" />
-                    </dd>
-                  </>
+        <ol className="mx-auto mt-16 max-w-[52rem] md:mt-20">
+          {chapterList.map((c) => (
+            <Reveal as="li" key={c.title} className="grid gap-2 border-t border-rule py-9 sm:grid-cols-12 sm:gap-8">
+              <p className="font-mono text-[0.75rem] uppercase tracking-[0.14em] text-ink-3 sm:col-span-3 sm:pt-1.5">{c.when}</p>
+              <div className="sm:col-span-9">
+                <h3 className="font-wide text-xl font-semibold uppercase tracking-[-0.005em] text-ink md:text-2xl">{c.title}</h3>
+                {c.body.todo ? (
+                  <div className="mt-4">
+                    <Prompt b={c.body} as="div" />
+                  </div>
                 ) : (
-                  <dd className="mt-1">
-                    {c.link ? (
-                      <a
-                        href={c.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-lg leading-snug text-ink underline decoration-rule underline-offset-4 hover:decoration-ink"
-                      >
-                        {c.value}
-                        <ArrowUpRight size={14} />
-                      </a>
-                    ) : (
-                      <span className="text-lg leading-snug text-ink">{c.value}</span>
-                    )}
-                    <p className="note mt-1">{c.detail}</p>
-                  </dd>
+                  <p className="mt-3 max-w-[60ch] leading-relaxed text-ink-2">
+                    <Copy text={c.body.text} />
+                  </p>
                 )}
               </div>
-            ))}
-          </dl>
-        </Band>
+            </Reveal>
+          ))}
+        </ol>
+      </section>
 
-        <Band label="Notable projects">
-          <ul className="border-t border-rule">
-            {notable.map((n) => {
-              const inner = (
-                <>
-                  <p className="flex items-center gap-3 font-serif text-[1.9rem] italic tracking-[-0.02em] text-ink md:text-[2.4rem]">
-                    {n.title}
-                    {n.external ? (
-                      <ArrowUpRight className="size-5 shrink-0 text-ink-3 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 md:size-6" />
-                    ) : (
-                      <ArrowRight className="size-5 shrink-0 text-ink-3 transition-transform duration-300 group-hover:translate-x-1.5 md:size-6" />
-                    )}
-                  </p>
-                  <p className="mt-2 max-w-[62ch] leading-relaxed text-ink-2">
-                    <Copy text={n.line} />
-                  </p>
-                </>
-              );
-              return (
-                <li key={n.title} className="border-b border-rule">
-                  {n.external ? (
-                    <a href={n.href} target="_blank" rel="noopener noreferrer" className="group block py-7">
-                      {inner}
-                    </a>
-                  ) : (
-                    <TransitionLink href={n.href} label={n.title} data-cursor="View case" className="group block py-7">
-                      {inner}
-                    </TransitionLink>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </Band>
+      {/* Visibly in progress (Q8): the UX course notes, in my own handwriting. */}
+      <section className={section}>
+        <div className="grid items-center gap-14 md:grid-cols-12 md:gap-10">
+          <Reveal className="order-2 text-center md:order-1 md:col-span-6 md:text-left">
+            <Head kicker={learning.kicker} title={learning.headline} body={learning.body} align="left" />
+          </Reveal>
+          <Reveal delay={0.08} className="relative order-1 mx-auto w-full max-w-[20rem] md:order-2 md:col-span-5 md:col-start-8 md:max-w-none">
+            <Print src={learning.photo.src} alt={learning.photo.alt} tilt={3} />
+          </Reveal>
+        </div>
+      </section>
 
-        <Band label="Passions">
-          <h3 className="max-w-[28ch] font-serif text-[1.9rem] leading-[1.18] tracking-[-0.015em] text-ink md:text-[2.4rem]">
-            {passions.headline}
-          </h3>
-          <p className="mt-5 max-w-[62ch] text-lg leading-relaxed text-ink-2">
-            <Copy text={passions.body} />
-          </p>
-          <ul className="mt-7 flex flex-wrap gap-2">
-            {interests.map((t) => (
-              <li key={t} className="chip">
-                {t}
-              </li>
-            ))}
-          </ul>
-          <Scribble className="mt-6 -rotate-2 text-[1.75rem] md:text-[2.25rem]">{passions.scribble}</Scribble>
-
-          <div className="mt-12 grid gap-8 lg:grid-cols-2 lg:gap-10">
-            <div>
-              <p className="label text-ink-3">Also: four cats, one bed, no personal space</p>
-              <ul className="mt-5 space-y-5">
-                {catList.map((c) =>
-                  c.todo ? (
-                    <Prompt key={c.who} b={{ text: c.line }} />
-                  ) : (
-                    <li key={c.who}>
-                      <p className="text-[0.9375rem] font-semibold text-ink">{c.who}</p>
-                      <p className="mt-0.5 text-[0.9375rem] leading-relaxed text-ink-2">{c.line}</p>
-                    </li>
-                  )
-                )}
-              </ul>
-            </div>
-
-            {/* A door into the 3D studio, same as the home page offers. */}
-            <TransitionLink
-              href="/studio"
-              label="Studio"
-              className="group flex h-fit items-center justify-between gap-6 rounded-[1.75rem] bg-accent p-6 text-on-hl md:p-8"
-            >
-              <div>
-                <p className="font-serif text-3xl font-normal tracking-[-0.02em]">See all of it, in a room</p>
-                <p className="mt-1.5 max-w-[34ch] text-on-hl/80">
-                  The studio is a little 3D version of everything above. The cats are in there too.
-                </p>
-              </div>
-              <span className="grid size-12 shrink-0 place-items-center rounded-full bg-on-hl text-accent transition-transform duration-300 group-hover:translate-x-1">
-                <ArrowRight size={20} />
-              </span>
-            </TransitionLink>
-          </div>
-        </Band>
-
-        <Reveal className="border-t border-rule py-14 md:py-20">
-          <p className="mx-auto max-w-[34ch] text-center font-serif text-[1.9rem] leading-[1.2] tracking-[-0.015em] text-ink md:max-w-[44ch] md:text-[2.75rem]">
-            {signoff.line}
-          </p>
-          <div className="mt-8 text-center">
-            <Scribble className="-rotate-2 text-[2.25rem] md:text-[3rem]">{signoff.scribble}</Scribble>
-          </div>
+      {/* Off the clock: a loose spread of prints, deliberately off the grid (Q75). */}
+      <section className={section}>
+        <Reveal>
+          <Head kicker={offClock.kicker} title={offClock.headline} body={offClock.body} />
         </Reveal>
-      </div>
+        <div className="mx-auto mt-16 grid max-w-[60rem] grid-cols-1 gap-12 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-16 md:mt-24">
+          {offClock.photos.map((p, i) => (
+            <Reveal key={p.src} delay={(i % 2) * 0.06} className={i % 2 === 1 ? "sm:mt-24" : ""}>
+              <Print {...p} tilt={i % 2 === 0 ? -1.5 : 1.5} />
+            </Reveal>
+          ))}
+        </div>
+        <Reveal className="mx-auto mt-20 max-w-[40rem] text-center">
+          <p className="text-[1.45rem] font-medium leading-[1.3] tracking-[-0.02em] text-ink [text-wrap:balance] md:text-[1.85rem]">
+            <Copy text={offClock.kitchen} />
+          </p>
+        </Reveal>
+        <Reveal className="mx-auto mt-20 max-w-[30rem]">
+          <Print {...offClock.memes} tilt={-1} />
+        </Reveal>
+      </section>
+
+      {/* The cats. Simba and Cream lead: they're the two I'm most like. */}
+      <section id="cats" className={section}>
+        <Reveal>
+          <Head kicker={cats.kicker} title={cats.headline} body={cats.body} />
+        </Reveal>
+        <ul className="mx-auto mt-16 grid max-w-[64rem] grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8 md:mt-20">
+          {cats.members.map((c, i) => (
+            <Reveal as="li" key={c.name} delay={i * 0.05}>
+              <figure className="group" data-cream={c.name === "Cream" ? "" : undefined}>
+                <div className="overflow-hidden rounded-[1.1rem] shadow-[0_30px_60px_-35px_rgb(0_0_0/0.7)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={c.src}
+                    alt={c.alt}
+                    loading="lazy"
+                    className="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
+                  />
+                </div>
+                <figcaption className="mt-5">
+                  <p className="font-wide text-xl font-semibold uppercase text-ink">{c.name}</p>
+                  <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-2">{c.line}</p>
+                </figcaption>
+              </figure>
+            </Reveal>
+          ))}
+        </ul>
+      </section>
+
+      {/* Certified type nerd. The specimen survives (Q80). */}
+      <section id="type" className={section}>
+        <Reveal>
+          <Head kicker="Certified type nerd" title="Every font on this site." body="Type anything. These are the five voices this site is set in, and what each one is for." />
+        </Reveal>
+        <Reveal className="mx-auto mt-14 max-w-[60rem]">
+          <TypeSpecimen />
+        </Reveal>
+      </section>
+
+      {/* The resume bit, kept quiet on purpose (Q106). */}
+      <section className={section}>
+        <Reveal>
+          <Head kicker={history.kicker} title={history.headline} />
+        </Reveal>
+        <dl className="mx-auto mt-14 grid max-w-[52rem] gap-x-10 gap-y-8 sm:grid-cols-2">
+          {credentials.map((c) => (
+            <Reveal key={c.value} className="border-t border-rule pt-5">
+              <dt className="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-ink-3">{c.label}</dt>
+              <dd className="mt-2 text-lg text-ink">{c.value}</dd>
+              {c.todo ? (
+                <dd className="mt-3">
+                  <Prompt b={{ text: c.detail }} as="div" />
+                </dd>
+              ) : (
+                <dd className="mt-1 text-[0.9375rem] text-ink-2">{c.detail}</dd>
+              )}
+            </Reveal>
+          ))}
+        </dl>
+      </section>
+
+      {/* Sign-off, then a door into the studio. */}
+      <section className={section}>
+        <Reveal className="mx-auto max-w-[44rem] text-center">
+          <p className="text-[1.6rem] font-medium leading-[1.2] tracking-[-0.025em] text-ink [text-wrap:balance] md:text-[2.2rem]">
+            <Copy text={signoff.line} />
+          </p>
+          {/* The motto, said plainly. */}
+          <p className="mt-10 font-mono text-[0.75rem] uppercase tracking-[0.18em] text-accent">The motto</p>
+          <p className="mt-3 font-wide text-[1.35rem] font-semibold uppercase leading-[1.1] tracking-[-0.01em] text-ink [text-wrap:balance] md:text-[1.9rem]">
+            {signoff.motto}
+          </p>
+        </Reveal>
+
+        <Reveal className="mx-auto mt-20 max-w-[44rem]">
+          <TransitionLink
+            href="/studio"
+            label="Studio"
+            className="group flex items-center justify-between gap-6 rounded-[1.75rem] border border-rule bg-sheet p-6 hover:border-ink md:p-8"
+          >
+            <div>
+              <p className="font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-accent">The studio</p>
+              <p className="mt-2 font-wide text-2xl font-semibold uppercase text-ink">See all of it, in a room</p>
+              <p className="mt-1.5 max-w-[38ch] text-ink-2">A little 3D version of the above. The cats are in there too.</p>
+            </div>
+            <span className="grid size-12 shrink-0 place-items-center rounded-full bg-ink text-paper transition-colors duration-300 group-hover:bg-ink-2">
+              <ArrowRight size={20} />
+            </span>
+          </TransitionLink>
+        </Reveal>
+      </section>
 
       <Footer />
     </main>

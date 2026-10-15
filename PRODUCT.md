@@ -16,7 +16,7 @@ Success for both: they download the resume, copy the email, or send a message th
 Personal portfolio of Sevith Sadashiva (Bangalore). It positions Sevith as a **product engineer**: one person who designs the interface, defines the product and ships the code, rather than a specialist in any one of the three. Today a technical writer at Digital.ai who owns documentation as a product, and who designs and ships AI products solo.
 
 ## Positioning
-One person covering design, product definition and engineering, with evidence on both sides: enterprise GenAI launch work (Ask Release GA at Digital.ai) plus independently built full-stack AI products (Flint OS, Tesseract AI). Most product engineers have never had to make an enterprise GenAI product understandable to a paying customer; most people who have cannot ship a Flask quant API.
+One person covering design, product definition and engineering, with evidence on both sides: enterprise GenAI launch work (Ask Release GA at Digital.ai) plus independently built full-stack AI products (Polaris, formerly Flint OS; Tesseract AI). Most product engineers have never had to make an enterprise GenAI product understandable to a paying customer; most people who have cannot ship a Flask quant API.
 
 ## Operating Context
 Visitors arrive from resume and LinkedIn links on desktop and phone. Single-page Next.js 14 site (App Router, Tailwind v3, Framer Motion), deployed on Vercel. The contact form sends mail through EmailJS (env vars `NEXT_PUBLIC_EMAILJS_*`).
@@ -44,7 +44,7 @@ Visitors arrive from resume and LinkedIn links on desktop and phone. Single-page
 
 ## Evidence on Hand
 - Resume facts: 260+ user stories, 25+ Agile sprints, 4 major release cycles (25.1–26.3), 30+ customer-reported defects resolved, 3 enterprise products (Deploy, Release, TeamForge), Ask Release GA launch; Ceyone internship, 30% engagement lift and 10% dev-time cut.
-- Project screenshots in `public/` (tesseract.png, Vercel.png, 1.png, Ochi.png, 3.png, 4.png). **No Flint OS screenshot yet**; it uses a placeholder until the user adds one.
+- Project screenshots in `public/reel/` as WebP. Polaris (formerly Flint OS) uses `polaris.webp`. Tesseract's case-study media lives in `public/work/tesseract/`.
 - No testimonials, logos of clients, or metrics beyond the resume. Do not invent them.
 
 ## Product Principles

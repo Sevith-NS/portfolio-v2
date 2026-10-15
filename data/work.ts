@@ -12,6 +12,15 @@
 
 export type Block = { text: string; draft?: boolean; todo?: boolean };
 
+/** One step of a product walkthrough: a short clip or a screenshot, with what it shows. */
+export type Step = {
+  title: string;
+  text: string;
+  media: { kind: "video"; src: string; poster: string; label: string } | { kind: "image"; src: string; alt: string };
+  /** A personality line under the media, in the caption voice. */
+  aside?: string;
+};
+
 export type CaseStudy = {
   slug: string;
   role: string;
@@ -22,6 +31,8 @@ export type CaseStudy = {
   process: Block[];
   /** What I built. */
   approach: Block[];
+  /** The product, shown working. Optional: only cases with real footage get one. */
+  walkthrough?: Step[];
   /** What insights informed the design. */
   insights: Block[];
   /** The calls I made, and why. */
@@ -38,7 +49,7 @@ export type CaseStudy = {
 
 export const cases: CaseStudy[] = [
   {
-    slug: "flint-os",
+    slug: "polaris",
     role: "Market research, product design, product definition, UX, frontend and backend",
     status: "Still cooking",
     problem: {
@@ -50,20 +61,20 @@ export const cases: CaseStudy[] = [
         todo: true,
       },
       {
-        text: "How you picked which factors and risk metrics made the cut — and, more interesting, what you cut.",
+        text: "How you picked which factors and risk metrics made the cut, and, more interesting, what you cut.",
         todo: true,
       },
       {
-        text: "How you tested it on yourself. The 5% month is the result; what was the setup — how much, how long, which strategies?",
+        text: "How you tested it on yourself. The 5% month is the result; what was the setup: how much, how long, which strategies?",
         todo: true,
       },
     ],
     approach: [
-      { text: "*Terminal*: candlestick charting with a systematic Quant Trade Plan — limit entry, ATR and swing-based stop loss, 1.5R and 3R targets, a *factor vote breakdown* and half-Kelly position sizing." },
-      { text: "*Portfolio*: paper trading on live prices with risk analytics — 95% VaR and CVaR, Sharpe, Sortino, max drawdown, beta against the S&P 500, and Markowitz max-Sharpe optimization." },
+      { text: "*Terminal*: candlestick charting with a systematic Quant Trade Plan: limit entry, ATR and swing-based stop loss, 1.5R and 3R targets, a *factor vote breakdown* and half-Kelly position sizing." },
+      { text: "*Portfolio*: paper trading on live prices with risk analytics: 95% VaR and CVaR, Sharpe, Sortino, max drawdown, beta against the S&P 500, and Markowitz max-Sharpe optimization." },
       { text: "*Trading Desk*: a multi-agent pipeline. Four analysts file reports, a bull and a bear argue it out, three risk seats fight over position size, and a portfolio manager approves or refuses with a share count." },
       { text: "*Backtest*: an event-driven backtester running 13 strategies, costs on both sides, plus out-of-sample, walk-forward and Monte Carlo robustness passes." },
-      { text: "*Flint AI*: a Gemini assistant that can see the paper portfolio, the symbol on screen, live signals and news sentiment, and answers grounded questions about risk and sizing." },
+      { text: "*AI desk*: a Gemini assistant that can see the paper portfolio, the symbol on screen, live signals and news sentiment, and answers grounded questions about risk and sizing." },
     ],
     insights: [
       {
@@ -80,7 +91,7 @@ export const cases: CaseStudy[] = [
       },
     ],
     decisions: [
-      { text: "Split the product into *two independently deployable services* — a Next.js frontend and a Flask quant API — talking only over HTTP." },
+      { text: "Split the product into *two independently deployable services*, a Next.js frontend and a Flask quant API, talking only over HTTP." },
       { text: "Every Trading Desk decision is *journalled*, then scored on realized alpha against the S&P 500. Past hits and misses feed the next run's prompts." },
       { text: "When a bar touches both the stop and the target, the backtester assumes *the stop was hit*. Results err on the side of caution." },
     ],
@@ -90,7 +101,7 @@ export const cases: CaseStudy[] = [
     ],
     misses: [
       {
-        text: "The honest gap. No users but you yet? A strategy that looked beautiful in backtest and fell apart live? An agent debate that produced confident nonsense? Name one real miss — it reads far stronger than a clean sweep.",
+        text: "The honest gap. No users but you yet? A strategy that looked beautiful in backtest and fell apart live? An agent debate that produced confident nonsense? Name one real miss. It reads far stronger than a clean sweep.",
         todo: true,
       },
     ],
@@ -98,7 +109,7 @@ export const cases: CaseStudy[] = [
       text: "Personally tested and optimized the portfolio, reaching a *5% return within the first month*.",
     },
     why: {
-      text: "Why this shape beat the simpler one — a single app, one model, no debate, no journal. What would that version have gotten wrong?",
+      text: "Why this shape beat the simpler one: a single app, one model, no debate, no journal. What would that version have gotten wrong?",
       todo: true,
     },
   },
@@ -107,7 +118,7 @@ export const cases: CaseStudy[] = [
     role: "Product scope, design and full-stack build",
     status: "Live",
     problem: {
-      text: "I built Tesseract for me. I knew the theory for placements cold, but *explaining it clearly under pressure* is a different skill — and most students only find that out in the real interview.",
+      text: "I built Tesseract for me. I knew the theory for placements cold, but *explaining it clearly under pressure* is a different skill, and most students only find that out in the real interview.",
     },
     process: [
       {
@@ -124,9 +135,40 @@ export const cases: CaseStudy[] = [
       },
     ],
     approach: [
-      { text: "*Gemini* generates interview questions tailored to the role and experience level a student picks." },
-      { text: "*Text-to-speech* reads questions aloud, so practice sits closer to a real conversation than to a reading exercise." },
-      { text: "A *dashboard* to start new mock interviews and go back over feedback from past ones." },
+      { text: "A *jobs feed* of fresh postings, pulled nightly from open job boards, so practice starts from a real role." },
+      { text: "*Paste a LinkedIn link* or a job description, and the interview is built around that exact posting." },
+      { text: "*Gemini* writes the questions (technical, behavioural or mixed) and can *tailor them to your resume*, which is read once and reused everywhere." },
+      { text: "Questions are *read aloud*, the camera is optional, and *video never leaves the browser*: only the text transcript of your answers is saved." },
+      { text: "*Feedback on every answer*: a score, filler words, skipped questions, and a critique of what you actually said." },
+    ],
+    walkthrough: [
+      {
+        title: "Start from a real job",
+        text: "Fresh postings every morning, pulled from open job boards worldwide. Pick one and the practice is about that role, not a generic one.",
+        media: { kind: "video", src: "/work/tesseract/jobs.mp4", poster: "/work/tesseract/jobs-poster.webp", label: "Scrolling the Tesseract jobs feed" },
+      },
+      {
+        title: "Build the interview around it",
+        text: "Paste the job, set the role and company, say how much experience you have, then pick the format and how many questions. Tick one box and the questions come from your own resume.",
+        media: { kind: "video", src: "/work/tesseract/setup.mp4", poster: "/work/tesseract/setup-poster.webp", label: "Filling in the new interview form, sped up" },
+        aside: "Sped up 3\u00d7. Nobody needs to watch me type.",
+      },
+      {
+        title: "Your resume, read once",
+        text: "Upload it once. Tesseract keeps the details and reuses them to fill in every new interview and to write questions about your own work.",
+        media: { kind: "image", src: "/work/tesseract/profile-page.webp", alt: "Tesseract profile page showing an uploaded resume and the details extracted from it" },
+      },
+      {
+        title: "Then it gets real",
+        text: "Questions are read aloud, one at a time. The camera is optional and the video never leaves your browser. Only the text of your answers is saved.",
+        media: { kind: "video", src: "/work/tesseract/interview.mp4", poster: "/work/tesseract/interview-poster.webp", label: "Stepping through interview questions with the camera off" },
+      },
+      {
+        title: "Honest feedback, per answer",
+        text: "A score, the filler words, what got skipped, and a critique of what you actually said, with your answer right underneath it.",
+        media: { kind: "image", src: "/work/tesseract/feedback.webp", alt: "Tesseract feedback page: a 1.7 out of 5 average score and per-question critique" },
+        aside: "Yes, that 1.7 out of 5 is mine. The coach does not do participation trophies.",
+      },
     ],
     insights: [
       {
@@ -157,7 +199,7 @@ export const cases: CaseStudy[] = [
       text: "Live, and proven on exactly one user: *me, in a real interview*. The build is done; distribution is not.",
     },
     why: {
-      text: "Why generated questions plus spoken delivery beat the obvious alternatives — a fixed question bank, or just recording yourself. What does your version do that those cannot?",
+      text: "Why generated questions plus spoken delivery beat the obvious alternatives: a fixed question bank, or just recording yourself. What does your version do that those cannot?",
       todo: true,
     },
   },
@@ -181,7 +223,7 @@ export const cases: CaseStudy[] = [
     ],
     insights: [
       {
-        text: "The thing that surprised you about how deploys really work. What did you assume was simple and was not — or assumed was magic and turned out to be a shell command?",
+        text: "The thing that surprised you about how deploys really work. What did you assume was simple and was not, or assumed was magic and turned out to be a shell command?",
         todo: true,
       },
     ],
@@ -224,7 +266,7 @@ export const cases: CaseStudy[] = [
       },
     ],
     approach: [
-      { text: "A *MERN* dashboard — MongoDB, Express, React, Node.js — with real-time data visualization." },
+      { text: "A *MERN* dashboard (MongoDB, Express, React, Node.js) with real-time data visualization." },
       { text: "*Machine-learning predictions* drawn alongside the actuals, in the same charts." },
     ],
     insights: [
@@ -237,16 +279,16 @@ export const cases: CaseStudy[] = [
       { text: "Kept predictions *visually distinct* from actual data, so the two can never be confused." },
     ],
     wins: [
-      { text: "Real practice turning raw data into dashboards in React — which I carried straight into *Flint's charts and analytics*." },
+      { text: "Real practice turning raw data into dashboards in React, which I carried straight into *Polaris's charts and analytics*." },
     ],
     misses: [
       {
-        text: "Where this falls short as a product. Would you trust its predictions with your own money? If not, say why — that is the useful answer.",
+        text: "Where this falls short as a product. Would you trust its predictions with your own money? If not, say why. That is the useful answer.",
         todo: true,
       },
     ],
     outcome: {
-      text: "Live on Vercel. Its real output was the charting skill underneath *Flint OS*.",
+      text: "Live on Vercel. Its real output was the charting skill underneath *Polaris*.",
     },
     why: {
       text: "Why pairing predictions with actuals in one chart was the right call, rather than splitting them into two views.",
@@ -273,7 +315,7 @@ export const cases: CaseStudy[] = [
     ],
     insights: [
       {
-        text: "What clicked about motion here. You have said you learnt to drive animation with math — what was the moment it landed?",
+        text: "What clicked about motion here. You have said you learnt to drive animation with math. What was the moment it landed?",
         todo: true,
       },
     ],
@@ -306,7 +348,7 @@ export const cases: CaseStudy[] = [
     },
     process: [
       {
-        text: "How you scoped this. Four modules is a lot for a college project — did you talk to other students, or start from what you personally wanted?",
+        text: "How you scoped this. Four modules is a lot for a college project. Did you talk to other students, or start from what you personally wanted?",
         todo: true,
       },
       {
@@ -322,7 +364,7 @@ export const cases: CaseStudy[] = [
     ],
     insights: [
       {
-        text: "What you learnt about students' actual prep habits that shaped the modules — or, honestly, if this was scoped on instinct, say that instead.",
+        text: "What you learnt about students' actual prep habits that shaped the modules, or, honestly, if this was scoped on instinct, say that instead.",
         todo: true,
       },
     ],
@@ -335,7 +377,7 @@ export const cases: CaseStudy[] = [
     ],
     misses: [
       {
-        text: "The over-scoping. Four modules in one project — which of them is thin, and what would you have dropped to make the rest good?",
+        text: "The over-scoping. Four modules in one project. Which of them is thin, and what would you have dropped to make the rest good?",
         todo: true,
       },
     ],
@@ -343,7 +385,7 @@ export const cases: CaseStudy[] = [
       text: "Shipped as my college project: a *four-module platform* that taught me what scope really costs.",
     },
     why: {
-      text: "Why one platform beat four small focused projects — or, if it did not, what you would tell your past self.",
+      text: "Why one platform beat four small focused projects, or, if it did not, what you would tell your past self.",
       todo: true,
     },
   },
@@ -352,7 +394,7 @@ export const cases: CaseStudy[] = [
     role: "Full-stack build",
     status: "Live",
     problem: {
-      text: "My first full-stack build, over a summer break: recreate a real *subscription product* end to end — auth, uploads, recurring payments, all of it.",
+      text: "My first full-stack build, over a summer break: recreate a real *subscription product* end to end: auth, uploads, recurring payments, all of it.",
     },
     process: [
       { text: "Followed an *open-source course* as the starting point." },
@@ -368,7 +410,7 @@ export const cases: CaseStudy[] = [
     ],
     insights: [
       {
-        text: "What surprised you about payments or auth — the part you expected to take an afternoon and did not.",
+        text: "What surprised you about payments or auth: the part you expected to take an afternoon and did not.",
         todo: true,
       },
     ],
@@ -377,7 +419,7 @@ export const cases: CaseStudy[] = [
     ],
     wins: [
       { text: "Live on Vercel, with *auth, storage, payments and the frontend* all actually fitting together." },
-      { text: "The project that made me want to go deep, and led straight to *Flint* and *Tesseract*." },
+      { text: "The project that made me want to go deep, and led straight to *Polaris* and *Tesseract*." },
     ],
     misses: [
       {
@@ -386,7 +428,7 @@ export const cases: CaseStudy[] = [
       },
     ],
     outcome: {
-      text: "Live on Vercel — and the build that set the direction for everything after it.",
+      text: "Live on Vercel, and the build that set the direction for everything after it.",
     },
     why: {
       text: "Why cloning a real subscription product was the right first full-stack project, rather than something original and smaller.",

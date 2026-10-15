@@ -15,3 +15,5 @@ next-env.d.ts
 .impeccable
 .impeccable/decision-payload.json
 .next-verify
+.next-preview
+photos-src

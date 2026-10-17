@@ -15,7 +15,7 @@ const Footer = () => {
   return (
     // The wrap rises over the page as its own sheet (see RiseSheet).
     <footer id="contact" className="mt-16 overflow-x-clip md:mt-24">
-      <RiseSheet className="relative border-t border-rule bg-sheet shadow-[0_-30px_60px_-40px_rgb(0_0_0/0.6)]">
+      <RiseSheet className="relative border-t border-rule bg-sheet shadow-[0_-30px_60px_-40px_rgb(var(--shade)/0.6)]">
       {/* Simba and Cream, in pixels, on the card's top edge: Cream irritating
           him, Simba keeping his calm (see PixelCats). */}
       <PixelCats className="z-10" />
@@ -76,8 +76,8 @@ const Footer = () => {
       {/* The sign-off: full-bleed, edge to edge. Hover it to wipe the lamp-lit
           version through, like clearing a circle of fogged glass. */}
       <div aria-hidden className="relative left-1/2 mt-20 w-screen -translate-x-1/2 overflow-hidden">
-        <p className={cn(wordmark, "text-lamp/[0.14]")}>sevith.</p>
-        <GlassPaint className={cn(wordmark, "absolute inset-0 flex items-center justify-center text-lamp")}>sevith.</GlassPaint>
+        <p className={cn(wordmark, "text-warm/[0.14]")}>sevith.</p>
+        <GlassPaint className={cn(wordmark, "absolute inset-0 flex items-center justify-center text-warm")}>sevith.</GlassPaint>
       </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-t border-rule pt-6">

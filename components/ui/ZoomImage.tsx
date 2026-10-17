@@ -25,7 +25,7 @@ export function ZoomImage({ src, alt }: { src: string; alt: string }) {
           type="button"
           onClick={() => dialog.current?.close()}
           aria-label="Close"
-          className="absolute right-3 top-3 z-10 grid size-10 place-items-center rounded-full border border-rule bg-paper/90 text-ink shadow-[0_8px_24px_-8px_rgb(0_0_0/0.5)] backdrop-blur-sm hover:border-ink"
+          className="absolute right-3 top-3 z-10 grid size-10 place-items-center rounded-full border border-rule bg-paper/90 text-ink shadow-[0_8px_24px_-8px_rgb(var(--shade)/0.5)] backdrop-blur-sm hover:border-ink"
         >
           <X size={18} />
         </button>

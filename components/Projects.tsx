@@ -8,8 +8,9 @@ import { TransitionLink } from "./transition/TransitionLink";
 import { Reveal } from "./motion/Reveal";
 import { BrowserFrame } from "./ui/BrowserFrame";
 
-// One project: a screenshot dressed in a browser frame (Q97), sitting on a dark
-// surface lit from below-left by the lamp. It leans toward the cursor. Plates
+// One project: a screenshot dressed in a browser frame (Q97), and the only light
+// on the plate is its own screen spilling onto the surface (Q123). It leans
+// toward the cursor. Plates
 // scroll past one after another, so each one's outcome and stack stay readable.
 function Plate({ p, index, total }: { p: (typeof projects)[number]; index: number; total: number }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -36,7 +37,16 @@ function Plate({ p, index, total }: { p: (typeof projects)[number]; index: numbe
             }}
             className="grain relative isolate overflow-hidden rounded-[1.75rem] border border-rule bg-sheet px-5 pt-10 [perspective:1200px] sm:px-12 sm:pt-14"
           >
-            <div aria-hidden className="lamp-light absolute inset-0 -z-10 opacity-80 transition-opacity duration-700 group-hover:opacity-100" />
+            {img && (
+              // Screen spill: the screenshot itself, blurred, so the light takes its colour.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={img}
+                alt=""
+                aria-hidden
+                className="pointer-events-none absolute inset-x-[10%] top-[20%] -z-10 h-[85%] w-[80%] object-cover opacity-20 blur-[56px] saturate-150 transition-opacity duration-700 group-hover:opacity-30 dark:opacity-35 dark:group-hover:opacity-50"
+              />
+            )}
 
             <motion.div
               style={{ rotateX: rx, rotateY: ry }}
@@ -96,7 +106,7 @@ const Projects = () => {
         <h2 className="mt-5 font-wide text-[clamp(2rem,5vw,4rem)] font-semibold uppercase leading-[1] tracking-[-0.01em] text-ink">
           <span className="block">Designed it.</span>
           <span className="block">Built it.</span>
-          <span className="block text-lamp">Shipped it.</span>
+          <span className="block text-warm">Shipped it.</span>
         </h2>
       </Reveal>
       <div className="flex flex-col gap-24 md:gap-36">

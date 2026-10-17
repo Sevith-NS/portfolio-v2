@@ -10,6 +10,9 @@ Legend: **[S]** needs something from Sevith first.
 
 ## 0. Just shipped (verify on a real phone)
 
+- [ ] **No glow, screen spill.** Done when the colours have been judged in both modes without the glow, and the spill doesn't look muddy on oat.
+- [ ] **Living headline.** Done when the cursor reaction is noticeable only on a second pass, never jitters the layout, and the scroll narrowing feels right on a phone.
+- [ ] **Film posters.** Done when all three read clearly in the studio at night and at golden hour.
 - [ ] **Pixel scan theme switch.** Done when it runs smoothly on a mid-range Android phone and the scan visibly grows out of the theme button.
 - [ ] **Two-colour palette (lapis replaces orange).** Done when every page has been eyeballed in both modes and no orange is left outside the 3D room.
 - [ ] **Footer cat scenes.** Done when all five scenes have been watched start to finish on phone width without the cats leaving the card edge.

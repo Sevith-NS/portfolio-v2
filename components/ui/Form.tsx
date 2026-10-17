@@ -67,7 +67,7 @@ export function Form() {
       {input}
       {errors[k] && (
         <p id={`f-${k}-err`} role="alert" className="flex items-center gap-1.5 text-sm text-ink">
-          <WarningCircle size={15} weight="fill" className="shrink-0 text-[#D9480F] dark:text-[#FF8A5B]" />
+          <WarningCircle size={15} weight="fill" className="shrink-0 text-danger" />
           {errors[k]}
         </p>
       )}
@@ -81,7 +81,7 @@ export function Form() {
     onChange: set(k),
     "aria-invalid": !!errors[k],
     "aria-describedby": errors[k] ? `f-${k}-err` : undefined,
-    className: cn(inputClass, errors[k] ? "border-[#D9480F] dark:border-[#FF8A5B]" : "border-rule"),
+    className: cn(inputClass, errors[k] ? "border-danger" : "border-rule"),
   });
 
   return (
@@ -116,7 +116,7 @@ export function Form() {
 
             {status === "error" && (
               <p role="alert" className="flex items-start gap-2 rounded-xl border border-rule bg-paper p-3 text-sm text-ink">
-                <WarningCircle size={17} weight="fill" className="mt-px shrink-0 text-[#D9480F] dark:text-[#FF8A5B]" />
+                <WarningCircle size={17} weight="fill" className="mt-px shrink-0 text-danger" />
                 The message didn&apos;t send. Try again, or email me directly at {email}.
               </p>
             )}

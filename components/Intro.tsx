@@ -13,7 +13,7 @@ export default function Intro() {
       <div className="grid items-center gap-14 md:grid-cols-12 md:gap-10">
         <Reveal className="relative mx-auto w-full max-w-[22rem] md:col-span-5 md:mx-0 md:max-w-none md:pl-6">
           <figure className="group">
-            <div className="overflow-hidden rounded-[1.25rem] shadow-[0_40px_80px_-40px_rgb(0_0_0/0.7)] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] [transform:rotate(-3deg)] group-hover:[transform:rotate(0deg)_scale(1.02)]">
+            <div className="overflow-hidden rounded-[1.25rem] shadow-[0_40px_80px_-40px_rgb(var(--shade)/0.7)] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] [transform:rotate(-3deg)] group-hover:[transform:rotate(0deg)_scale(1.02)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={intro.photo.src} alt={intro.photo.alt} loading="lazy" className="aspect-square w-full object-cover object-[56%_50%]" />
             </div>

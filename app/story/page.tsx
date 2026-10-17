@@ -41,7 +41,7 @@ function Print({ src, alt, caption, className = "", tilt = 0 }: { src: string; a
   return (
     <figure className={`group ${className}`}>
       <div
-        className="overflow-hidden rounded-[1.1rem] shadow-[0_30px_60px_-35px_rgb(0_0_0/0.7)] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:![transform:rotate(0deg)_scale(1.015)]"
+        className="overflow-hidden rounded-[1.1rem] shadow-[0_30px_60px_-35px_rgb(var(--shade)/0.7)] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:![transform:rotate(0deg)_scale(1.015)]"
         style={{ transform: `rotate(${tilt}deg)` }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -176,7 +176,7 @@ export default function StoryPage() {
           {cats.members.map((c, i) => (
             <Reveal as="li" key={c.name} delay={i * 0.05}>
               <figure className="group" data-cream={c.name === "Cream" ? "" : undefined}>
-                <div className="overflow-hidden rounded-[1.1rem] shadow-[0_30px_60px_-35px_rgb(0_0_0/0.7)]">
+                <div className="overflow-hidden rounded-[1.1rem] shadow-[0_30px_60px_-35px_rgb(var(--shade)/0.7)]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={c.src}

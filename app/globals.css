@@ -2,63 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* AFTER HOURS. Two colours per mode, nothing else. Light: oat page, black
-   text, lapis (#002DB4) for everything that highlights. Dark: near-black page,
-   white text, a brighter lapis for the same jobs (#2F5BFF for fills, #809BFF
-   where it has to be read as small text). Lapis fills carry white text. No
-   orange, no pastels, no neon. See ART-DIRECTION.md. */
+/* AFTER HOURS, lapis. Colour tokens (--paper, --ink, --lamp...) live in
+   lib/theme.ts and are emitted for :root and .dark by the Tailwind plugin in
+   tailwind.config.ts. Never write a colour here; reference a token. */
 @layer base {
-  :root {
-    --paper: 239 233 222;
-    --sheet: 247 243 236;
-    --ink: 26 22 18;
-    --ink-2: 78 70 61;
-    --ink-3: 112 103 92;
-    --rule: 221 212 198;
-    --hl: 0 45 180;
-    --on-hl: 252 250 246;
-    --accent: 0 45 180;
-    /* The highlight colour (it was the lamp's orange; now lapis), and the shadow. */
-    --lamp: 0 45 180;
-    --deep: 20 34 100;
-    --tint-sage: 213 227 218;
-    --tint-butter: 234 241 198;
-    --tint-blush: 245 225 218;
-    --tint-lapis: 221 227 246;
-    --tint-stone: 236 236 234;
-    --tint-rose: 244 222 228;
-    --tint-mint: 214 238 229;
-    --tint-amber: 246 230 204;
-    --tint-garnet: 248 217 212;
-    --tint-clover: 200 236 208;
-    color-scheme: light;
-  }
-
-  .dark {
-    --paper: 10 11 14;
-    --sheet: 19 21 27;
-    --ink: 242 238 230;
-    --ink-2: 176 172 164;
-    --ink-3: 125 123 119;
-    --rule: 38 41 50;
-    --hl: 47 91 255;
-    --on-hl: 252 250 246;
-    --accent: 128 155 255;
-    --lamp: 47 91 255;
-    --deep: 26 40 120;
-    --tint-sage: 24 34 32;
-    --tint-butter: 36 34 24;
-    --tint-blush: 44 30 30;
-    --tint-lapis: 22 28 56;
-    --tint-stone: 26 28 34;
-    --tint-rose: 42 26 34;
-    --tint-mint: 18 36 36;
-    --tint-amber: 44 30 20;
-    --tint-garnet: 48 24 26;
-    --tint-clover: 16 36 26;
-    color-scheme: dark;
-  }
-
   html {
     -webkit-text-size-adjust: 100%;
     /* Glows reach past their boxes on purpose; the page itself never may. */
@@ -108,14 +55,6 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
 
-@keyframes lamp-breathe {
-  0%, 100% { opacity: 0.88; }
-  30% { opacity: 1; }
-  60% { opacity: 0.93; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .lamp-breathe { animation: none; }
-}
 
 /* Grain on everything, as one fixed layer, so texture never changes at a
    section edge. Static and blend-free, so it costs nothing while scrolling. */
@@ -136,7 +75,7 @@ body::after {
 }
 
 @layer components {
-  /* The marker: a band of lamp orange that sweeps in behind the key phrase. */
+  /* The marker: a band of tungsten that sweeps in behind the key phrase. */
   .hl {
     background-image: linear-gradient(rgb(var(--hl)), rgb(var(--hl)));
     background-repeat: no-repeat;
@@ -157,7 +96,7 @@ body::after {
     @apply font-sans text-[0.8125rem] font-medium leading-5 text-ink-3 tabular;
   }
 
-  /* Keyword emphasis in prose: bold ink with a coral rule under it. The
+  /* Keyword emphasis in prose: bold ink with a lamp-coloured rule under it. The
      quiet cousin of .hl, which stays reserved for decisions. */
   .key {
     @apply font-semibold text-ink;
@@ -203,45 +142,12 @@ body::after {
   .btn-primary { @apply bg-ink text-paper hover:bg-lamp hover:text-on-hl; }
   .btn-ghost { @apply border border-rule bg-paper/40 text-ink backdrop-blur-sm hover:border-ink; }
 
-  /* The lamp: one hot core low on the left with a steep falloff, a faint maroon
-     shadow opposite, and a cinema vignette. Gradients, not blurred blobs, so the
-     falloff can be controlled and the rest of the frame stays properly dark. */
-  .lamp-light {
-    background:
-      radial-gradient(38rem 30rem at 6% 96%, rgb(var(--lamp) / 0.42), rgb(var(--lamp) / 0.12) 45%, transparent 72%),
-      radial-gradient(70rem 40rem at 0% 100%, rgb(var(--lamp) / 0.08), transparent 70%);
-  }
-  /* The same lamp, but set on the seam between the hero and the section after
-     it, so one light spills across both instead of stopping at a box edge. */
-  .lamp-wash {
-    background:
-      radial-gradient(44rem 38rem at 4% 100svh, rgb(var(--lamp) / 0.4), rgb(var(--lamp) / 0.12) 45%, transparent 72%),
-      radial-gradient(80rem 60rem at 0% 100svh, rgb(var(--lamp) / 0.07), transparent 70%);
-  }
-  /* The lamp for a tall section: raised to two-thirds height so a fade at the
-     bottom edge (.fade-bottom) softens the spill without killing the bulb. */
-  .lamp-raised {
-    background:
-      radial-gradient(40rem 34rem at 4% 64%, rgb(var(--lamp) / 0.4), rgb(var(--lamp) / 0.12) 45%, transparent 72%),
-      radial-gradient(70rem 50rem at 0% 64%, rgb(var(--lamp) / 0.07), transparent 70%);
-  }
-  .lamp-shadow {
-    background: radial-gradient(40rem 32rem at 100% 0%, rgb(var(--deep) / 0.22), transparent 65%);
-  }
-  /* A real bulb isn't perfectly steady. Slow, low amplitude, off for reduced motion. */
-  .lamp-breathe { animation: lamp-breathe 9s ease-in-out infinite; }
-  /* For a lamp that lives inside one section: it fades out before the section
-     ends, so the light never stops at a hard edge. */
-  .fade-bottom {
-    -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent);
-    mask-image: linear-gradient(to bottom, #000 72%, transparent);
-  }
   .glow-soft {
     -webkit-mask-image: radial-gradient(closest-side, #000 35%, transparent);
     mask-image: radial-gradient(closest-side, #000 35%, transparent);
   }
   .vignette {
-    background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(0 0 0 / 0.35) 100%);
+    background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(var(--shade) / 0.35) 100%);
   }
 
   /* Film grain for colour fields: a tiny SVG noise tile, not a scrolling filter. */
@@ -281,22 +187,4 @@ body::after {
 @media (hover: hover) and (pointer: fine) {
   .has-cursor, .has-cursor a, .has-cursor button { cursor: none; }
   .has-cursor input, .has-cursor textarea { cursor: text; }
-}
-
-/* The side-switch pixel dissolve draws on a canvas (ThemeToggle.tsx). Only the
-   creed's entrance and exit live here: it lands once the screen is nearly
-   covered and leaves before the pixels start dropping away. */
-@keyframes mosaic-say-in {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes mosaic-say-out {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-12px); }
-}
-[data-mosaic="in"] .mosaic-say {
-  animation: mosaic-say-in 520ms cubic-bezier(0.16, 1, 0.3, 1) calc(2900ms + var(--say-delay, 0ms)) both;
-}
-[data-mosaic="out"] .mosaic-say {
-  animation: mosaic-say-out 220ms cubic-bezier(0.76, 0, 0.24, 1) both;
 }

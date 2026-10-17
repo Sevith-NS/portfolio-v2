@@ -85,7 +85,7 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
     return () => io.disconnect();
   }, [navItems, home]);
 
-  const pill = "flex h-10 items-center rounded-full border border-rule bg-paper/80 backdrop-blur-md shadow-[0_6px_20px_-12px_rgb(0_0_0/0.25)]";
+  const pill = "flex h-10 items-center rounded-full border border-rule bg-paper/80 backdrop-blur-md shadow-[0_6px_20px_-12px_rgb(var(--shade)/0.25)]";
 
   return (
     <header className="fixed inset-x-0 top-3 z-50 px-4 md:top-4 md:px-8">
@@ -103,7 +103,7 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
             label="Home"
             className={cn(pill, "px-4 font-serif text-[1.15rem] tracking-[-0.02em] text-ink")}
           >
-            sevith<span className="text-lamp">.</span>
+            sevith<span className="text-warm">.</span>
           </TransitionLink>
         </div>
 
@@ -174,7 +174,7 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
             animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
             exit={{ opacity: 0, y: -8, scale: 0.98, filter: "blur(6px)" }}
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
-            className="mx-auto mt-2 max-w-[64rem] overflow-hidden rounded-3xl border border-rule bg-paper/95 p-2 shadow-[0_16px_40px_-20px_rgb(0_0_0/0.3)] backdrop-blur-md lg:hidden"
+            className="mx-auto mt-2 max-w-[64rem] overflow-hidden rounded-3xl border border-rule bg-paper/95 p-2 shadow-[0_16px_40px_-20px_rgb(var(--shade)/0.3)] backdrop-blur-md lg:hidden"
           >
             {navItems.map((item, i) => {
               const Ic = icons[item.name] ?? Briefcase;

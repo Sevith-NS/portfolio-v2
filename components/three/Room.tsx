@@ -9,6 +9,7 @@ import { useTheme } from "next-themes";
 import * as THREE from "three";
 import { Box, Bulb, Glow, Label, M, Model, Seated, useFontsReady, useModel, type V3 } from "./kit";
 import { useInView3D } from "./useInView3D";
+import { dark, light } from "@/lib/theme";
 import { Cream } from "./Cream";
 import { StudioSkeleton } from "./StudioSkeleton";
 
@@ -25,12 +26,12 @@ type Hour = {
   amb: number; hemi: [string, string, number]; key: { color: string; i: number; p: V3 }; lamp: number; exposure: number;
 };
 const NIGHT: Hour = {
-  floor: "#6B5442", floorLine: "#56432F", wall: "#232838", wall2: "#1C2030", trim: "#161925", paper: "#EDE6DA", ink: "#1A1612", accent: "#D9693A",
+  floor: "#6B5442", floorLine: "#56432F", wall: "#232838", wall2: "#1C2030", trim: "#161925", paper: "#EDE6DA", ink: "#1A1612", accent: dark.hex("lamp"),
   screen: "#0B0F1C", sky: ["#070A18", "#1A2048"], city: "#0C0F1D", cityLit: ["#FFC37A", "#FFD9A0", "#9FB4FF"], moon: "#F4F1E6",
   amb: 0.1, hemi: ["#3A4A8A", "#0B0C12", 0.45], key: { color: "#8EA6FF", i: 0.8, p: [-4.5, 3.6, 0.8] }, lamp: 9, exposure: 1.08,
 };
 const GOLDEN: Hour = {
-  floor: "#C9A27E", floorLine: "#B08967", wall: "#EFE6D8", wall2: "#E4D9C8", trim: "#D6C9B4", paper: "#FBF7F0", ink: "#1A1612", accent: "#B8491F",
+  floor: "#C9A27E", floorLine: "#B08967", wall: "#EFE6D8", wall2: "#E4D9C8", trim: "#D6C9B4", paper: "#FBF7F0", ink: "#1A1612", accent: light.hex("accent"),
   screen: "#0B0F1C", sky: ["#F7C98F", "#E8875A"], city: "#7A4C42", cityLit: ["#FFE2A8"], moon: null,
   amb: 0.32, hemi: ["#FFE2B8", "#7A5A48", 0.75], key: { color: "#FFB27A", i: 2.1, p: [-4.5, 2.2, 0.9] }, lamp: 2.4, exposure: 1.0,
 };
@@ -153,8 +154,8 @@ function Shell({ h }: { h: Hour }) {
 }
 
 // Three prints taped above the desk, drawn once to canvas in the site's own
-// fonts: the film this room would be, a wanted notice for the cat who knocks
-// mugs over, and the only gym advice anyone needs.
+// fonts: homages to Interstellar, Cars and Game of Thrones (Q122, Q125-Q129),
+// made for this room rather than copied from the real posters.
 type Faces = { serif: string; sans: string; wide: string };
 type Draw = (g: CanvasRenderingContext2D, w: number, h: number, f: Faces) => void;
 const PW = 480, PH = 640;
@@ -170,103 +171,238 @@ function text(g: CanvasRenderingContext2D, s: string, x: number, y: number, font
   g.fillText(s, x, y);
 }
 
-const drawFilm: Draw = (g, w, h, f) => {
-  g.fillStyle = "#0B2C9E";
-  g.fillRect(0, 0, w, h);
-  // The lamp, as a low sun over the city.
-  g.fillStyle = "#E8501A";
-  g.beginPath();
-  g.arc(w / 2, h * 0.4, w * 0.3, 0, Math.PI * 2);
-  g.fill();
-  g.fillStyle = "#0A0B0E";
-  let seed = 3;
-  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  for (let x = 0; x < w; ) {
-    const bw = 26 + rnd() * 40, bh = h * (0.06 + rnd() * 0.14);
-    g.fillRect(x, h * 0.6 - bh, bw, bh + 4);
-    x += bw + 3;
-  }
-  g.fillRect(0, h * 0.6, w, 6);
-  g.textAlign = "center";
-  g.textBaseline = "alphabetic";
-  text(g, "AFTER", w / 2, h * 0.76, `800 ${w * 0.17}px ${f.wide}`, "#EDE6DA", 2, true);
-  text(g, "HOURS", w / 2, h * 0.88, `800 ${w * 0.17}px ${f.wide}`, "#EDE6DA", 2, true);
-  text(g, "A SEVITH SADASHIVA PRODUCTION · 2AM", w / 2, h * 0.95, `600 ${w * 0.03}px ${f.sans}`, "#CFE0EE", 3);
-};
+// A repeatable scatter, so the stars and the crowd land in the same place every load.
+const seeded = (s: number) => () => ((s = (s * 16807) % 2147483647) / 2147483647);
 
-const drawWanted: Draw = (g, w, h, f) => {
-  g.fillStyle = "#EADFC6";
+// Interstellar: Gargantua, its disk crossing in front, the Endurance a speck beside it.
+const drawInterstellar: Draw = (g, w, h, f) => {
+  g.fillStyle = "#05060A";
   g.fillRect(0, 0, w, h);
-  g.strokeStyle = "#3A2A1E";
-  g.lineWidth = 6;
-  g.strokeRect(18, 18, w - 36, h - 36);
-  g.textAlign = "center";
-  g.textBaseline = "alphabetic";
-  text(g, "WANTED", w / 2, h * 0.165, `700 ${w * 0.16}px ${f.serif}`, "#3A2A1E", 4);
-  // The mugshot: a white cat, blue eyes, no remorse.
-  const cx = w / 2, cy = h * 0.42;
-  g.fillStyle = "#E8501A";
-  g.fillRect(w * 0.18, h * 0.2, w * 0.64, h * 0.42);
-  g.fillStyle = "#F8F6F1";
-  g.beginPath();
-  g.moveTo(cx - 118, cy - 40); g.lineTo(cx - 92, cy - 132); g.lineTo(cx - 34, cy - 74);
-  g.moveTo(cx + 118, cy - 40); g.lineTo(cx + 92, cy - 132); g.lineTo(cx + 34, cy - 74);
-  g.fill();
-  g.beginPath();
-  g.ellipse(cx, cy, 120, 96, 0, 0, Math.PI * 2);
-  g.fill();
-  g.fillStyle = "#F3C7C7";
-  g.beginPath();
-  g.moveTo(cx - 104, cy - 52); g.lineTo(cx - 92, cy - 110); g.lineTo(cx - 54, cy - 72);
-  g.moveTo(cx + 104, cy - 52); g.lineTo(cx + 92, cy - 110); g.lineTo(cx + 54, cy - 72);
-  g.fill();
-  for (const side of [-1, 1]) {
-    g.fillStyle = "#7FC0EC";
-    g.beginPath();
-    g.ellipse(cx + side * 44, cy - 6, 20, 22, 0, 0, Math.PI * 2);
-    g.fill();
-    g.fillStyle = "#15110E";
-    g.beginPath();
-    g.ellipse(cx + side * 44, cy - 6, 6, 18, 0, 0, Math.PI * 2);
-    g.fill();
-    g.strokeStyle = "#8D867C";
-    g.lineWidth = 3;
-    for (const dy of [-8, 8]) {
+  const rnd = seeded(11);
+  for (let i = 0; i < 140; i++) {
+    g.fillStyle = `rgba(235,238,245,${0.2 + rnd() * 0.6})`;
+    g.fillRect(rnd() * w, rnd() * h * 0.72, rnd() < 0.9 ? 1.2 : 2.2, rnd() < 0.9 ? 1.2 : 2.2);
+  }
+  const cx = w / 2, cy = h * 0.4, R = w * 0.19;
+  const band = (front: boolean) => {
+    g.save();
+    if (front) {
       g.beginPath();
-      g.moveTo(cx + side * 40, cy + 40 + dy / 2);
-      g.lineTo(cx + side * 150, cy + 30 + dy * 2);
-      g.stroke();
+      g.rect(0, cy, w, h);
+      g.clip();
     }
-  }
-  g.fillStyle = "#EFA0A6";
+    const grad = g.createLinearGradient(cx - w * 0.48, 0, cx + w * 0.48, 0);
+    grad.addColorStop(0, "rgba(255,170,90,0)");
+    grad.addColorStop(0.25, "#FFB061");
+    grad.addColorStop(0.5, "#FFF3DC");
+    grad.addColorStop(0.75, "#FFB061");
+    grad.addColorStop(1, "rgba(255,170,90,0)");
+    g.fillStyle = grad;
+    g.shadowColor = "#FF9C4A";
+    g.shadowBlur = 30;
+    g.beginPath();
+    g.ellipse(cx, cy, w * 0.48, R * 0.16, 0, 0, Math.PI * 2);
+    g.fill();
+    g.restore();
+  };
+  // The light bent over the top and under the bottom of the hole.
+  g.save();
+  g.shadowColor = "#FFB061";
+  g.shadowBlur = 40;
+  g.strokeStyle = "#FFD9A0";
+  g.lineWidth = 9;
   g.beginPath();
-  g.moveTo(cx - 12, cy + 26); g.lineTo(cx + 12, cy + 26); g.lineTo(cx, cy + 40);
+  g.arc(cx, cy, R * 1.12, 0, Math.PI * 2);
+  g.stroke();
+  g.shadowBlur = 0;
+  g.strokeStyle = "#FFF6E6";
+  g.lineWidth = 2.5;
+  g.stroke();
+  g.restore();
+  band(false);
+  g.fillStyle = "#000000";
+  g.beginPath();
+  g.arc(cx, cy, R, 0, Math.PI * 2);
   g.fill();
-  text(g, "CREAM", w / 2, h * 0.73, `800 ${w * 0.13}px ${f.wide}`, "#3A2A1E", 3, true);
-  text(g, "for crimes against mugs", w / 2, h * 0.81, `italic 400 ${w * 0.065}px ${f.serif}`, "#3A2A1E");
-  text(g, "REWARD: ONE (1) TREAT", w / 2, h * 0.9, `600 ${w * 0.042}px ${f.sans}`, "#0B2C9E", 4);
+  band(true);
+  // The Endurance: a ring of twelve modules, tiny against it.
+  const ex = w * 0.76, ey = h * 0.6;
+  g.fillStyle = "#C9CDD6";
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2;
+    g.save();
+    g.translate(ex + Math.cos(a) * 11, ey + Math.sin(a) * 11);
+    g.rotate(a);
+    g.fillRect(-2, -3.5, 4, 7);
+    g.restore();
+  }
+  g.textAlign = "center";
+  g.textBaseline = "alphabetic";
+  text(g, "INTERSTELLAR", w / 2, h * 0.82, `700 ${w * 0.074}px ${f.wide}`, "#EDE6DA", 6, true);
+  text(g, "DO NOT GO GENTLE", w / 2, h * 0.875, `500 ${w * 0.03}px ${f.sans}`, "#9A9EA6", 6);
+  text(g, "2014", w / 2, h * 0.94, `600 ${w * 0.03}px ${f.sans}`, "#5C6070", 4);
 };
 
-const drawGym: Draw = (g, w, h, f) => {
-  g.fillStyle = "#16161A";
+// Cars: the Piston Cup, last lap under the lights, one red car breaking away.
+const drawCars: Draw = (g, w, h, f) => {
+  const sky = g.createLinearGradient(0, 0, 0, h * 0.55);
+  sky.addColorStop(0, "#0B1030");
+  sky.addColorStop(0.6, "#3A2050");
+  sky.addColorStop(1, "#E8703A");
+  g.fillStyle = sky;
   g.fillRect(0, 0, w, h);
-  // A barbell, loaded.
-  const y = h * 0.2;
-  g.fillStyle = "#9A9EA6";
-  g.fillRect(w * 0.08, y - 5, w * 0.84, 10);
-  g.fillStyle = "#E8501A";
-  for (const x of [w * 0.2, w * 0.74]) g.fillRect(x, y - 62, 26, 124);
-  g.fillStyle = "#EDE6DA";
-  for (const x of [w * 0.15, w * 0.83]) g.fillRect(x, y - 40, 18, 80);
-  g.textAlign = "left";
+  // The grandstand: a dark band full of camera flashes.
+  g.fillStyle = "#15131C";
+  g.fillRect(0, h * 0.4, w, h * 0.12);
+  const rnd = seeded(7);
+  for (let i = 0; i < 160; i++) {
+    g.fillStyle = rnd() < 0.15 ? "#FFF3D6" : `rgba(255,${150 + rnd() * 80},${90 + rnd() * 60},${0.25 + rnd() * 0.4})`;
+    g.fillRect(rnd() * w, h * 0.41 + rnd() * h * 0.1, 2, 2);
+  }
+  // The banked oval, sweeping through the frame.
+  g.fillStyle = "#2A2B30";
+  g.beginPath();
+  g.moveTo(0, h * 0.56);
+  g.quadraticCurveTo(w * 0.5, h * 0.48, w, h * 0.53);
+  g.lineTo(w, h * 0.78);
+  g.quadraticCurveTo(w * 0.5, h * 0.7, 0, h * 0.84);
+  g.closePath();
+  g.fill();
+  g.fillStyle = "#121318";
+  g.beginPath();
+  g.moveTo(0, h * 0.84);
+  g.quadraticCurveTo(w * 0.5, h * 0.7, w, h * 0.78);
+  g.lineTo(w, h);
+  g.lineTo(0, h);
+  g.fill();
+  g.strokeStyle = "rgba(237,230,218,0.55)";
+  g.lineWidth = 3;
+  g.setLineDash([22, 18]);
+  g.beginPath();
+  g.moveTo(0, h * 0.7);
+  g.quadraticCurveTo(w * 0.5, h * 0.59, w, h * 0.655);
+  g.stroke();
+  g.setLineDash([]);
+  // Speed: streaks trailing off the left edge.
+  for (let i = 0; i < 26; i++) {
+    const y = h * 0.56 + rnd() * h * 0.16, len = 60 + rnd() * 180, x = rnd() * w * 0.4;
+    g.strokeStyle = `rgba(255,${200 + rnd() * 50},${170 + rnd() * 60},${0.08 + rnd() * 0.25})`;
+    g.lineWidth = 1 + rnd() * 2;
+    g.beginPath();
+    g.moveTo(x, y);
+    g.lineTo(x + len, y - len * 0.04);
+    g.stroke();
+  }
+  // A stock car in profile: no face, just the red, the stripe and the 95.
+  const car = (alpha: number, dx: number) => {
+    g.save();
+    g.globalAlpha = alpha;
+    g.translate(w * 0.32 + dx, h * 0.555);
+    g.rotate(-0.06);
+    g.scale(1.05, 1.05);
+    g.fillStyle = "#D9261C";
+    g.beginPath();
+    g.moveTo(10, 62); g.lineTo(4, 40); g.lineTo(18, 30); g.lineTo(14, 16); g.lineTo(42, 16); g.lineTo(42, 28);
+    g.lineTo(90, 26); g.quadraticCurveTo(110, 4, 150, 6); g.quadraticCurveTo(176, 8, 190, 28);
+    g.lineTo(234, 36); g.quadraticCurveTo(252, 42, 248, 58); g.closePath();
+    g.fill();
+    if (alpha === 1) {
+      g.fillStyle = "#15131C";
+      g.beginPath();
+      g.moveTo(116, 11); g.lineTo(150, 10); g.lineTo(178, 27); g.lineTo(118, 27); g.closePath();
+      g.fill();
+      g.fillStyle = "#F5C518";
+      g.fillRect(20, 44, 216, 5);
+      g.fillStyle = "#FFFFFF";
+      g.beginPath();
+      g.arc(128, 42, 14, 0, Math.PI * 2);
+      g.fill();
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      text(g, "95", 128, 43, `800 15px ${f.wide}`, "#D9261C", 0, true);
+      for (const x of [56, 202]) {
+        g.fillStyle = "#0E0E10";
+        g.beginPath();
+        g.arc(x, 62, 16, 0, Math.PI * 2);
+        g.fill();
+        g.fillStyle = "#9A9EA6";
+        g.beginPath();
+        g.arc(x, 62, 6, 0, Math.PI * 2);
+        g.fill();
+      }
+    }
+    g.restore();
+  };
+  car(0.12, -48);
+  car(0.22, -26);
+  car(1, 0);
+  g.textAlign = "center";
   g.textBaseline = "alphabetic";
-  const x0 = w * 0.1;
-  text(g, "LIGHT", x0, h * 0.5, `800 ${w * 0.145}px ${f.wide}`, "#EDE6DA", 1, true);
-  text(g, "WEIGHT,", x0, h * 0.65, `800 ${w * 0.145}px ${f.wide}`, "#EDE6DA", 1, true);
-  text(g, "BABY!", x0, h * 0.8, `800 ${w * 0.145}px ${f.wide}`, "#E8501A", 1, true);
-  g.fillStyle = "#E8501A";
-  g.fillRect(x0, h * 0.86, w * 0.18, 4);
-  text(g, "LEG DAY IS TOMORROW. ALWAYS.", x0, h * 0.92, `600 ${w * 0.034}px ${f.sans}`, "#9A9EA6", 3);
+  text(g, "CARS", w / 2, h * 0.2, `800 ${w * 0.22}px ${f.wide}`, "#F5C518", 4, true);
+  text(g, "PISTON CUP · FINAL LAP", w / 2, h * 0.265, `600 ${w * 0.034}px ${f.sans}`, "#EDE6DA", 5);
+  text(g, "I am speed.", w / 2, h * 0.92, `italic 400 ${w * 0.075}px ${f.serif}`, "#EDE6DA");
+};
+
+// Game of Thrones: the Iron Throne in a shaft of cold light.
+const drawThrone: Draw = (g, w, h, f) => {
+  const bg = g.createLinearGradient(0, 0, 0, h);
+  bg.addColorStop(0, "#1C232C");
+  bg.addColorStop(1, "#0A0C10");
+  g.fillStyle = bg;
+  g.fillRect(0, 0, w, h);
+  const cx = w / 2;
+  const beam = g.createLinearGradient(0, 0, 0, h * 0.86);
+  beam.addColorStop(0, "rgba(200,220,255,0.24)");
+  beam.addColorStop(1, "rgba(200,220,255,0)");
+  g.fillStyle = beam;
+  g.beginPath();
+  g.moveTo(cx - w * 0.08, 0); g.lineTo(cx + w * 0.08, 0); g.lineTo(cx + w * 0.36, h * 0.86); g.lineTo(cx - w * 0.36, h * 0.86);
+  g.fill();
+  const rnd = seeded(5);
+  for (let i = 0; i < 50; i++) {
+    g.fillStyle = `rgba(220,232,255,${0.1 + rnd() * 0.3})`;
+    g.fillRect(cx + (rnd() - 0.5) * w * 0.4, rnd() * h * 0.8, 1.5, 1.5);
+  }
+  // The back: a fan of blades, hilts down, longest in the middle.
+  const oy = h * 0.62, n = 38;
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1);
+    const a = (t - 0.5) * 1.5 + (rnd() - 0.5) * 0.06;
+    const len = h * (0.16 + 0.3 * (1 - Math.abs(t - 0.5) * 1.7)) + rnd() * 26;
+    g.save();
+    g.translate(cx + (t - 0.5) * w * 0.3, oy);
+    g.rotate(a);
+    const steel = g.createLinearGradient(-4, 0, 4, 0);
+    steel.addColorStop(0, "#3A4048");
+    steel.addColorStop(0.5, "#A8B2BE");
+    steel.addColorStop(1, "#2A3038");
+    g.fillStyle = steel;
+    g.beginPath();
+    g.moveTo(-3.5, -24); g.lineTo(0, -len); g.lineTo(3.5, -24); g.closePath();
+    g.fill();
+    g.fillStyle = "#4A525C";
+    g.fillRect(-9, -26, 18, 4);
+    g.fillStyle = "#23282F";
+    g.fillRect(-2, -22, 4, 18);
+    g.restore();
+  }
+  // The seat, the arms and three steps, lit from above.
+  const block = (x: number, y: number, bw: number, bh: number, c: string) => {
+    g.fillStyle = c;
+    g.fillRect(x, y, bw, bh);
+    g.fillStyle = "rgba(190,206,226,0.55)";
+    g.fillRect(x, y, bw, 2);
+  };
+  block(cx - w * 0.18, h * 0.6, w * 0.36, h * 0.11, "#262C34");
+  block(cx - w * 0.23, h * 0.56, w * 0.06, h * 0.15, "#1E232A");
+  block(cx + w * 0.17, h * 0.56, w * 0.06, h * 0.15, "#1E232A");
+  block(cx - w * 0.26, h * 0.71, w * 0.52, h * 0.035, "#1B1F25");
+  block(cx - w * 0.31, h * 0.745, w * 0.62, h * 0.035, "#171A20");
+  block(cx - w * 0.36, h * 0.78, w * 0.72, h * 0.04, "#13161B");
+  g.textAlign = "center";
+  g.textBaseline = "alphabetic";
+  text(g, "WINTER IS COMING", w / 2, h * 0.08, `600 ${w * 0.03}px ${f.sans}`, "#8C9AAC", 7);
+  text(g, "GAME OF THRONES", w / 2, h * 0.9, `700 ${w * 0.06}px ${f.wide}`, "#D6DEE8", 5, true);
 };
 
 function usePoster(draw: Draw) {
@@ -307,7 +443,7 @@ function Print({ draw, p, tilt, h }: { draw: Draw; p: V3; tilt: number; h: Hour 
 }
 
 function Posters({ h }: { h: Hour }) {
-  const prints = [drawFilm, drawWanted, drawGym];
+  const prints = [drawInterstellar, drawCars, drawThrone];
   return (
     <>
       {prints.map((draw, i) => (
@@ -406,7 +542,7 @@ function Gym({ h }: { h: Hour }) {
   return (
     <>
       <Bench p={[1.18, 0, 0.42]} />
-      <Barbell p={[0.72, 0, 1.22]} accent={h === NIGHT ? "#D9744A" : "#E8501A"} />
+      <Barbell p={[0.72, 0, 1.22]} accent={h.accent} />
       <Dumbbell p={[1.26, 0, 0.94]} />
       <Dumbbell p={[1.26, 0, 1.08]} r={0.12} />
       <Kettlebell p={[1.24, 0, -0.52]} />
@@ -471,7 +607,7 @@ function Desk() {
 function Rug({ h }: { h: Hour }) {
   return (
     <group position={[0.15, 0, -0.3]}>
-      <Box p={[0, 0.006, 0]} s={[1.6, 0.012, 1.2]} c={h === NIGHT ? "#1B2A66" : "#0B2C9E"} rough={1} cast={false} />
+      <Box p={[0, 0.006, 0]} s={[1.6, 0.012, 1.2]} c={h === NIGHT ? dark.hex("deep") : light.hex("lamp")} rough={1} cast={false} />
       <Box p={[0, 0.0125, 0]} s={[1.44, 0.004, 1.04]} c={h === NIGHT ? "#A8977C" : "#E2D3B8"} rough={1} cast={false} />
     </group>
   );
@@ -659,7 +795,7 @@ export default function Room({
         onCreated={({ camera }) => camera.lookAt(0, 0.45, 0)}
         onPointerMissed={() => onHover(null)}
       >
-        <color attach="background" args={[h === NIGHT ? "#0A0B0E" : "#EAE6DE"]} />
+        <color attach="background" args={[(h === NIGHT ? dark : light).hex("paper")]} />
         <Lights h={h} on={lampOn} still={still} />
         <FitZoom />
         <SoftShadows size={16} samples={10} focus={0.6} />

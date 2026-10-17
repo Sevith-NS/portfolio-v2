@@ -8,6 +8,7 @@ import { TransitionProvider } from "@/components/transition/TransitionProvider";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { Cursor } from "@/components/motion/Cursor";
 import { EasterEggs } from "@/components/EasterEggs";
+import { dark, light } from "@/lib/theme";
 
 // Statements only. Extreme contrast, set large: film credits, not a newspaper.
 const serif = Bodoni_Moda({
@@ -38,8 +39,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#EFE9DE" },
-    { media: "(prefers-color-scheme: dark)", color: "#090D1E" },
+    { media: "(prefers-color-scheme: light)", color: light.hex("paper") },
+    { media: "(prefers-color-scheme: dark)", color: dark.hex("paper") },
   ],
 };
 

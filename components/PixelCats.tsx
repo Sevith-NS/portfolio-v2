@@ -9,7 +9,7 @@ import { catNote } from "./EasterEggs";
 // which Cream irritates Simba (his tail, zoomies over his head, boops, sitting
 // on him while he sleeps) and Simba keeps his calm, right up until he grabs her
 // for a love bite and grooms her into submission. Click either one and it
-// rolls over, then carries on.
+// flops onto its back, paws paddling at the air, then carries on.
 //
 // Every sprite is drawn in code on a 21x16 grid (no image files): a silhouette
 // in fur colours, then a one-pixel outline traced round it, scaled up with
@@ -19,7 +19,7 @@ export type CatName = "simba" | "cream";
 const CATS: CatName[] = ["simba", "cream"]; // Cream drawn last, so she can sit on him
 // Simba is the bigger cat; Cream is Pearl's small daughter.
 const SIZE: Record<CatName, number> = { simba: 1.2, cream: 1 };
-type Pose = "walk" | "run" | "sit" | "groom" | "yawn" | "stretch" | "loaf" | "sleep" | "crouch" | "jump";
+export type Pose = "walk" | "run" | "sit" | "groom" | "yawn" | "stretch" | "loaf" | "sleep" | "crouch" | "jump" | "belly";
 type Tail = "up" | "mid" | "low";
 type Key = "f" | "d" | "l" | "p" | "e" | "o";
 
@@ -31,10 +31,10 @@ const COATS: Record<CatName, Coat> = {
   cream: { f: "#FBF8F2", d: "#E6DED1", l: "#FFFFFF", p: "#F4AFB5", paw: "l", tip: "f" },
 };
 const OUTLINE = "#2B2420", EYE = "#1C1814";
-const LABEL: Record<CatName, string> = { simba: "Roll, Simba", cream: "Roll, Cream" };
+const LABEL: Record<CatName, string> = { simba: "Pet Simba", cream: "Pet Cream" };
 const NOTE: Record<CatName, string> = {
-  simba: "Simba did a roll. Tips appreciated.",
-  cream: "Cream rolled over. Belly rubs are a trap.",
+  simba: "Simba is belly up. Touch it and lose a hand.",
+  cream: "Cream is belly up. It's a trap. It's always a trap.",
 };
 
 // ---------- drawing ----------
@@ -145,6 +145,26 @@ function draw(c: Coat, { pose, frame, tail, blink, ears }: Look): Grid {
     put(14, 9, eye); put(16, 9, eye);
     if (c.stripes) { [7, 9, 11].forEach((x) => put(x, 10, "d")); put(14, 7, "d"); put(16, 7, "d"); }
     [5, 7, 11, 13].forEach((x) => put(x, 14, c.paw));
+  } else if (pose === "belly") {
+    // On its back: belly to the sky, all four paws paddling at the air.
+    put(3, 14, "f"); put(2, 14, "f"); put(1, wag ? 13 : 14, c.tip);
+    rect(4, 11, 14, 14, "f");
+    rect(6, 11, 12, 12, "l");
+    // The head, upside down: chin on top, ears flopped onto the floor.
+    rect(14, 10, 19, 14, "f");
+    rect(16, 10, 17, 10, "l");
+    put(16, 11, "p"); put(17, 11, "p");
+    put(15, 12, eye); put(18, 12, eye);
+    if (ears) { put(15, 15, "f"); put(18, 15, "f"); }
+    if (c.stripes) { [6, 8, 10].forEach((x) => put(x, 14, "d")); put(16, 14, "d"); put(18, 14, "d"); }
+    // Four legs out of step, each kicking up and bending back.
+    const reach = [2, 4, 4, 3], lean = [0, 1, 0, -1];
+    const leg = (x: number, phase: number) => {
+      const f = (frame + phase) % 4;
+      for (let y = 10; y > 10 - reach[f]; y--) put(x, y, "f");
+      put(x + lean[f], 10 - reach[f], c.paw);
+    };
+    leg(5, 0); leg(8, 2); leg(10, 1); leg(13, 3);
   } else {
     // jump: stretched out mid-air, legs reaching
     put(3, 6, "f"); put(2, 5, "f"); put(1, 4, c.tip);
@@ -341,7 +361,31 @@ function beatAt(time: number) {
   return SCENES[0].at(0);
 }
 
-const ROLL_S = 1.1;
+const BELLY_S = 2.4;
+const CATCH_UP = 320; // scene px a second, running back to the scene after a belly-up
+const frameMs = (pose: Pose) =>
+  pose === "run" ? 70 : pose === "walk" ? 125 : pose === "belly" ? 150 : pose === "groom" ? 250 : 600;
+
+// One cat, on its own, looping one pose. For cameos outside the footer.
+export function PixelSprite({ name, pose, className = "" }: { name: CatName; pose: Pose; className?: string }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const cv = ref.current;
+    if (!cv) return;
+    let raf = 0, last = -1;
+    const tick = (now: number) => {
+      const frame = Math.floor(now / frameMs(pose)) % 4;
+      if (frame !== last) {
+        paint(cv, COATS[name], { pose, frame, tail: "up", blink: false, ears: true });
+        last = frame;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [name, pose]);
+  return <canvas ref={ref} width={W} height={H} className={`block [image-rendering:pixelated] ${className}`} />;
+}
 
 export function PixelCats({ scale = 3, className = "" }: { scale?: number; className?: string }) {
   const box = useRef<HTMLDivElement>(null);
@@ -355,9 +399,17 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
     const el = box.current;
     if (!el) return;
     const drawn = ["", ""];
-    const rolls: Record<CatName, number> = { simba: -1, cream: -1 };
+    const bellies: Record<CatName, number> = { simba: -1, cream: -1 };
+    // Where each cat flopped: the scene keeps running underneath, so hold it there.
+    const pins: Record<CatName, number | null> = { simba: null, cream: null };
+    // After getting up, how far the cat still is from where the scene wants it.
+    // It runs that gap down instead of jumping.
+    const gaps: Record<CatName, number> = { simba: 0, cream: 0 };
+    let last = 0;
 
     const render = (beats: { simba: Beat; cream: Beat }, now: number) => {
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
+      last = now;
       const w = el.clientWidth;
       // Simba's spot, and how far the scenes may spread: everything squeezes
       // to fit on a phone.
@@ -368,13 +420,24 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
         const wrap = els.current[i], cv = cvs.current[i], fx = fxs.current[i];
         const cw = sw * SIZE[name], ch = sh * SIZE[name];
         if (!wrap || !cv) return;
-        // A click roll plays over whatever the scene is doing.
-        if (rolls[name] >= 0) {
-          const k = (now - rolls[name]) / 1000 / ROLL_S;
-          if (k >= 1) rolls[name] = -1;
-          else { b.pose = "loaf"; b.spin = (b.spin ?? 0) + ease(k) * 720 * b.face; b.fx = undefined; }
+        // A click flops the cat onto its back, over whatever the scene is doing.
+        if (bellies[name] >= 0) {
+          const k = (now - bellies[name]) / 1000 / BELLY_S;
+          if (k >= 1) {
+            gaps[name] = (pins[name] ?? b.x) - b.x;
+            bellies[name] = -1;
+            pins[name] = null;
+          } else {
+            pins[name] ??= b.x;
+            Object.assign(b, { x: pins[name], pose: "belly", y: 0, spin: 0, shake: 0, fx: undefined });
+          }
         }
-        const frame = Math.floor(now / (b.pose === "run" ? 70 : b.pose === "walk" ? 125 : b.pose === "groom" ? 250 : 600)) % 4;
+        if (bellies[name] < 0 && gaps[name] !== 0) {
+          const g = gaps[name];
+          gaps[name] = Math.sign(g) * Math.max(0, Math.abs(g) - CATCH_UP * dt);
+          Object.assign(b, { x: b.x + gaps[name], pose: "run", face: g > 0 ? -1 : 1, tail: "up", y: 0, spin: 0, shake: 0, fx: undefined });
+        }
+        const frame = Math.floor(now / frameMs(b.pose)) % 4;
         const x = anchor + b.x * span + (b.shake ?? 0);
         const y = -(b.y ?? 0);
         wrap.style.transform = `translate3d(${Math.round(x - cw / 2)}px, ${Math.round(y - ch)}px, 0)`;
@@ -392,18 +455,18 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
       });
     };
 
-    const onRoll = (e: Event) => {
+    const onBelly = (e: Event) => {
       const name = (e as CustomEvent<CatName>).detail;
-      if (rolls[name] >= 0) return;
-      rolls[name] = performance.now();
+      if (bellies[name] >= 0) return;
+      bellies[name] = performance.now();
       catNote(NOTE[name]);
     };
-    window.addEventListener("cat-roll", onRoll);
+    window.addEventListener("cat-belly", onBelly);
 
     // Reduced motion: the last scene's ending, held. Groomed, together, done.
     if (reduce) {
       render({ simba: { x: 18, pose: "loaf", face: 1, fx: "♥" }, cream: { x: 52, pose: "loaf", face: -1 } }, 0);
-      return () => window.removeEventListener("cat-roll", onRoll);
+      return () => window.removeEventListener("cat-belly", onBelly);
     }
 
     // Only animate while the footer is on screen; the story picks up where it left off.
@@ -425,7 +488,7 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();
-      window.removeEventListener("cat-roll", onRoll);
+      window.removeEventListener("cat-belly", onBelly);
     };
   }, [reduce, sh, sw]);
 
@@ -440,7 +503,7 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
           data-cursor={LABEL[name]}
           onClick={(e) => {
             e.stopPropagation();
-            window.dispatchEvent(new CustomEvent("cat-roll", { detail: name }));
+            window.dispatchEvent(new CustomEvent("cat-belly", { detail: name }));
           }}
         >
           <canvas

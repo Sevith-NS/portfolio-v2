@@ -195,3 +195,35 @@ against. Modern-Netflix flatness (Q41).
   (Q113).
 - Photos: plenty available, posed-candid, outdoors (Q93, Q94). **Cats yes**
   (Q95). **No desk** (Q96). Face on `/story` only, not home (Q100).
+
+---
+
+## Round two: the glow, the hero, the posters (2026-10-15)
+
+Racing green, oxblood noir and electric cobalt were each tried across the site
+and all three were rejected. The palette went back to oat / black / lapis /
+carrot. The diagnosis: the soft lamp glow was spoiling every palette.
+
+- **The glow goes** (Q116). It looked like a stain, the tint muddied the
+  ground, it read as AI-templated, and nothing in the frame explained it.
+- **The hero is alive and reactive** (Q117) but **type-led and quiet** (Q119).
+  The reaction is **subtle** (Q121): you notice it the second time you move.
+- **The type reacts** (Q120, Sevith liked type, field and scroll, so the
+  choice was made for him). The headline's letters widen on Archivo's width
+  axis as the cursor passes, and on scroll the headline settles tighter, so
+  phones get it too. No background field: it would fight a type-led hero.
+- **The only light on the page comes from the work** (Q118). **Screen spill**
+  (Q123): a faint, blurred copy of each screenshot's own colours sits under
+  it, like a monitor lighting a desk. The colour comes from the image, never
+  from a fixed tint.
+- **Colours are judged again only after the glow is gone** (Q124).
+- **Studio posters** are replaced (Q125) by three cinematic homages (Q122),
+  chosen for ambition and scale, for cars, and for taste (Q126). Each is drawn
+  for the room, never copied from the official artwork:
+  - Interstellar: **Gargantua**'s lit ring over a tiny Endurance (Q127).
+  - Cars: **a Piston Cup race**, with motion blur, the oval and a red car
+    breaking away. No character drawn (Q128).
+  - Game of Thrones: **the Iron Throne**, dark and centred, cold light from
+    above (Q129).
+- **Build order** (Q130): remove the glow and add screen spill, judge the
+  colours, then the hero type reaction, then the posters.

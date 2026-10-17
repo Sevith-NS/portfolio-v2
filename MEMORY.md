@@ -14,19 +14,44 @@ intake answers in `ART-DIRECTION.md`. The open work is in `TASK.md`.
 
 | Area | Now |
 |---|---|
-| Light palette | Two colours: oat `#EFE9DE` page, black text, lapis `#002DB4` for every highlight |
-| Dark palette | Two colours: near-black page, white text, lapis `#2F5BFF` for fills and `#809BFF` for small accent text |
+| Light palette | Oat `#EFE9DE` page, black `#1A1612` text, lapis `#002DB4` as the only accent |
+| Dark palette | Navy `#081028` page, off-white text, near-black surfaces, lapis `#2F5BFF` fills, `#809BFF` small-text accent |
+| Colour source | `lib/theme.ts` only. Tailwind emits the CSS variables from it; canvas, WebGL and metadata call `light.hex()` / `dark.hex()`. No hex anywhere else (3D room materials and pixel cats excepted) |
 | Fonts | Four families: Archivo (wide caps), Geist Sans (body), Geist Mono (labels), Bodoni Moda (logo and a few big statements). No handwriting anywhere |
 | Theme switch | A slow pixel scan that spreads out from the theme button, a quote, then a second scan from the same button clears it |
-| Page change | Curtain names the next page. Near-black in dark mode, oat with black type in light mode, lapis glow in both |
+| Page change | Curtain names the next page. Near-black in dark mode, oat with black type in light mode. No glow |
 | Motto | "Gotta stack up the Gandhis for a Porsche 911 GT3 RS." on /story, under the sign-off |
-| Studio | One night-time room in 3D. Cream loafs on the desk and runs laps when clicked |
+| Studio | One night-time room in 3D. Cream loafs on the desk and runs laps when clicked. Posters: Interstellar, Cars, Game of Thrones |
 | Footer | Pixel Simba and Cream on the contact card's edge, playing a five-scene loop |
 | Easter egg | Type `cream` anywhere. The footer shows the five keys and lights them up as you type |
 
 ---
 
+## Session: 17 Oct 2026
+
+- **Tungsten (warm black, bone, amber) tried and rejected outright.** Now lapis only, in both modes. Carrot is gone. Dark mode: only the page background is navy `#081028`; every other dark token is the original.
+- **One source of truth for colour:** `lib/theme.ts` holds a `Palette` class with `light` and `dark` instances. `tailwind.config.ts` builds the colour utilities and the `:root` / `.dark` variables from it. globals.css no longer holds any values.
+- **Pixel system:** `lib/pixels.ts` holds the shared pixel front (schedule, SVG mask, lapis flash). The theme switch is a pure pixel reveal over a frozen snapshot of the old page (no quote screen). Only the landing hero breaks into pixels on scroll (on every page it looked odd). The page-change curtain's name builds itself out of pixels of the letters (clipped to the glyphs, never a box; ~1.1s, the curtain holds until it's done), left to right, over a soft lapis glow (light-mode glow at 0.34, dark at 0.38). Both live in `components/motion/PixelDissolve.tsx`. A pixel skyline + Simba on the roofs was tried and rejected.
+- A pixel loading screen ("SEVITH" in pixel font) was tried and dropped as just okay.
+- New tokens `shade` (shadow colour) and `danger` (form errors) replace the hardcoded `rgb(0 0 0)` shadows and orange error hexes.
+
 ## Session: 15 Oct 2026
+
+### Round 8: palette trials, no glow, living headline, film posters (uncommitted)
+- **Three palettes tried and rejected:** racing green, oxblood noir and electric cobalt. Back to oat, black, lapis and carrot. The diagnosis: the soft lamp glow spoiled every palette.
+- **Intake round two (Q116-Q130)** is in `ART-DIRECTION.md`.
+- **The glow is gone everywhere:** the landing wash and its pulse, the hero's corner shadow, the case-study opening, the next-case card and the curtain. The glow CSS is deleted.
+- **Screen spill on project cards:** a blurred copy of each screenshot sits under it, so the only light comes from the work. Fainter in light mode.
+- **The hero headline reacts:** letters near the cursor widen and thicken on Archivo's axes, and the headline narrows on scroll. Off under reduced motion. Screen readers get the plain sentence.
+- **Studio posters replaced** with homages drawn in canvas: Gargantua (Interstellar), a Piston Cup race (Cars, no character drawn), the Iron Throne (Game of Thrones). The After Hours film, WANTED Cream and gym posters are gone.
+
+### Round 7: emerald trial (uncommitted, on top of commit 11a9c63)
+- **Palette swapped from lapis to a racing-green set,** three colours per mode from a car interior: emerald paint, cognac leather, cream or near-black base. Light: cream `#F1ECE2`, near-black text, emerald `#0F5C45`, cognac `#9A4E24`. Dark: near-black, off-white text, emerald `#13805C` fills and `#4FC496` small text, cognac `#D07A45`.
+- **Emerald** does every interactive job (nav pill, cursor, links, labels, markers, tags). **Cognac** is the lamp: the hero's "actually", "Shipped it.", the logo dot, the footer sign-off, the warm glows. New token `--warm` / `text-warm`.
+- **Dark-mode pixel scan** now uses the site's near-black (`#0A0B0E` / `#14161B`) instead of navy, with a cognac `#D07A45` scan flash. The light-mode scan flashes emerald.
+- Tried a pixel scan inside the footer name on hover. Sevith rejected it, so the fogged-glass `GlassPaint` wipe is back.
+- To undo, `git checkout -- .` returns to the committed lapis version.
+- **Studio "not loading":** could not reproduce. It loads in dev, in a production build, on direct load and through page navigation, with no hydration warnings.
 
 ### Round 6: two colours, no handwriting, motto, scan from the button
 - **Handwriting removed everywhere.** The `Scribble` component and its CSS are deleted. The 404 note is plain text now, and the "my actual handwriting" label on /story is gone.

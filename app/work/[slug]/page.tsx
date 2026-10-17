@@ -109,10 +109,7 @@ export default async function CasePage({ params }: Props) {
     <main id="main" className="relative">
       <FloatingNav navItems={navItems} />
 
-      {/* The opening, lit by the same lamp as the home page. */}
       <section className="relative isolate overflow-x-clip">
-        <div aria-hidden className="lamp-raised lamp-breathe fade-bottom pointer-events-none absolute inset-0 -z-10" />
-        <div aria-hidden className="lamp-shadow fade-bottom pointer-events-none absolute inset-0 -z-10" />
 
         <div className="mx-auto max-w-[64rem] px-4 pt-32 text-center md:px-8 md:pt-40">
           <TransitionLink href="/#projects" label="Work" className="inline-flex items-center gap-2 font-mono text-[0.75rem] uppercase tracking-[0.14em] text-ink-3 hover:text-ink">
@@ -252,7 +249,6 @@ export default async function CasePage({ params }: Props) {
             data-cursor="Next case"
             className="group relative isolate mt-10 block overflow-hidden rounded-[1.75rem] border border-rule bg-sheet p-8 md:p-14"
           >
-            <div aria-hidden className="lamp-light pointer-events-none absolute inset-0 -z-10 opacity-60 transition-opacity duration-700 group-hover:opacity-100" />
             <p className="font-mono text-[0.75rem] uppercase tracking-[0.18em] text-accent">Next case study</p>
             <p className="mt-4 flex items-center gap-4 font-wide text-4xl font-semibold uppercase tracking-[-0.01em] text-ink md:text-6xl">
               {next.title}

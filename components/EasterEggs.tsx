@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { PixelSprite } from "./PixelCats";
 
 // The cats (Q89, Q34). Cream is chaos: type "cream" anywhere (the footer says so,
 // and lights up a key per letter), tap the footer's keys, or tap her photo
@@ -106,24 +107,30 @@ export function EasterEggs() {
 
   return (
     <>
-      {/* Zoomies: in from the left, a spin, a double-back, and out the right. */}
+      {/* Zoomies: pixel Cream sprints in from the left, hops, doubles back, and
+          bolts out the right. */}
       <AnimatePresence>
         {zoomies > 0 && (
           <motion.div
             key={zoomies}
             aria-hidden
-            className="pointer-events-none fixed bottom-6 left-0 z-[140] size-16 md:size-20"
-            initial={{ x: "-20vw", y: 0, rotate: 0 }}
+            className="pointer-events-none fixed bottom-6 left-0 z-[140] aspect-[21/16] w-24 md:w-32"
+            initial={{ x: "-20vw", y: 0, scaleX: 1 }}
             animate={{
               x: ["-20vw", "55vw", "38vw", "70vw", "120vw"],
               y: [0, -60, 0, -36, 0],
-              rotate: [0, 360, 300, 660, 720],
+              // Face the way she runs: turn round for the double-back, then again.
+              scaleX: [1, 1, -1, -1, 1, 1],
             }}
-            transition={{ duration: 2.6, ease: "easeInOut", times: [0, 0.35, 0.5, 0.75, 1] }}
+            transition={{
+              duration: 2.6,
+              ease: "easeInOut",
+              times: [0, 0.35, 0.5, 0.75, 1],
+              scaleX: { duration: 2.6, ease: "linear", times: [0, 0.35, 0.36, 0.5, 0.51, 1] },
+            }}
             onAnimationComplete={() => setZoomies(0)}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/cats/cream-face.webp" alt="" className="size-full rounded-full object-cover shadow-[0_12px_30px_-10px_rgb(0_0_0/0.6)] ring-2 ring-paper" />
+            <PixelSprite name="cream" pose="run" className="size-full" />
           </motion.div>
         )}
       </AnimatePresence>
@@ -139,7 +146,7 @@ export function EasterEggs() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="rounded-full border border-rule bg-sheet/95 px-5 py-2.5 font-mono text-[0.75rem] uppercase tracking-[0.12em] text-ink shadow-[0_16px_40px_-20px_rgb(0_0_0/0.6)] backdrop-blur-md"
+              className="rounded-full border border-rule bg-sheet/95 px-5 py-2.5 font-mono text-[0.75rem] uppercase tracking-[0.12em] text-ink shadow-[0_16px_40px_-20px_rgb(var(--shade)/0.6)] backdrop-blur-md"
             >
               {note}
             </motion.p>

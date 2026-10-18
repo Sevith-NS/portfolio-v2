@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "framer-motion";
 import { useLenis } from "lenis/react";
-import { PixelReveal } from "@/components/motion/PixelDissolve";
+import { cut } from "@/lib/cut";
 
 type Phase = "idle" | "cover" | "reveal";
 type Ctx = { navigate: (href: string, label?: string) => void };
@@ -12,17 +12,13 @@ type Ctx = { navigate: (href: string, label?: string) => void };
 const TransitionContext = createContext<Ctx>({ navigate: () => {} });
 export const usePageTransition = () => useContext(TransitionContext);
 
-// Premium motion personality: one curve for the curtain, in and out.
-const CURTAIN = [0.76, 0, 0.24, 1] as const;
-const COVER_MS = 620;
-// The curtain stays shut at least this long, so the page name finishes
-// building itself in pixels before it opens.
-const NAME_DELAY_MS = 200;
-const NAME_MS = 1100;
-const HOLD_MS = NAME_DELAY_MS + NAME_MS * 1.1 + 250;
+// Cut, not curtain: the slate is up within a couple of frames, holds long
+// enough to read the next page's name, then cuts away on a flash.
+const COVER_MS = 140;
+const HOLD_MS = 760;
 const SAFETY_MS = 3500;
 
-// Page changes play like a film slate: a curtain closes, names the next scene, and opens.
+// Page changes play like a hard cut in an edit: a slate cuts in, names the next scene, and cuts out.
 export function TransitionProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -30,7 +26,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   const lenis = useLenis();
   const [phase, setPhase] = useState<Phase>("idle");
   const [label, setLabel] = useState("");
-  // const [scene, setScene] = useState(1);
+  const [take, setTake] = useState(0);
   const pending = useRef<string | null>(null);
   const pushTimer = useRef<number | undefined>(undefined);
   const safetyTimer = useRef<number | undefined>(undefined);
@@ -41,6 +37,8 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
     window.clearTimeout(safetyTimer.current);
     pending.current = null;
     setPhase("reveal");
+    // Out of the slate on a flash, over the new page.
+    cut(["white", "invert", "clear"]);
   }, []);
 
   const navigate = useCallback(
@@ -62,7 +60,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
       busy.current = true;
       pending.current = target;
       setLabel(next);
-      // setScene((s) => s + 1);
+      setTake((t) => t + 1);
       setPhase("cover");
       coveredAt.current = performance.now();
       pushTimer.current = window.setTimeout(() => router.push(href), COVER_MS);
@@ -113,41 +111,27 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
           <motion.div
             key="curtain"
             aria-hidden
-            // Between pages the next page's name settles in on the page colour.
-            className="pointer-events-auto fixed inset-0 z-[100] flex items-end overflow-hidden bg-paper text-ink"
-            initial={{ clipPath: "inset(100% 0% 0% 0%)" }}
-            animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
-            exit={{ clipPath: "inset(0% 0% 100% 0%)" }}
-            transition={{ duration: 0.62, ease: CURTAIN }}
+            // A slate cut straight in, no wipe: black, the page name, a blood ghost.
+            className="pointer-events-auto fixed inset-0 z-[100] overflow-hidden bg-void text-bone"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0 } }}
           >
-            {/* A soft lapis glow rising from under the page name, like light
-                spilling in from the next room as it opens. */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ delay: 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_22%_105%,rgb(var(--lamp)/0.34),transparent_70%)] dark:bg-[radial-gradient(70%_60%_at_22%_105%,rgb(var(--lamp)/0.38),transparent_70%)]"
-            />
-            <div className="relative mx-auto flex w-full max-w-page items-end justify-between gap-6 px-4 pb-10 md:px-8 md:pb-14">
-              {/* The next page's name builds itself in pixels, left to right. */}
-              <PixelReveal delay={NAME_DELAY_MS} duration={NAME_MS}>
-                <motion.p
-                  exit={{ opacity: 0, y: -16 }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="font-wide text-5xl font-semibold uppercase leading-none tracking-[-0.01em] md:text-8xl"
-                >
-                  {label || "Sevith"}
-                </motion.p>
-              </PixelReveal>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.7 }}
-                transition={{ delay: 0.3, duration: 0.3 }}
-                className="hidden font-mono text-[0.75rem] uppercase tracking-[0.18em] sm:block"
-              >
-                Sevith Sadashiva
-              </motion.p>
+            <div className="slate-flash absolute inset-0" />
+            <div className="absolute inset-0 grid place-items-center px-4">
+              {/* The next page's name, slammed on, with a lapis ghost a frame behind it. */}
+              <p data-cut="in" data-cut-v="slam" style={{ animationDelay: "70ms" }} className="title relative text-center text-[clamp(4.5rem,22vw,20rem)]">
+                <span className="absolute inset-0 translate-x-[0.03em] translate-y-[0.015em] text-blood">{label || "Sevith"}</span>
+                <span className="relative">{label || "Sevith"}</span>
+              </p>
+            </div>
+            <div className="hud absolute inset-x-0 top-6 flex justify-between px-4 md:top-8 md:px-8">
+              <span>cut to</span>
+              <span>take {String(take).padStart(2, "0")}</span>
+            </div>
+            <div className="hud absolute inset-x-0 bottom-6 flex justify-between px-4 md:bottom-8 md:px-8">
+              <span>sevith_sadashiva</span>
+              <span>© {new Date().getFullYear()}</span>
             </div>
           </motion.div>
         )}

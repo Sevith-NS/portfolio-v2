@@ -1,24 +1,21 @@
-import { navItems } from "@/data";
-import Hero from "@/components/Hero";
-import Intro from "@/components/Intro";
-import Projects from "@/components/Projects";
-import Approach from "@/components/Approach";
-import Footer from "@/components/Footer";
-import { FloatingNav } from "@/components/ui/FloatingNav";
+import Title from "@/components/home/Title";
+import Who from "@/components/home/Who";
+import Tapes from "@/components/home/Tapes";
+import Process from "@/components/home/Process";
+import Contact from "@/components/Contact";
+import { Reel } from "@/components/edit/Reel";
 
-const Home = () => {
+// Home, cut like an edit: the title card, the trailer, who I am (a bone
+// negative), the tapes, the process triptych, then the end card.
+export default function Home() {
   return (
     <main id="main" className="relative">
-      <FloatingNav navItems={navItems} />
-      {/* What I offer, who I am, the work, how I build it, then say hi (Q72, Q73, Q82).
-          Experience and Off the clock move to /story. */}
-      <Hero />
-      <Intro />
-      <Projects />
-      <Approach />
-      <Footer />
+      <Title />
+      <Reel />
+      <Who />
+      <Tapes />
+      <Process />
+      <Contact />
     </main>
   );
-};
-
-export default Home;
+}

@@ -8,8 +8,8 @@ export const live = <T extends { todo?: boolean }>(blocks: T[]) => (dev ? blocks
 
 // A question the data can't answer, parked where the answer belongs. Dev only.
 export const Prompt = ({ b, as: As = "li" }: { b: Block; as?: "li" | "div" }) => (
-  <As className="rounded-2xl border border-dashed border-accent/60 bg-sheet/60 p-4">
-    <p className="label text-accent">your turn</p>
-    <p className="mt-1.5 text-[0.9375rem] italic leading-relaxed text-ink-2">{b.text}</p>
+  <As className="border-2 border-dashed border-blood p-4">
+    <p className="hud text-fg">your turn</p>
+    <p className="mt-1.5 text-[0.875rem] italic leading-relaxed text-mute">{b.text}</p>
   </As>
 );

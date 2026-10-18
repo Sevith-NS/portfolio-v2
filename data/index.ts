@@ -3,22 +3,15 @@ export const resumeLink =
 
 export const email = "sevithns@gmail.com";
 
-export const navItems = [
-  { name: "Work", link: "#projects" },
-  { name: "Story", link: "/story" },
-  { name: "Studio", link: "/studio" },
-  { name: "Contact", link: "#contact" },
-];
-
 // Home, section two: who I am, short. The long version lives on /story.
 // First person, punchy, and the first joke is allowed here because the
-// visitor has already scrolled once (Q7). Edit freely.
+// visitor has already scrolled once. Edit freely.
 export const intro = {
   kicker: "Who I am",
   headline: "Self-taught designer. Learn it at 2am, ship it by morning.",
   body: "I'm Sevith. I design the interface, decide what the product should *actually do*, and write the code, so what you signed off on is what ships. *Startups, small businesses*, anyone who wants a clean UI built *end to end*. Freelance or full-time, either works.",
   aside: "Not everyone has great taste. Fortunately, I do.",
-  photo: { src: "/cats/simba.webp", alt: "Simba, Sevith's orange cat, looking thoroughly unimpressed", caption: "Simba, head of quality assurance." },
+  photo: { src: "/cats/simba.webp", alt: "Simba, Sevith's orange cat, looking thoroughly unimpressed", caption: "simba. head of qa. has never approved a build." },
   more: "The long version",
 };
 

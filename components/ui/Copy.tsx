@@ -1,6 +1,5 @@
 // Keyword emphasis for data-driven copy: *wrap a phrase in asterisks* in any
-// string and it renders bold with a soft lapis underline. The highlighter
-// (.hl) stays reserved for decisions, so this is the quieter mark for prose.
+// string and it renders bold with a blood marker rule under it (.key).
 // No hooks, so server components can use it too.
 export function Copy({ text, className }: { text: string; className?: string }) {
   const parts = text.split(/\*([^*]+)\*/g);

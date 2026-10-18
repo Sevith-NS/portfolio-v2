@@ -1,21 +1,20 @@
-import { navItems } from "@/data";
-import { FloatingNav } from "@/components/ui/FloatingNav";
 import { TransitionLink } from "@/components/transition/TransitionLink";
 
 export default function NotFound() {
   return (
-    <main id="main" className="relative z-[1] mx-auto flex min-h-[100dvh] max-w-page flex-col justify-center px-4 md:px-8">
-      <FloatingNav navItems={navItems} />
-      <p className="note">404 · Not found</p>
-      <h1 className="mt-3 font-serif text-6xl font-normal tracking-[-0.02em] text-ink md:text-8xl">This page is not available.</h1>
-      <p className="mt-4 text-lg text-ink-2">Cut in the edit, probably.</p>
-      <div className="mt-10 flex flex-wrap gap-3">
-        <TransitionLink href="/" label="Home" className="btn btn-primary">
-          Back to the start
-        </TransitionLink>
-        <TransitionLink href="/#projects" label="Work" className="btn btn-ghost">
-          See the work
-        </TransitionLink>
+    <main id="main" data-scene="Lost" className="tone-void relative flex min-h-[100svh] flex-col justify-end px-4 pb-20 md:px-6">
+      <div className="mx-auto w-full max-w-page">
+        <p className="hud">404, no such frame</p>
+        <h1 className="title mt-4 text-[clamp(4rem,16vw,16rem)]">Signal lost.</h1>
+        <p className="mt-6 max-w-[44ch] text-[1.0625rem]">This page got cut in the edit. The rest of the tape is still here.</p>
+        <div className="mt-10 flex flex-wrap gap-3">
+          <TransitionLink href="/" label="Sevith" className="btn btn-solid">
+            Back to the start
+          </TransitionLink>
+          <TransitionLink href="/#work" label="Work" className="btn">
+            See the work
+          </TransitionLink>
+        </div>
       </div>
     </main>
   );

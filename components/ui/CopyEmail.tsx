@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Check, Copy } from "@phosphor-icons/react";
 import { email } from "@/data";
 import { cn } from "@/lib/utils";
 
@@ -24,23 +22,11 @@ export function CopyEmail({ className, label = "Copy email" }: { className?: str
     }
   };
 
-  const text = state === "copied" ? "Copied to clipboard" : state === "failed" ? email : label;
+  const text = state === "copied" ? "Copied" : state === "failed" ? email : label;
 
   return (
-    <button type="button" onClick={copy} className={cn("btn btn-ghost", className)} aria-live="polite">
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.span
-          key={state}
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
-          transition={{ duration: 0.18 }}
-          className="inline-flex items-center gap-2"
-        >
-          {state === "copied" ? <Check size={16} weight="bold" /> : <Copy size={16} />}
-          {text}
-        </motion.span>
-      </AnimatePresence>
+    <button type="button" onClick={copy} className={cn("btn", className)} aria-live="polite">
+      {text}
     </button>
   );
 }

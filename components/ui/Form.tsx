@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, CheckCircle, CircleNotch, WarningCircle } from "@phosphor-icons/react";
 import emailjs from "@emailjs/browser";
 import { email } from "@/data";
 import { cn } from "@/lib/utils";
@@ -21,7 +20,7 @@ const validate = (f: Fields): Errors => {
 };
 
 const inputClass =
-  "w-full rounded-xl border bg-paper px-4 py-3 text-base text-ink placeholder:text-ink-3 outline-none transition-colors focus:border-ink focus-visible:outline-none";
+  "w-full border-2 bg-transparent px-4 py-3 text-[0.9375rem] text-fg placeholder:text-mute outline-none focus:border-blood focus-visible:outline-none";
 
 export function Form() {
   const [fields, setFields] = useState<Fields>({ name: "", mail: "", message: "" });
@@ -61,13 +60,13 @@ export function Form() {
 
   const field = (k: keyof Fields, label: string, input: React.ReactNode) => (
     <div className="flex flex-col gap-2">
-      <label htmlFor={`f-${k}`} className="text-sm font-medium text-ink">
+      <label htmlFor={`f-${k}`} className="hud text-fg">
         {label}
       </label>
       {input}
       {errors[k] && (
-        <p id={`f-${k}-err`} role="alert" className="flex items-center gap-1.5 text-sm text-ink">
-          <WarningCircle size={15} weight="fill" className="shrink-0 text-danger" />
+        <p id={`f-${k}-err`} role="alert" className="flex items-center gap-2 text-[0.8125rem] text-fg">
+          <span aria-hidden className="size-2 shrink-0 bg-blood" />
           {errors[k]}
         </p>
       )}
@@ -81,11 +80,13 @@ export function Form() {
     onChange: set(k),
     "aria-invalid": !!errors[k],
     "aria-describedby": errors[k] ? `f-${k}-err` : undefined,
-    className: cn(inputClass, errors[k] ? "border-danger" : "border-rule"),
+    className: cn(inputClass, errors[k] ? "border-blood" : "border-line"),
   });
 
   return (
-    <div className="relative rounded-2xl border border-rule bg-paper p-5 md:p-8">
+    // The call sheet: a bone page pinned into the black.
+    <div className="tone-bone relative p-5 md:p-8">
+      <p className="hud mb-6 border-b-2 border-fg pb-2 text-fg">call_sheet.txt</p>
       <AnimatePresence mode="wait" initial={false}>
         {status === "sent" ? (
           <motion.div
@@ -95,10 +96,9 @@ export function Form() {
             exit={{ opacity: 0 }}
             className="flex min-h-[22rem] flex-col items-start justify-center gap-4"
           >
-            <CheckCircle size={32} weight="fill" className="text-ink" />
-            <p className="text-2xl font-semibold tracking-[-0.02em] text-ink">Note received.</p>
-            <p className="max-w-[40ch] text-ink-2">Thanks for reaching out. I&apos;ll get back to you soon.</p>
-            <button type="button" onClick={() => setStatus("idle")} className="btn btn-ghost mt-2">
+            <p className="title text-[3rem] text-fg">That&apos;s a wrap.</p>
+            <p className="max-w-[40ch] text-mute">Message received. I&apos;ll get back to you soon.</p>
+            <button type="button" onClick={() => setStatus("idle")} className="btn mt-2">
               Send another
             </button>
           </motion.div>
@@ -115,22 +115,14 @@ export function Form() {
             )}
 
             {status === "error" && (
-              <p role="alert" className="flex items-start gap-2 rounded-xl border border-rule bg-paper p-3 text-sm text-ink">
-                <WarningCircle size={17} weight="fill" className="mt-px shrink-0 text-danger" />
+              <p role="alert" className="flex items-start gap-2 border-2 border-blood p-3 text-[0.8125rem] text-fg">
+                <span aria-hidden className="mt-1.5 size-2 shrink-0 bg-blood" />
                 The message didn&apos;t send. Try again, or email me directly at {email}.
               </p>
             )}
 
-            <button type="submit" disabled={status === "sending"} className="btn btn-primary self-start">
-              {status === "sending" ? (
-                <>
-                  <CircleNotch size={16} className="animate-spin" /> Sending
-                </>
-              ) : (
-                <>
-                  Send note <ArrowRight size={16} />
-                </>
-              )}
+            <button type="submit" disabled={status === "sending"} className="btn btn-solid self-start">
+              {status === "sending" ? "Sending" : "Send message"}
             </button>
           </motion.form>
         )}

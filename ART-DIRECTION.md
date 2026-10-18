@@ -1,3 +1,5 @@
+> **Retired direction.** The site was rebuilt on 17 Oct 2026 as a drill cover / zine cut like an edit (see `MEMORY.md`). The quotes below are still Sevith's own words and a source of facts; the visual rules are not.
+
 # After Hours
 
 The art direction for sevith.com. Every decision below traces to a numbered

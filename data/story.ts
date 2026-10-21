@@ -24,13 +24,13 @@ export const hello = {
 
 // For the recruiter with forty seconds.
 export const short: Block[] = [
-  { text: "*Self-taught designer.* BCA from Christ University." },
+  { text: "*Self-taught designer.* Google certified in *UX Design* and *Project Management*. BCA from Christ University." },
   { text: "I design it, decide what it does, and build it. *One person, no handoff.*" },
   { text: "Built *Polaris* and *Tesseract AI* solo, from the idea to a working product." },
   { text: "Open to *freelance and full-time*. Startups, small businesses, anyone who wants it clean." },
 ];
 
-export const chapters: { when: string; title: string; body: Block }[] = [
+export const chapters: { when: string; title: string; body: Block; link?: { label: string; href: string } }[] = [
   {
     when: "As a kid",
     title: "Wow. I want to build that.",
@@ -39,16 +39,30 @@ export const chapters: { when: string; title: string; body: Block }[] = [
     },
   },
   {
-    when: "Christ University",
-    title: "BCA, and a lot of side quests",
+    when: "Christ · Year one",
+    title: "Studied to pass. Learnt to build.",
     body: {
-      text: "What the degree gave you, and what you had to go and get yourself. If most of what you use now was learnt outside the syllabus, say so. It reads as drive, not a complaint.",
-      todo: true,
+      text: "BCA at Christ University. The syllabus taught me how to pass exams. Everything I actually build with, I taught myself, starting with tutorials. A *Spotify clone* over the summer break was pure follow-along, but it's where I learnt how a *SaaS app takes payments*: subscriptions, premium features, the lot. First year I got voted in as *student council rep*, and met the people who mattered more than the marks: *designers, game devs*, the ones who made the place worth showing up to.",
     },
   },
   {
+    when: "Christ · Year two",
+    title: "Ran the fests. Slept in the auditorium.",
+    body: {
+      text: "Joined the *Student Welfare Office* on the art committee and helped run the best fests Christ throws: *Blossoms, InBloom* and *Nritta 2023*. For InBloom, a colleague and I designed the *registration website*: students from other universities signing up, an *in-house payment portal* handling registration and logging, *200+ participants* through the door. Nobody asked me to treat it like a real product. I did anyway.",
+    },
+  },
+  {
+    when: "Christ · Final year",
+    title: "Re-elected, published, building",
+    body: {
+      text: "Voted back in as *student council rep*. Either I did the job, or nobody else wanted it. Joined the *Centre for AI* and edited its first ever biannual magazine, *Talos*: collected the articles, shaped the issue, and designed it so people would actually read past page two. And a few *faculty who pushed me* talked me into harder things: *Tesseract*, then a final-year project that became the seed of *Polaris*. A full degree. Just not the part they grade.",
+    },
+    link: { label: "Read Talos", href: "https://drive.google.com/file/d/1rx8vgj8mxJsNDjhte6Q9KzW4wnLt3rmv/view?usp=sharing" },
+  },
+  {
     when: "Dec 2024 to Mar 2025",
-    title: "First real users",
+    title: "First job, first number",
     body: {
       text: "Built a *real-estate platform* at Ceyone in React, TypeScript and Tailwind. Iterating on the UI lifted engagement *30%*, the first time I watched a design call move a number instead of just an opinion.",
     },
@@ -73,7 +87,7 @@ export const learning = {
   photo: { src: "/story/ux-notes.webp", alt: "Handwritten notes from the Google UX Design course, on inclusive design and case studies" },
   kicker: "Visibly in progress",
   headline: "Still learning. On purpose.",
-  body: "I'm a self-taught designer, so I learn something and ship it into a real project the same week. Last up: the *Google UX Design* course. These are my actual notes. The right-hand page says *tell a story* and *be concise*, which is, coincidentally, what this page is trying to do.",
+  body: "Self-taught means I learn something and ship it into a real project the same week. Done so far: the *Google UX Design* and *Google Project Management* certificates. These are my actual UX notes. The right-hand page says *tell a story* and *be concise*. Still working on the second one.",
 };
 
 export const offClock = {
@@ -82,7 +96,7 @@ export const offClock = {
   body: "Music, art, food, fits. Not everyone has great taste. I'm just saying it out loud.",
   photos: [
     { src: "/story/beach.webp", alt: "Sevith at the beach in a white tank top and loose white trousers", caption: "Overspends on fits. Zero regrets." },
-    { src: "/story/goa.webp", alt: "Sevith in a green shirt walking down a colourful street in Goa, drinking coffee", caption: "Goa. Coffee in one hand, main-character energy in the other." },
+    { src: "/story/goa.webp", alt: "Sevith in a green shirt walking down a colourful street in Goa, holding a matcha", caption: "Goa. Matcha in one hand, main-character energy in the other. The matcha was a prop. It tasted awful." },
     { src: "/story/climbing.webp", alt: "Sevith on a climbing wall, mid-route", caption: "Always exploring. Always finds the way back down." },
     { src: "/story/touching-grass.webp", alt: "Sevith lying face-down in tall grass on a misty hillside", caption: "Chronically online guy, touching grass. Documented, obviously." },
   ],
@@ -109,16 +123,12 @@ export const history = {
     { label: "Education", value: "BCA, Christ University", detail: "Bangalore" },
     { label: "Day job", value: "Technical Writer", detail: "Digital.ai · Mar 2025 – present" },
     { label: "Before that", value: "Software Developer Intern", detail: "Ceyone Marketing · Dec 2024 – Mar 2025" },
-    {
-      label: "Certification",
-      value: "Google UX Design Certificate",
-      detail: "Finished or in progress, and when? Confirm before this ships. It's the only line on the page I couldn't verify.",
-      todo: true,
-    },
+    { label: "Certification", value: "Google UX Design Certificate", detail: "Completed" },
+    { label: "Certification", value: "Google Project Management Certificate", detail: "Completed" },
   ] as { label: string; value: string; detail: string; todo?: boolean }[],
 };
 
 export const signoff = {
   line: "At 14 I wanted to be rich af. Now I want people to land on something I built and go *wow*. Honestly, the two aren't unrelated.",
-  motto: "Gotta stack up the Gandhis for a Porsche 911 GT3 RS.",
+  motto: "I don't chase money. I chase a Porsche 911 GT3 RS. The money just has to keep up.",
 };

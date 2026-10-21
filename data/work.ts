@@ -57,16 +57,14 @@ export const cases: CaseStudy[] = [
     },
     process: [
       {
-        text: "Your actual first move. Did you paper-trade by hand for a few weeks, read up on factor investing, or pull apart an existing terminal to see what it hid? Name the step and roughly when.",
+        text: "It started with *tab fatigue*: one laptop, a tab for every piece of information, juggling all of them to make one call. I don't have a Bloomberg terminal on my desk. So I built one with whatever I had.",
+      },
+      {
+        text: "Plain version: Polaris shows a lot of numbers (VaR, Sharpe, Sortino, drawdown, beta, the factor votes). How did you decide which ones earn a spot on screen? And did you ever build something, look at it, and remove it because it didn't help you decide anything? One example is enough.",
         todo: true,
       },
       {
-        text: "How you picked which factors and risk metrics made the cut, and, more interesting, what you cut.",
-        todo: true,
-      },
-      {
-        text: "How you tested it on yourself. The 5% month is the result; what was the setup: how much, how long, which strategies?",
-        todo: true,
+        text: "Then I put *real money* on its recommendations. The strategy was deliberately simple: *buy at support, sell at resistance*, plus basic smart money concepts and key levels. Everything I'd learnt by *losing a lot of money* went into it, so I never have to learn it that way again.",
       },
     ],
     approach: [
@@ -101,8 +99,7 @@ export const cases: CaseStudy[] = [
     ],
     misses: [
       {
-        text: "The honest gap. No users but you yet? A strategy that looked beautiful in backtest and fell apart live? An agent debate that produced confident nonsense? Name one real miss. It reads far stronger than a clean sweep.",
-        todo: true,
+        text: "*I didn't build another Bloomberg.* I built something that tells me why a trade makes sense, and why it doesn't. It has a long way to go, and I'm still learning the *quant and finance* to get it there.",
       },
     ],
     outcome: {
@@ -122,16 +119,13 @@ export const cases: CaseStudy[] = [
     },
     process: [
       {
-        text: "What you tried before building anything. Mock interviews with friends, YouTube question lists, writing answers out longhand? What specifically failed?",
-        todo: true,
+        text: "First I tried everything that already existed. Question lists from *InterviewBit* and similar sites, rehearsed on my own. *YouTube*, which helped up to a point. *Mock interviews with friends*, which lasted until we made eye contact and all started laughing.",
       },
       {
-        text: "How you landed on role plus experience level as the two inputs. Did you try others first?",
-        todo: true,
+        text: "The first version did three things: *give me a question, record my answer, tell me how it went*. Everything else, the job feed, the resume, the formats, came out of a lot of conversations with *classmates and teachers* about what they actually needed.",
       },
       {
-        text: "How you tested it: how many rounds you ran on yourself before your real placements, and what you changed between them.",
-        todo: true,
+        text: "Then I used it. A lot. I did not keep count, but enough that by the real placement round, the hard questions had already happened to me once.",
       },
     ],
     approach: [
@@ -172,12 +166,10 @@ export const cases: CaseStudy[] = [
     ],
     insights: [
       {
-        text: "Why hearing a question mattered more than reading it. What did silent practice fail to prepare you for, and what tipped you off?",
-        todo: true,
+        text: "Rehearsing from a list, I was answering questions lying on my bed. *Nobody interviews lying on their bed.* Practice only counts if it feels like the real thing: a question you hear, not read, and a *camera that's on*.",
       },
       {
-        text: "What you noticed reviewing your own past sessions that made feedback history worth building.",
-        todo: true,
+        text: "Going back through my old sessions was humbling. My answers were *vague*, and I never built up to the point, I just sort of arrived at it. The feedback kept handing me *frameworks to structure an answer*, and seeing the same mistake across sessions is what made me use them. One bad answer is noise. Five in a row is a pattern.",
       },
     ],
     decisions: [
@@ -191,16 +183,14 @@ export const cases: CaseStudy[] = [
     misses: [
       { text: "*No real users yet.* It works, it is live, and it has an audience of one. Getting it in front of students is the next step and I have not done it." },
       {
-        text: "A product or design call you would take back. Something students found confusing, or a feature you built that nobody needed?",
-        todo: true,
+        text: "The first setup made you *fill in a form by hand*: role, company, your experience, the job. Who even does that anymore. So I built a *resume parser* and a *job description fetcher* that pulls from any job portal, and the form now mostly fills itself.",
       },
     ],
     outcome: {
       text: "Live, and proven on exactly one user: *me, in a real interview*. The build is done; distribution is not.",
     },
     why: {
-      text: "Why generated questions plus spoken delivery beat the obvious alternatives: a fixed question bank, or just recording yourself. What does your version do that those cannot?",
-      todo: true,
+      text: "A fixed question bank lets you rehearse the answers. Recording yourself lets you rehearse on the bed. Friends let you rehearse laughing. Tesseract writes the questions from *the job you want and the resume you have*, says them out loud, hears you answer, and then tells you *what was actually wrong*. That's the only one of the four that feels like the interview.",
     },
   },
   {
@@ -213,8 +203,7 @@ export const cases: CaseStudy[] = [
     process: [
       { text: "Followed *Harkirat Singh's course* as the starting point, then built past it." },
       {
-        text: "Where you stopped following along and started making your own calls. Which part did you have to work out yourself?",
-        todo: true,
+        text: "The course stopped holding my hand at the *AWS Console*. That part I had to figure out myself. A flight cockpit is easier to navigate.",
       },
     ],
     approach: [
@@ -223,8 +212,7 @@ export const cases: CaseStudy[] = [
     ],
     insights: [
       {
-        text: "The thing that surprised you about how deploys really work. What did you assume was simple and was not, or assumed was magic and turned out to be a shell command?",
-        todo: true,
+        text: "I used to think uploading a project to Vercel *was* deployment, and that I had reached peak technology. Then I built the part Vercel hides, and found out *the upload is the easy bit*.",
       },
     ],
     decisions: [
@@ -236,63 +224,14 @@ export const cases: CaseStudy[] = [
     ],
     misses: [
       {
-        text: "What this version cannot do that the real thing can. Concurrent builds, caching, rollbacks, custom domains? Naming the gap signals you understand it.",
-        todo: true,
+        text: "*It's primitive.* It takes the project and pulls the latest changes on a *fixed schedule*, not when you push, and that's about all it does. Everything that makes the real one worth paying for is missing. It's hosting, barely.",
       },
     ],
     outcome: {
       text: "A working deploy pipeline, on GitHub, built to be *understood* rather than used.",
     },
     why: {
-      text: "Why building it beat reading about it. What do you know now that a blog post would not have taught you?",
-      todo: true,
-    },
-  },
-  {
-    slug: "zenfinance",
-    role: "Design and MERN build",
-    status: "Live",
-    problem: {
-      text: "A practice project, to learn how to *map data into charts* and build dashboards in React. Most personal finance dashboards only show what already happened, so I tried to show *what is likely next* too.",
-    },
-    process: [
-      {
-        text: "How you got from 'learn charts' to this specific product. What did you sketch or try first?",
-        todo: true,
-      },
-      {
-        text: "How you chose the prediction model, and how you checked whether its output was worth showing at all.",
-        todo: true,
-      },
-    ],
-    approach: [
-      { text: "A *MERN* dashboard (MongoDB, Express, React, Node.js) with real-time data visualization." },
-      { text: "*Machine-learning predictions* drawn alongside the actuals, in the same charts." },
-    ],
-    insights: [
-      {
-        text: "What made you separate predictions from actuals visually. Did you first draw them the same way and find it misleading?",
-        todo: true,
-      },
-    ],
-    decisions: [
-      { text: "Kept predictions *visually distinct* from actual data, so the two can never be confused." },
-    ],
-    wins: [
-      { text: "Real practice turning raw data into dashboards in React, which I carried straight into *Polaris's charts and analytics*." },
-    ],
-    misses: [
-      {
-        text: "Where this falls short as a product. Would you trust its predictions with your own money? If not, say why. That is the useful answer.",
-        todo: true,
-      },
-    ],
-    outcome: {
-      text: "Live on Vercel. Its real output was the charting skill underneath *Polaris*.",
-    },
-    why: {
-      text: "Why pairing predictions with actuals in one chart was the right call, rather than splitting them into two views.",
-      todo: true,
+      text: "Anybody can read about deployment pipelines. I'm a *FAFO* learner: the more I mess around, the more I find out. *Reading and then building it* is the only way it sticks for me.",
     },
   },
   {
@@ -305,18 +244,34 @@ export const cases: CaseStudy[] = [
     process: [
       { text: "Followed a *Sheriyans Coding School* tutorial as the starting point." },
       {
-        text: "What you rebuilt from scratch or changed once the tutorial ran out. Which interaction did you have to reason through yourself?",
-        todo: true,
+        text: "Then I rebuilt the *hover-to-reveal text* myself: fixed its positioning and kept playing with its styles until it felt right.",
       },
     ],
     approach: [
       { text: "Rebuilt the site in *React with Vite*, Tailwind CSS and *Framer Motion*." },
       { text: "Concentrated on *scroll-driven reveals*, marquee type and hover interactions." },
     ],
+    walkthrough: [
+      {
+        title: "Type first, then motion",
+        text: "A big all-caps hero with a small image that slides into the headline, then a full-width marquee that rolls in as you scroll.",
+        media: { kind: "video", src: "/work/ochi/hero.mp4", poster: "/work/ochi/hero-poster.webp", label: "The Ochi hero headline, then the marquee scrolling in" },
+      },
+      {
+        title: "The eyes",
+        text: "Two pupils that follow your cursor anywhere on the page. Find the centre of each eye, find the cursor, point the pupil, every frame.",
+        media: { kind: "video", src: "/work/ochi/eyes.mp4", poster: "/work/ochi/eyes-poster.webp", label: "The cartoon eyes tracking the cursor as it moves" },
+        aside: "They watch you scroll. Rude, honestly.",
+      },
+      {
+        title: "Hover to reveal",
+        text: "Hover a project and its name slides in across the cards. The part I rebuilt myself: its positioning, and its styles until they felt right.",
+        media: { kind: "video", src: "/work/ochi/hover.mp4", poster: "/work/ochi/hover-poster.webp", label: "Hovering featured projects to reveal their names" },
+      },
+    ],
     insights: [
       {
-        text: "What clicked about motion here. You have said you learnt to drive animation with math. What was the moment it landed?",
-        todo: true,
+        text: "It landed with *the eyes that follow your cursor*. Find the centre of each eye, find the cursor, work out where the pupil should point, every frame. One hell of a thing to pull off, and the first time *math felt like a design tool*.",
       },
     ],
     decisions: [
@@ -327,112 +282,14 @@ export const cases: CaseStudy[] = [
     ],
     misses: [
       {
-        text: "Where the rebuild does not hold up against the original, or what you would now do differently. Also worth saying plainly: this is a study piece, not original design.",
-        todo: true,
+        text: "*A study piece, not original design.* The layout and motion are Ochi's. I was building scroll-animated sites before they got famous; this one showed me exactly how complex, and how simple, they can be.",
       },
     ],
     outcome: {
       text: "Live, and the direct reason the motion on *this* site works the way it does.",
     },
     why: {
-      text: "Why rebuilding someone else's site taught you more, at that point, than designing your own would have.",
-      todo: true,
-    },
-  },
-  {
-    slug: "learn2lead",
-    role: "Product scope and full-stack build",
-    status: "Code on GitHub",
-    problem: {
-      text: "My college project. Make e-courses easier to get at, and pull *interview prep, internships and startup pitching* into one place instead of scattering them across separate sites.",
-    },
-    process: [
-      {
-        text: "How you scoped this. Four modules is a lot for a college project. Did you talk to other students, or start from what you personally wanted?",
-        todo: true,
-      },
-      {
-        text: "The order you built it in, and what you cut along the way to actually ship it.",
-        todo: true,
-      },
-    ],
-    approach: [
-      { text: "*Courses*, videos and study materials, with interactive quizzes and mock interviews." },
-      { text: "*Personalized progress dashboards*, plus an admin side for managing content." },
-      { text: "*Internship listings* and *PitchIt*, where founders present startup ideas to venture capitalists." },
-      { text: "*Stripe* payments for premium content." },
-    ],
-    insights: [
-      {
-        text: "What you learnt about students' actual prep habits that shaped the modules, or, honestly, if this was scoped on instinct, say that instead.",
-        todo: true,
-      },
-    ],
-    decisions: [
-      { text: "Built on *PHP and JavaScript* to learn from the basics how a backend talks to a frontend, so that moving to Node and friends later would make sense." },
-    ],
-    wins: [
-      { text: "Delivered as my college project. *PitchIt* was the most ambitious piece." },
-      { text: "Building a *multi-sided product* with payments and an admin side taught me how many moving parts a real platform has." },
-    ],
-    misses: [
-      {
-        text: "The over-scoping. Four modules in one project. Which of them is thin, and what would you have dropped to make the rest good?",
-        todo: true,
-      },
-    ],
-    outcome: {
-      text: "Shipped as my college project: a *four-module platform* that taught me what scope really costs.",
-    },
-    why: {
-      text: "Why one platform beat four small focused projects, or, if it did not, what you would tell your past self.",
-      todo: true,
-    },
-  },
-  {
-    slug: "spotify",
-    role: "Full-stack build",
-    status: "Live",
-    problem: {
-      text: "My first full-stack build, over a summer break: recreate a real *subscription product* end to end: auth, uploads, recurring payments, all of it.",
-    },
-    process: [
-      { text: "Followed an *open-source course* as the starting point." },
-      {
-        text: "What you added or rebuilt beyond the course, and the first thing that broke in a way the tutorial did not cover.",
-        todo: true,
-      },
-    ],
-    approach: [
-      { text: "*Next.js App Router*, Tailwind, *Supabase* and PostgreSQL." },
-      { text: "Song upload, playback through an advanced player, liked songs and playlists." },
-      { text: "Supabase and GitHub *authentication*, and *Stripe recurring subscriptions*, cancellation included." },
-    ],
-    insights: [
-      {
-        text: "What surprised you about payments or auth: the part you expected to take an afternoon and did not.",
-        todo: true,
-      },
-    ],
-    decisions: [
-      { text: "*Server components read the database directly*; API route handlers only cover writes and payments." },
-    ],
-    wins: [
-      { text: "Live on Vercel, with *auth, storage, payments and the frontend* all actually fitting together." },
-      { text: "The project that made me want to go deep, and led straight to *Polaris* and *Tesseract*." },
-    ],
-    misses: [
-      {
-        text: "Where a first build shows. Something you would now call badly structured, or a shortcut on payments or auth you would not repeat?",
-        todo: true,
-      },
-    ],
-    outcome: {
-      text: "Live on Vercel, and the build that set the direction for everything after it.",
-    },
-    why: {
-      text: "Why cloning a real subscription product was the right first full-stack project, rather than something original and smaller.",
-      todo: true,
+      text: "Following a tutorial only gets you a copy. The parts of Ochi that mattered, *the eyes and the hover*, didn't work until I understood them. That's why this one taught me a lot.",
     },
   },
 ];

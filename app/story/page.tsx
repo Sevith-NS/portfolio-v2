@@ -127,6 +127,17 @@ export default function StoryPage() {
                     <Copy text={c.body.text} />
                   </p>
                 )}
+                {c.link && (
+                  <a
+                    href={c.link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex items-center gap-2 font-mono text-[0.75rem] uppercase tracking-[0.14em] text-ink underline decoration-rule underline-offset-4 hover:decoration-ink"
+                  >
+                    {c.link.label}
+                    <ArrowRight size={14} weight="bold" aria-hidden />
+                  </a>
+                )}
               </div>
             </Reveal>
           ))}

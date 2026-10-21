@@ -14,10 +14,3 @@ export function useInView3D(ref: React.RefObject<Element | null>, margin = "200p
   }, [ref, margin]);
   return inView;
 }
-
-// Read a token from :root so the scene follows the active theme.
-export function cssColor(name: string, fallback: string) {
-  if (typeof window === "undefined") return fallback;
-  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  return v ? `rgb(${v.split(" ").join(",")})` : fallback;
-}

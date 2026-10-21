@@ -75,18 +75,6 @@ body::after {
 }
 
 @layer components {
-  /* The marker: a band of tungsten that sweeps in behind the key phrase. */
-  .hl {
-    background-image: linear-gradient(rgb(var(--hl)), rgb(var(--hl)));
-    background-repeat: no-repeat;
-    background-position: 0 85%;
-    background-size: 0% 12%;
-    transition: background-size 900ms cubic-bezier(0.16, 1, 0.3, 1);
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
-  }
-  .hl[data-on="true"] { background-size: 100% 12%; }
-
   .section-title {
     @apply font-serif text-[2.4rem] md:text-[3.75rem] font-normal tracking-[-0.025em] leading-[1.05] text-ink;
     text-wrap: balance;
@@ -96,8 +84,7 @@ body::after {
     @apply font-sans text-[0.8125rem] font-medium leading-5 text-ink-3 tabular;
   }
 
-  /* Keyword emphasis in prose: bold ink with a lamp-coloured rule under it. The
-     quiet cousin of .hl, which stays reserved for decisions. */
+  /* Keyword emphasis in prose: bold ink with a lamp-coloured rule under it. */
   .key {
     @apply font-semibold text-ink;
     text-decoration-line: underline;
@@ -163,7 +150,6 @@ body::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hl { transition: none; }
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 

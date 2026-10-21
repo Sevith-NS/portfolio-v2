@@ -17,7 +17,7 @@ export type V3 = [number, number, number];
 export const M = "/models/";
 
 // ---------- models ----------
-export const shadowAll = (o: THREE.Object3D) =>
+const shadowAll = (o: THREE.Object3D) =>
   o.traverse((m) => {
     if ((m as THREE.Mesh).isMesh) {
       m.castShadow = true;
@@ -78,7 +78,7 @@ export function Seated({ name, ...rest }: { name: string; p?: V3; r?: number; s?
   return <SeatedOn obj={useModel(name)} {...rest} />;
 }
 
-export function SeatedOn({ obj, p = [0, 0, 0], r = 0, s = 1, still, face }: { obj: THREE.Object3D; p?: V3; r?: number; s?: number; still: boolean; face?: number }) {
+function SeatedOn({ obj, p = [0, 0, 0], r = 0, s = 1, still, face }: { obj: THREE.Object3D; p?: V3; r?: number; s?: number; still: boolean; face?: number }) {
   const seat = useMemo(() => findSeat(obj), [obj]);
   const cos = Math.cos(r), sin = Math.sin(r);
   const at: V3 = [p[0] + (seat.x * cos + seat.z * sin) * s, p[1] + seat.y * s, p[2] + (-seat.x * sin + seat.z * cos) * s];
@@ -201,11 +201,11 @@ const HIP_Y = 0.225, SHOULDER_X = 0.115, THIGH_L = 0.095, SHIN_L = 0.095, UPPER_
 // Everything above the hips lives in a group pivoted at the hips, so leaning bends the back.
 const T_SHOULDER = 0.195, T_NECK = 0.212, T_HEAD = 0.222;
 // One kick cycle, and the moment inside it when boot meets ball.
-const KICK_T = 3.4, KICK_HIT = 0.72, BALL_R = 0.055;
+const KICK_T = 3.4, KICK_HIT = 0.72;
 
 type Pose = "idle" | "sit" | "walk" | "run" | "reach" | "play" | "kick";
 
-export function Minifig({
+function Minifig({
   pose = "idle",
   p = [0, 0, 0],
   r = 0,
@@ -439,7 +439,7 @@ export function Minifig({
 
 // ---------- lights ----------
 // Every light eases toward its target; under reduced motion it snaps.
-export function useEase(still: boolean) {
+function useEase(still: boolean) {
   const invalidate = useThree((s) => s.invalidate);
   return (cur: number, target: number, d: number, rate = 5) => {
     const k = still ? 1 : 1 - Math.exp(-rate * d);

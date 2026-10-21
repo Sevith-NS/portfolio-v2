@@ -21,7 +21,7 @@ export type Step = {
   aside?: string;
 };
 
-export type CaseStudy = {
+type CaseStudy = {
   slug: string;
   role: string;
   status: string;
@@ -47,7 +47,7 @@ export type CaseStudy = {
   why: Block;
 };
 
-export const cases: CaseStudy[] = [
+const cases: CaseStudy[] = [
   {
     slug: "polaris",
     role: "Market research, product design, product definition, UX, frontend and backend",

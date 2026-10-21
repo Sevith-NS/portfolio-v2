@@ -15,11 +15,11 @@ import { catNote } from "./EasterEggs";
 // in fur colours, then a one-pixel outline traced round it, scaled up with
 // nearest-neighbour sampling so it stays crisp.
 
-export type CatName = "simba" | "cream";
+type CatName = "simba" | "cream";
 const CATS: CatName[] = ["simba", "cream"]; // Cream drawn last, so she can sit on him
 // Simba is the bigger cat; Cream is Pearl's small daughter.
 const SIZE: Record<CatName, number> = { simba: 1.2, cream: 1 };
-export type Pose = "walk" | "run" | "sit" | "groom" | "yawn" | "stretch" | "loaf" | "sleep" | "crouch" | "jump" | "belly";
+type Pose = "walk" | "run" | "sit" | "groom" | "yawn" | "stretch" | "loaf" | "sleep" | "crouch" | "jump" | "belly";
 type Tail = "up" | "mid" | "low";
 type Key = "f" | "d" | "l" | "p" | "e" | "o";
 

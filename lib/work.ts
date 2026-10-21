@@ -1,8 +1,7 @@
 // Shared by client and server components.
 const names: Record<string, string> = {
   re: "React", tail: "Tailwind", javascript: "JavaScript", next: "Next.js", gemini: "Gemini", clerk: "Clerk",
-  neon: "Neon", ts: "TypeScript", nodejs: "Node.js", aws: "AWS", mongodb: "MongoDB", fm: "Framer Motion",
-  html5: "HTML", css: "CSS", php: "PHP", stripe: "Stripe", python: "Python",
+  neon: "Neon", ts: "TypeScript", nodejs: "Node.js", aws: "AWS", fm: "Framer Motion", python: "Python",
 };
 
 export const stack = (icons: string[]) =>

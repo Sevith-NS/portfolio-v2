@@ -3,7 +3,7 @@
 // colour as it passes. Both draw from the same schedule so they read as one
 // system.
 
-export const BAND = 0.22; // how ragged the front is, as a share of the sweep
+const BAND = 0.22; // how ragged the front is, as a share of the sweep
 export const FLASH = 0.018; // how long a cell glows as the front passes it
 
 // When each cell's moment comes, from 0 to 1: its distance from the origin over

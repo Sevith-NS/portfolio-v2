@@ -40,7 +40,7 @@ const TOKENS = [
   "tint-clover",
 ] as const;
 
-export type Token = (typeof TOKENS)[number];
+type Token = (typeof TOKENS)[number];
 
 export class Palette {
   static readonly tokens = TOKENS;

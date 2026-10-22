@@ -21,7 +21,7 @@ const validate = (f: Fields): Errors => {
 };
 
 const inputClass =
-  "w-full rounded-xl border bg-paper px-4 py-3 text-base text-ink placeholder:text-ink-3 outline-none transition-colors focus:border-ink focus-visible:outline-none";
+  "w-full rounded-xl border bg-paper/50 px-4 py-3 text-base text-ink placeholder:text-ink-3 outline-none transition-colors focus:border-ink focus-visible:outline-none";
 
 export function Form() {
   const [fields, setFields] = useState<Fields>({ name: "", mail: "", message: "" });
@@ -85,7 +85,7 @@ export function Form() {
   });
 
   return (
-    <div className="relative rounded-2xl border border-rule bg-paper p-5 md:p-8">
+    <div className="liquid p-5 md:p-8">
       <AnimatePresence mode="wait" initial={false}>
         {status === "sent" ? (
           <motion.div

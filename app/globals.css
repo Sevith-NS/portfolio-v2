@@ -129,6 +129,69 @@ body::after {
   .btn-primary { @apply bg-ink text-paper hover:bg-lamp hover:text-on-hl; }
   .btn-ghost { @apply border border-rule bg-paper/40 text-ink backdrop-blur-sm hover:border-ink; }
 
+  /* Liquid glass on the page colour itself. Built from --on-hl, which is the
+     same off-white in both modes, so only the text changes with the theme. */
+  .liquid {
+    position: relative;
+    isolation: isolate;
+    border-radius: 1.75rem;
+    background: linear-gradient(155deg, rgb(var(--on-hl) / 0.34), rgb(var(--on-hl) / 0.1) 55%, rgb(var(--on-hl) / 0.2));
+    backdrop-filter: blur(24px) saturate(1.6);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    box-shadow:
+      inset 0 0 28px rgb(var(--on-hl) / 0.14),
+      0 0 0 1px rgb(var(--shade) / 0.06), /* keeps the edge on a light page */
+      0 28px 56px -30px rgb(var(--shade) / 0.5);
+  }
+  /* The rim: bright at the top-left, fading round the sides, catching again bottom-right. */
+  .liquid::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(140deg, rgb(var(--on-hl) / 0.9), rgb(var(--on-hl) / 0.12) 40%, rgb(var(--on-hl) / 0.08) 65%, rgb(var(--on-hl) / 0.5));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Dark mode: near-clear glass lit from the top-left. A white fill over navy
+     reads as milky plastic, so the feel comes from light, not from the fill. */
+  .dark .liquid {
+    background: linear-gradient(165deg, rgb(var(--on-hl) / 0.09), rgb(var(--on-hl) / 0.015) 40%, rgb(var(--on-hl) / 0.04));
+    backdrop-filter: blur(28px) saturate(1.8) brightness(1.08);
+    -webkit-backdrop-filter: blur(28px) saturate(1.8) brightness(1.08);
+    box-shadow:
+      inset 0 1px 0 rgb(var(--on-hl) / 0.4),
+      inset 0 -18px 32px -24px rgb(var(--shade) / 0.7),
+      inset 0 0 0 1px rgb(var(--on-hl) / 0.05),
+      0 40px 80px -36px rgb(var(--shade) / 0.9),
+      0 0 60px -24px rgb(var(--lamp) / 0.35);
+  }
+  .dark .liquid::before {
+    background: linear-gradient(135deg, rgb(var(--on-hl) / 0.85), rgb(var(--on-hl) / 0.18) 22%, rgb(var(--on-hl) / 0.04) 50%, rgb(var(--on-hl) / 0.1) 78%, rgb(var(--on-hl) / 0.45));
+  }
+  /* The specular bloom where the curved edge catches the light. */
+  .dark .liquid::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background:
+      radial-gradient(90% 55% at 12% 0%, rgb(var(--on-hl) / 0.14), transparent 60%),
+      radial-gradient(70% 45% at 100% 100%, rgb(var(--lamp) / 0.12), transparent 70%);
+    pointer-events: none;
+  }
+  @supports not (backdrop-filter: blur(1px)) {
+    .liquid { background: rgb(var(--sheet)); }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .liquid { background: rgb(var(--sheet)); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  }
+
   .glow-soft {
     -webkit-mask-image: radial-gradient(closest-side, #000 35%, transparent);
     mask-image: radial-gradient(closest-side, #000 35%, transparent);

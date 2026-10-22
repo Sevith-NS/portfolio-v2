@@ -60,42 +60,66 @@ const cases: CaseStudy[] = [
         text: "It started with *tab fatigue*: one laptop, a tab for every piece of information, juggling all of them to make one call. I don't have a Bloomberg terminal on my desk. So I built one with whatever I had.",
       },
       {
-        text: "Plain version: Polaris shows a lot of numbers (VaR, Sharpe, Sortino, drawdown, beta, the factor votes). How did you decide which ones earn a spot on screen? And did you ever build something, look at it, and remove it because it didn't help you decide anything? One example is enough.",
-        todo: true,
+        text: "Then the rule that decided what stays on screen: *every number is earned*. No figure ships without its source and its age, and a backtest that never saw out-of-sample data says so on the result. Other apps headline a single *Strong Buy*, a score with hidden weights, an analyst's upside %. Polaris shows none of them, because none of them can show their working.",
+        draft: true,
+      },
+      {
+        text: "Some things didn't earn it. I built *next-day price forecasts* on XGBoost and Prophet, looked at what they cost, and cut them: two large libraries carrying one feature.",
       },
       {
         text: "Then I put *real money* on its recommendations. The strategy was deliberately simple: *buy at support, sell at resistance*, plus basic smart money concepts and key levels. Everything I'd learnt by *losing a lot of money* went into it, so I never have to learn it that way again.",
       },
     ],
     approach: [
-      { text: "*Terminal*: candlestick charting with a systematic Quant Trade Plan: limit entry, ATR and swing-based stop loss, 1.5R and 3R targets, a *factor vote breakdown* and half-Kelly position sizing." },
+      { text: "*Real and paper, never summed*: real holdings sync read-only from Zerodha and Upstox, paper books sit beside them, and no total ever adds the two together." },
+      { text: "*Terminal*: candlestick charting with a systematic Quant Trade Plan: limit entry, ATR and swing-based stop loss, two targets projected in ATR from a fair-value anchor and labelled with their R multiple, a *factor vote breakdown* and half-Kelly position sizing." },
       { text: "*Portfolio*: paper trading on live prices with risk analytics: 95% VaR and CVaR, Sharpe, Sortino, max drawdown, beta against the S&P 500, and Markowitz max-Sharpe optimization." },
-      { text: "*Trading Desk*: a multi-agent pipeline. Four analysts file reports, a bull and a bear argue it out, three risk seats fight over position size, and a portfolio manager approves or refuses with a share count." },
+      { text: "*AI desk*: a multi-agent research desk. Four analysts file reports, a bull and a bear argue it out, three risk seats fight over position size, and a portfolio manager approves or refuses with a share count." },
       { text: "*Backtest*: an event-driven backtester running 13 strategies, costs on both sides, plus out-of-sample, walk-forward and Monte Carlo robustness passes." },
-      { text: "*AI desk*: a Gemini assistant that can see the paper portfolio, the symbol on screen, live signals and news sentiment, and answers grounded questions about risk and sizing." },
+      { text: "*Ask Polaris*: a Gemini assistant that can see the paper portfolio, the symbol on screen, live signals and news sentiment, and answers grounded questions about risk and sizing." },
+    ],
+    walkthrough: [
+      {
+        title: "Read the market first",
+        text: "Top gainers and losers, then a heatmap of the day's change. Green and red before a single chart, so you know what kind of day it is.",
+        media: { kind: "video", src: "/work/polaris/markets.mp4", poster: "/work/polaris/markets-poster.webp", label: "The Polaris markets page: top movers, then the US equities heatmap" },
+      },
+      {
+        title: "Click a ticker, get a plan",
+        text: "Open a symbol from the watchlist and the chart arrives with a trade plan beside it: side, entry, stop, two targets and a size, drawn on the chart as lines.",
+        media: { kind: "video", src: "/work/polaris/terminal.mp4", poster: "/work/polaris/terminal-poster.webp", label: "Opening PLTR from the watchlist and zooming into its trade plan" },
+        aside: "Entry, stop, targets. Shown before the paper trade button, not after.",
+      },
+      {
+        title: "Then check what's underneath",
+        text: "Every reading side by side, then a fundamental x-ray built from four years of raw statements: growth, profitability, cash quality and the balance sheet.",
+        media: { kind: "video", src: "/work/polaris/fundamentals.mp4", poster: "/work/polaris/fundamentals-poster.webp", label: "Scrolling the PLTR fundamentals tab: readings, then the fundamental x-ray" },
+      },
+      {
+        title: "News, scored for tone",
+        text: "Headlines from public feeds, each scored by a sentiment model, rolled up into an overall tone and a tone for every category.",
+        media: { kind: "video", src: "/work/polaris/news.mp4", poster: "/work/polaris/news-poster.webp", label: "The Polaris news page, zooming into tone by category" },
+      },
     ],
     insights: [
       {
-        text: "The insight behind the factor vote breakdown. What convinced you a signal is worthless unless the user can see which factors voted for it, and which voted against?",
-        todo: true,
+        text: "*Surface candidates, never verdicts.* A single rating built from untested indicators is a recommendation engine wearing a lab coat. So the plan shows which factors voted for the trade and which voted against, and you weigh them yourself.",
+        draft: true,
       },
       {
-        text: "What paper-trading taught you that changed the risk analytics. Did a drawdown you did not see coming push VaR and CVaR up the screen?",
-        todo: true,
-      },
-      {
-        text: "Why the Trading Desk had to argue instead of just answering. What was wrong with a single model handing down one verdict?",
-        todo: true,
+        text: "*AI observes and explains; it never trades.* One model handing down one verdict has nobody checking it. On the desk, every round of debate needs a rebuttal, the risk seats argue size against half-Kelly and portfolio VaR, and the manager can still refuse.",
+        draft: true,
       },
     ],
     decisions: [
-      { text: "Split the product into *two independently deployable services*, a Next.js frontend and a Flask quant API, talking only over HTTP." },
-      { text: "Every Trading Desk decision is *journalled*, then scored on realized alpha against the S&P 500. Past hits and misses feed the next run's prompts." },
+      { text: "Split the product into *two independently deployable services*, a Next.js frontend and a FastAPI quant API, talking only over HTTP." },
+      { text: "Trade plan targets are *one continuous function of the measured state*: signal strength, trend and mean reversion move them smoothly, and a 52-week high or low in the way pulls them back. No fixed 1.5R and 3R." },
+      { text: "Every AI desk decision is *journalled*, then scored on realized alpha against the S&P 500. Past hits and misses feed the next run's prompts." },
       { text: "When a bar touches both the stop and the target, the backtester assumes *the stop was hit*. Results err on the side of caution." },
     ],
     wins: [
       { text: "Ran it on my own money as the first user: *5% return in the first month*, after tuning the portfolio." },
-      { text: "The one mechanism you would rebuild exactly the same way. Which part of this is genuinely good, and how do you know?", todo: true },
+      { text: "The part I'd rebuild exactly the same way: the *AI desk debate*. It argues both sides of a trade before anything gets a share count." },
     ],
     misses: [
       {
@@ -106,8 +130,7 @@ const cases: CaseStudy[] = [
       text: "Personally tested and optimized the portfolio, reaching a *5% return within the first month*.",
     },
     why: {
-      text: "Why this shape beat the simpler one: a single app, one model, no debate, no journal. What would that version have gotten wrong?",
-      todo: true,
+      text: "*One platform for every market I trade*, India and the US, real and paper, instead of a tab for every tool. The simpler version is the tab fatigue I started with.",
     },
   },
   {

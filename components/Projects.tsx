@@ -35,16 +35,16 @@ function Plate({ p, index, total }: { p: (typeof projects)[number]; index: numbe
               mx.set(0);
               my.set(0);
             }}
-            className="grain relative isolate overflow-hidden rounded-[1.75rem] border border-rule bg-sheet px-5 pt-10 [perspective:1200px] sm:px-12 sm:pt-14"
+            className="liquid overflow-hidden px-5 pt-10 [perspective:1200px] sm:px-12 sm:pt-14"
           >
             {img && (
-              // Screen spill: the screenshot itself, blurred, so the light takes its colour.
+              // The plate's background is its own screenshot, blurred under the glass, so every project gets its own colour.
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={img}
                 alt=""
                 aria-hidden
-                className="pointer-events-none absolute inset-x-[10%] top-[20%] -z-10 h-[85%] w-[80%] object-cover opacity-20 blur-[56px] saturate-150 transition-opacity duration-700 group-hover:opacity-30 dark:opacity-35 dark:group-hover:opacity-50"
+                className="pointer-events-none absolute inset-0 -z-10 h-full w-full scale-125 object-cover opacity-70 blur-2xl saturate-150 transition-opacity duration-700 group-hover:opacity-90"
               />
             )}
 

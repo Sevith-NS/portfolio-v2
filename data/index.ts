@@ -33,8 +33,8 @@ export const projects = [
     des: "Polaris reads your broker holdings from Zerodha and Upstox, tracks India and US markets, and gives you a paper desk for every idea before real money moves.",
     img: "/polaris.png",
     iconLists: ["/next.svg", "/ts.svg", "/tail.svg", "/python.svg", "/gemini.svg"],
-    link: "https://github.com/Sevith-NS/algo-trader",
-    parts: ["Signal engine", "Risk analytics", "ML forecasts", "Backtester", "AI desk", "Trading desk agents"],
+    link: "https://algo-trader-frontend-sable.vercel.app/",
+    parts: ["Signal engine", "Risk analytics", "Broker sync", "Backtester", "AI desk agents", "Ask Polaris"],
   },
   {
     id: 1,
@@ -115,9 +115,9 @@ export const approach = [
     artifact: {
       heading: "Polaris \u00b7 build log",
       rows: [
-        { tag: "Shipped", text: "Two services: Next.js frontend, Flask quant API" },
+        { tag: "Shipped", text: "Two services: Next.js frontend, FastAPI quant API" },
         { tag: "Shipped", text: "Backtester running 13 strategies" },
-        { tag: "Shipped", text: "Trading Desk: agents argue before they commit" },
+        { tag: "Shipped", text: "AI desk: agents argue before they commit" },
         { tag: "Live", text: "Paper portfolio, +5% in the first month" },
       ],
     },

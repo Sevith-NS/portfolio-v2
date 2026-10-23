@@ -2,45 +2,73 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
-import { SoftShadows, useGLTF } from "@react-three/drei";
-import { Bloom, EffectComposer, N8AO, Vignette } from "@react-three/postprocessing";
+import { useGLTF } from "@react-three/drei";
+import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import { useReducedMotion } from "framer-motion";
 import { useTheme } from "next-themes";
 import * as THREE from "three";
-import { Box, Bulb, Glow, Label, M, Model, Seated, useFontsReady, useModel, type V3 } from "./kit";
+import { Box, Bulb, Glow, Label, M, Model, Seated, TOON, useFontsReady, useModel, type V3 } from "./kit";
 import { useInView3D } from "./useInView3D";
 import { dark, light } from "@/lib/theme";
-import { Cream } from "./Cream";
+import { Cat, COATS } from "./Cat";
 import { StudioSkeleton } from "./StudioSkeleton";
+import { PixelArt } from "./PixelArt";
 
 // AFTER HOURS, the room. One corner of one room at 2am: the desk, the lamp as the
 // only warm light, the city outside, the gym corner, and Cream on the desk. In
 // light mode it is the same room at golden hour. See ART-DIRECTION.md.
 
-export type Hotspot = "lamp" | "monitor" | "cream";
+export type Hotspot = "lamp" | "monitor" | "cream" | "simba";
 
 // ---------- the two hours ----------
 type Hour = {
   floor: string; floorLine: string; wall: string; wall2: string; trim: string; paper: string; ink: string; accent: string;
   screen: string; sky: [string, string]; city: string; cityLit: string[]; moon: string | null;
-  amb: number; hemi: [string, string, number]; key: { color: string; i: number; p: V3 }; lamp: number; exposure: number;
+  amb: number; hemi: [string, string, number]; key: { color: string; i: number; p: V3 }; lamp: number;
 };
 const NIGHT: Hour = {
   floor: "#6B5442", floorLine: "#56432F", wall: "#232838", wall2: "#1C2030", trim: "#161925", paper: "#EDE6DA", ink: "#1A1612", accent: dark.hex("lamp"),
   screen: "#0B0F1C", sky: ["#070A18", "#1A2048"], city: "#0C0F1D", cityLit: ["#FFC37A", "#FFD9A0", "#9FB4FF"], moon: "#F4F1E6",
-  amb: 0.1, hemi: ["#3A4A8A", "#0B0C12", 0.45], key: { color: "#8EA6FF", i: 0.8, p: [-4.5, 3.6, 0.8] }, lamp: 9, exposure: 1.08,
+  amb: 0.55, hemi: ["#5A6AAA", "#1A1C28", 0.7], key: { color: "#9FB2FF", i: 1.5, p: [-4.5, 3.6, 0.8] }, lamp: 1.6,
 };
 const GOLDEN: Hour = {
   floor: "#C9A27E", floorLine: "#B08967", wall: "#EFE6D8", wall2: "#E4D9C8", trim: "#D6C9B4", paper: "#FBF7F0", ink: "#1A1612", accent: light.hex("accent"),
   screen: "#0B0F1C", sky: ["#F7C98F", "#E8875A"], city: "#7A4C42", cityLit: ["#FFE2A8"], moon: null,
-  amb: 0.32, hemi: ["#FFE2B8", "#7A5A48", 0.75], key: { color: "#FFB27A", i: 2.1, p: [-4.5, 2.2, 0.9] }, lamp: 2.4, exposure: 1.0,
+  amb: 0.7, hemi: ["#FFE2B8", "#7A5A48", 0.8], key: { color: "#FFC896", i: 2.0, p: [-4.5, 2.6, 0.9] }, lamp: 0.3,
 };
+
+// 16-bit: the room is drawn this many pixels tall, then scaled up without smoothing.
+const ROWS = 320;
+
+// Blocky on purpose: no smoothing, no mipmaps.
+function blocky(t: THREE.Texture) {
+  t.magFilter = t.minFilter = THREE.NearestFilter;
+  t.generateMipmaps = false;
+  return t;
+}
 
 const ROOM = 3;
 const H = ROOM / 2;
 const WALL_H = 1.7;
 const DESK_Y = 0.38;
 const CREAM_HOME: V3 = [-0.3, DESK_Y, -1.02];
+// Simba climbs in over the front edge of the floor, the side nearest the contact card, and loafs on the rug.
+const SIMBA_ENTRY: V3 = [-0.25, -0.18, 1.7];
+const SIMBA_HOME: V3 = [-0.4, 0.013, 0.2];
+
+// Where Simba's leap ended on screen, as a spot just outside the floor's front edge below it.
+// Screen x tracks x - z (the camera looks down the diagonal), centred on the room, at FitZoom's scale.
+function entryAt(clientX: number, el: HTMLElement | null): V3 {
+  if (!el) return SIMBA_ENTRY;
+  const r = el.getBoundingClientRect();
+  const zoom = Math.min(r.width / 4.0, r.height / 3.45);
+  const s = THREE.MathUtils.clamp(((clientX - r.left - r.width / 2) / zoom) * Math.SQRT2, -2.6, 2.6);
+  // The left front edge is z = H, the right one x = H; both keep x - z = s.
+  return s < 0 ? [s + H, -0.18, H + 0.2] : [H + 0.2, -0.18, H - s];
+}
+// The whole work corner (desk, chair, prints, clock, Cream) slides along the back wall by this much,
+// so it sits in the middle of the room instead of crowding the plant.
+const WORK_X = -0.35;
 
 // ---------- textures drawn once, no image files ----------
 function usePlanks(h: Hour) {
@@ -62,8 +90,7 @@ function usePlanks(h: Hour) {
     }
     const t = new THREE.CanvasTexture(cv);
     t.colorSpace = THREE.SRGBColorSpace;
-    t.anisotropy = 8;
-    return t;
+    return blocky(t);
   }, [h]);
   useEffect(() => () => tex.dispose(), [tex]);
   return tex;
@@ -112,7 +139,7 @@ function useSkyline(h: Hour) {
     }
     const t = new THREE.CanvasTexture(cv);
     t.colorSpace = THREE.SRGBColorSpace;
-    return t;
+    return blocky(t);
   }, [h]);
   useEffect(() => () => tex.dispose(), [tex]);
   return tex;
@@ -126,12 +153,12 @@ function Shell({ h }: { h: Hour }) {
     <>
       <mesh position={[0, -0.06, 0]} receiveShadow castShadow>
         <boxGeometry args={[ROOM, 0.12, ROOM]} />
-        <meshStandardMaterial attach="material-0" color={h.floorLine} />
-        <meshStandardMaterial attach="material-1" color={h.floorLine} />
-        <meshStandardMaterial attach="material-2" map={planks} roughness={0.72} />
-        <meshStandardMaterial attach="material-3" color={h.floorLine} />
-        <meshStandardMaterial attach="material-4" color={h.floorLine} />
-        <meshStandardMaterial attach="material-5" color={h.floorLine} />
+        <meshToonMaterial attach="material-0" color={h.floorLine} gradientMap={TOON} />
+        <meshToonMaterial attach="material-1" color={h.floorLine} gradientMap={TOON} />
+        <meshToonMaterial attach="material-2" map={planks} gradientMap={TOON} />
+        <meshToonMaterial attach="material-3" color={h.floorLine} gradientMap={TOON} />
+        <meshToonMaterial attach="material-4" color={h.floorLine} gradientMap={TOON} />
+        <meshToonMaterial attach="material-5" color={h.floorLine} gradientMap={TOON} />
       </mesh>
       <Box p={[0, WALL_H / 2, -H - 0.05]} s={[ROOM, WALL_H, 0.1]} c={h.wall} rough={0.95} cast={false} />
       <Box p={[-H - 0.05, WALL_H / 2, -0.05]} s={[0.1, WALL_H, ROOM + 0.1]} c={h.wall2} rough={0.95} cast={false} />
@@ -153,8 +180,7 @@ function Shell({ h }: { h: Hour }) {
   );
 }
 
-// Three prints taped above the desk, drawn once to canvas in the site's own
-// fonts: homages to Interstellar, Cars and Game of Thrones (Q122, Q125-Q129),
+// Three prints taped above the desk, drawn once to canvas in the pixel font: homages to Interstellar, Cars and Game of Thrones (Q122, Q125-Q129),
 // made for this room rather than copied from the real posters.
 type Faces = { serif: string; sans: string; wide: string };
 type Draw = (g: CanvasRenderingContext2D, w: number, h: number, f: Faces) => void;
@@ -412,14 +438,11 @@ function usePoster(draw: Draw) {
     cv.width = PW;
     cv.height = PH;
     const g = cv.getContext("2d")!;
-    draw(g, PW, PH, {
-      serif: face("--font-serif", "Georgia, serif"),
-      sans: face("--font-geist-sans", "system-ui, sans-serif"),
-      wide: face("--font-display", "system-ui, sans-serif"),
-    });
+    const pixel = face("--font-pixel", "monospace");
+    draw(g, PW, PH, { serif: pixel, sans: pixel, wide: pixel });
+    // Averaged down, not point-sampled: the palette pass does the pixelating, so fine art doesn't sparkle.
     const t = new THREE.CanvasTexture(cv);
     t.colorSpace = THREE.SRGBColorSpace;
-    t.anisotropy = 8;
     return t;
   }, [draw, fonts]); // eslint-disable-line react-hooks/exhaustive-deps -- redraw once fonts load
   useEffect(() => () => tex.dispose(), [tex]);
@@ -434,7 +457,7 @@ function Print({ draw, p, tilt, h }: { draw: Draw; p: V3; tilt: number; h: Hour 
     <group position={p} rotation={[0, 0, tilt]}>
       <mesh receiveShadow>
         <planeGeometry args={[w, ht]} />
-        <meshStandardMaterial map={tex} emissiveMap={tex} emissive="#FFFFFF" emissiveIntensity={h === NIGHT ? 0.32 : 0.08} roughness={0.85} />
+        <meshToonMaterial map={tex} emissiveMap={tex} emissive="#FFFFFF" emissiveIntensity={h === NIGHT ? 0.32 : 0.08} gradientMap={TOON} />
       </mesh>
       <Box p={[-w / 2 + 0.03, ht / 2 - 0.004, 0.003]} s={[0.07, 0.022, 0.003]} c="#E8DFC8" r={[0, 0, 0.5]} cast={false} />
       <Box p={[w / 2 - 0.03, ht / 2 - 0.004, 0.003]} s={[0.07, 0.022, 0.003]} c="#E8DFC8" r={[0, 0, -0.5]} cast={false} />
@@ -453,7 +476,7 @@ function Posters({ h }: { h: Hour }) {
       <group position={[0.98, 1.2, -H + 0.012]}>
         <mesh>
           <circleGeometry args={[0.16, 40]} />
-          <meshStandardMaterial color={h.paper} roughness={0.6} />
+          <meshToonMaterial color={h.paper} gradientMap={TOON} />
         </mesh>
         <Label text="2:00" size={0.07} color={h.ink} p={[0, 0, 0.004]} />
       </group>
@@ -466,11 +489,11 @@ function Posters({ h }: { h: Hour }) {
 // kettlebell. Iron and steel catch the lamp; the plates carry the site's rust.
 const IRON = "#2A2B30", STEEL = "#9A9EA6", RUBBER = "#18181B", PAD = "#6E2430";
 
-function Cyl({ p, r = [0, 0, 0], rad, len, c, metal = 0.5, rough = 0.45, seg = 28 }: { p: V3; r?: V3; rad: number; len: number; c: string; metal?: number; rough?: number; seg?: number }) {
+function Cyl({ p, r = [0, 0, 0], rad, len, c, seg = 28 }: { p: V3; r?: V3; rad: number; len: number; c: string; metal?: number; rough?: number; seg?: number }) {
   return (
     <mesh position={p} rotation={r} castShadow receiveShadow>
       <cylinderGeometry args={[rad, rad, len, seg]} />
-      <meshStandardMaterial color={c} metalness={metal} roughness={rough} />
+      <meshToonMaterial color={c} gradientMap={TOON} />
     </mesh>
   );
 }
@@ -512,11 +535,11 @@ function Kettlebell({ p }: { p: V3 }) {
     <group position={p}>
       <mesh position={[0, 0.045, 0]} castShadow receiveShadow>
         <sphereGeometry args={[0.048, 24, 16]} />
-        <meshStandardMaterial color={IRON} metalness={0.6} roughness={0.5} />
+        <meshToonMaterial color={IRON} gradientMap={TOON} />
       </mesh>
       <mesh position={[0, 0.098, 0]} castShadow>
         <torusGeometry args={[0.028, 0.007, 10, 24, Math.PI]} />
-        <meshStandardMaterial color={IRON} metalness={0.6} roughness={0.5} />
+        <meshToonMaterial color={IRON} gradientMap={TOON} />
       </mesh>
       <Box p={[0, 0.006, 0]} s={[0.06, 0.012, 0.06]} c={IRON} metal={0.6} rough={0.5} />
     </group>
@@ -606,7 +629,7 @@ function Desk() {
 // A rug in the site's own colours: ivory with an editorial-blue border.
 function Rug({ h }: { h: Hour }) {
   return (
-    <group position={[0.15, 0, -0.3]}>
+    <group position={[-0.15, 0, -0.15]}>
       <Box p={[0, 0.006, 0]} s={[1.6, 0.012, 1.2]} c={h === NIGHT ? dark.hex("deep") : light.hex("lamp")} rough={1} cast={false} />
       <Box p={[0, 0.0125, 0]} s={[1.44, 0.004, 1.04]} c={h === NIGHT ? "#A8977C" : "#E2D3B8"} rough={1} cast={false} />
     </group>
@@ -651,7 +674,7 @@ function DeskLamp({ on, h, onPick, onHover }: { on: boolean; h: Hour; onPick: ()
   return (
     <group position={[-0.34, DESK_Y, -1.28]} {...hover("lamp", onHover)} onClick={stop(onPick)}>
       <primitive object={lamp} />
-      <Bulb p={[0.03, 0.24, 0]} on={on} intensity={h.lamp} distance={4.4} size={0.024} color="#FFA860" shadow />
+      <Bulb p={[0.03, 0.24, 0]} on={on} intensity={h.lamp} distance={1.3} size={0.024} color="#FFA860" />
     </group>
   );
 }
@@ -693,6 +716,9 @@ function Scene({
   h,
   lampOn,
   chaos,
+  simba,
+  simbaFuss,
+  simbaFrom,
   still,
   onHover,
   onPick,
@@ -700,6 +726,9 @@ function Scene({
   h: Hour;
   lampOn: boolean;
   chaos: number;
+  simba: boolean;
+  simbaFuss: number;
+  simbaFrom: V3;
   still: boolean;
   onHover: (v: Hotspot | null) => void;
   onPick: (v: Hotspot) => void;
@@ -713,23 +742,30 @@ function Scene({
   return (
     <group>
       <Shell h={h} />
-      <Posters h={h} />
       <Rug h={h} />
       <Gym h={h} />
 
       {/* The desk, at 2am. */}
-      <Desk />
-      <Monitor h={h} onPick={() => onPick("monitor")} onHover={onHover} />
-      <Model name="computerKeyboard" p={[0.2, DESK_Y, -1.06]} />
-      <Model name="computerMouse" p={[0.44, DESK_Y, -1.06]} />
-      <DeskLamp on={lampOn} h={h} onPick={() => onPick("lamp")} onHover={onHover} />
-      <Mug knocked={knocked} still={still} />
-      {/* Swivelled a little toward the mouse, so the camera catches his profile and beard. */}
-      <Seated name="chairDesk" p={[0.24, 0, -0.62]} r={Math.PI - 0.5} face={Math.PI - 0.5} still={still} />
+      <group position={[WORK_X, 0, 0]}>
+        <Posters h={h} />
+        <Desk />
+        <Monitor h={h} onPick={() => onPick("monitor")} onHover={onHover} />
+        <Model name="computerKeyboard" p={[0.2, DESK_Y, -1.06]} />
+        <Model name="computerMouse" p={[0.44, DESK_Y, -1.06]} />
+        <DeskLamp on={lampOn} h={h} onPick={() => onPick("lamp")} onHover={onHover} />
+        <Mug knocked={knocked} still={still} />
+        {/* Swivelled a little toward the mouse, so the camera catches his profile and beard. */}
+        <Seated name="chairDesk" p={[0.24, 0, -0.62]} r={Math.PI - 0.5} face={Math.PI - 0.5} still={still} />
 
-      {/* Cream: loafed next to the lamp (Q45). Click her and she does laps. */}
-      <group {...hover("cream", onHover)} onClick={stop(() => onPick("cream"))}>
-        <Cream home={CREAM_HOME} homeYaw={0.7} scale={0.95} runs={chaos} still={still} />
+        {/* Cream: loafed next to the lamp (Q45). Click her and she does laps. */}
+        <group {...hover("cream", onHover)} onClick={stop(() => onPick("cream"))}>
+          <Cat home={CREAM_HOME} homeYaw={0.7} scale={0.95} runs={chaos} still={still} />
+        </group>
+      </group>
+
+      {/* Simba: comes in from the contact card. Click him and he complains about it. */}
+      <group {...hover("simba", onHover)} onClick={stop(() => onPick("simba"))}>
+        <Cat coat={COATS.simba} home={SIMBA_HOME} homeYaw={0.9} scale={1.15} fuss={simbaFuss} still={still} entry={simbaFrom} inside={simba} />
       </group>
 
       <Model name="pillowBlue" p={[-1.0, 0, 0.82]} r={0.5} />
@@ -760,16 +796,23 @@ function Ready({ onReady }: { onReady: () => void }) {
 export default function Room({
   lampOn,
   chaos,
+  simbaX,
+  simbaFuss,
   onHover,
   onPick,
 }: {
   lampOn: boolean;
   chaos: number;
+  /** Where Simba's leap out of the contact card ended (clientX), once he's left it. */
+  simbaX: number | null;
+  simbaFuss: number;
   onHover: (v: Hotspot | null) => void;
   onPick: (v: Hotspot) => void;
 }) {
   const wrap = useRef<HTMLDivElement>(null);
   const inView = useInView3D(wrap, "0px");
+  const simba = simbaX !== null;
+  const simbaFrom = useMemo(() => (simbaX === null ? SIMBA_ENTRY : entryAt(simbaX, wrap.current)), [simbaX]);
   const still = !!useReducedMotion();
   const { resolvedTheme } = useTheme();
   const [h, setH] = useState<Hour>(NIGHT);
@@ -777,38 +820,44 @@ export default function Room({
   const camera = useMemo(() => ({ position: [9, 7.5, 9] as V3, zoom: 120, near: 0.1, far: 100 }), []);
   const [ready, setReady] = useState(false);
   useEffect(() => () => void (document.body.style.cursor = ""), []);
+  // Draw ROWS pixels tall whatever the box size; the browser scales it up without smoothing.
+  const [dpr, setDpr] = useState(1);
+  useEffect(() => {
+    const el = wrap.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setDpr(ROWS / Math.max(1, e.contentRect.height)));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   return (
     <div
       ref={wrap}
-      className="relative h-full w-full"
+      className="relative h-full w-full [&_canvas]:[image-rendering:pixelated]"
       role="img"
-      aria-label={`Sevith's room ${h === NIGHT ? "at 2am" : "at golden hour"}: at the desk with the lamp ${lampOn ? "on" : "off"}, Cream loafed by the lamp, a cushion by the window, and a bench, barbell and dumbbells in the corner.`}
+      aria-label={`Sevith's room ${h === NIGHT ? "at 2am" : "at golden hour"}: at the desk with the lamp ${lampOn ? "on" : "off"}, Cream loafed by the lamp,${simba ? " Simba loafed on the rug," : ""} a cushion by the window, and a bench, barbell and dumbbells in the corner.`}
     >
       <Canvas
         orthographic
-        shadows
-        dpr={[1, 2]}
+        shadows="basic"
+        dpr={dpr}
         frameloop={!inView ? "never" : still ? "demand" : "always"}
         camera={camera}
-        gl={{ antialias: false, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: h.exposure }}
+        gl={{ antialias: false, toneMapping: THREE.NoToneMapping }}
         onCreated={({ camera }) => camera.lookAt(0, 0.45, 0)}
         onPointerMissed={() => onHover(null)}
       >
         <color attach="background" args={[(h === NIGHT ? dark : light).hex("paper")]} />
         <Lights h={h} on={lampOn} still={still} />
         <FitZoom />
-        <SoftShadows size={16} samples={10} focus={0.6} />
         <Suspense fallback={null}>
-          <Scene h={h} lampOn={lampOn} chaos={chaos} still={still} onHover={onHover} onPick={onPick} />
+          <Scene h={h} lampOn={lampOn} chaos={chaos} simba={simba} simbaFuss={simbaFuss} simbaFrom={simbaFrom} still={still} onHover={onHover} onPick={onPick} />
           <Ready onReady={() => setReady(true)} />
         </Suspense>
-        {/* The finish: soft contact darkness, the lamp and screens glowing, and the
-            edges of the frame falling away, like the rest of the site. */}
-        <EffectComposer multisampling={4}>
-          <N8AO aoRadius={0.35} intensity={2.2} distanceFalloff={0.6} halfRes />
-          <Bloom mipmapBlur luminanceThreshold={0.95} luminanceSmoothing={0.2} intensity={0.9} />
-          <Vignette offset={0.32} darkness={0.55} />
+        {/* The finish: the lamp and screens glow, then the pixel-art pass inks the outlines. */}
+        <EffectComposer multisampling={0}>
+          <Bloom mipmapBlur luminanceThreshold={1.2} luminanceSmoothing={0.1} intensity={0.7} />
+          <PixelArt />
         </EffectComposer>
       </Canvas>
       {!ready && <StudioSkeleton />}

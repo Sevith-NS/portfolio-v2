@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useReducedMotion } from "framer-motion";
+import { usePathname } from "next/navigation";
 import { catNote } from "./EasterEggs";
 
 // Simba and Cream, in pixels, on the top edge of the contact card. They don't
@@ -352,6 +353,18 @@ const SCENES: Scene[] = [
 ];
 const LOOP = SCENES.reduce((s, c) => s + c.s, 0);
 
+// The studio page: Cream is already in the room, so Simba goes to join her. He
+// sits, wanders over, crouches and leaps up and forward out of the card, into the
+// studio above. Where the arc ends on screen is where he climbs into the room.
+const OUT = 3.9;
+const walkOut = (t: number) => ({
+  simba: t < 1.2 ? sit(0, 1, { blink: blinkAt(t, 0.6) })
+    : t < 2.6 ? go(t, 1.2, 2.6, 0, 70, "walk")
+    : t < 3.2 ? { x: 70, pose: "crouch" as const, face: 1 as const, shake: wiggle(t), fx: t > 2.8 ? "!" : undefined }
+    : { ...hop(t, 3.2, OUT, 70, 300, 90, 0, 280), face: 1 as const },
+  cream: sit(REST, -1),
+});
+
 function beatAt(time: number) {
   let t = time % LOOP;
   for (const sc of SCENES) {
@@ -393,6 +406,8 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
   const cvs = useRef<(HTMLCanvasElement | null)[]>([]);
   const fxs = useRef<(HTMLSpanElement | null)[]>([]);
   const reduce = useReducedMotion();
+  const studio = usePathname() === "/studio";
+  const cats: CatName[] = studio ? ["simba"] : CATS;
   const sw = W * scale, sh = H * scale;
 
   useEffect(() => {
@@ -415,7 +430,7 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
       // to fit on a phone.
       const span = Math.min(1, (w - sw) / (REST + 200 + sw));
       const anchor = Math.min(w - (REST * span + sw / 2), Math.max(sw / 2 + 180 * span, w * 0.1));
-      CATS.forEach((name, i) => {
+      cats.forEach((name, i) => {
         const b = { ...beats[name] };
         const wrap = els.current[i], cv = cvs.current[i], fx = fxs.current[i];
         const cw = sw * SIZE[name], ch = sh * SIZE[name];
@@ -463,6 +478,21 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
     };
     window.addEventListener("cat-belly", onBelly);
 
+    // Simba has left the card for the room: hide him and tell the studio, once.
+    let gone = false;
+    const leave = () => {
+      if (gone) return;
+      gone = true;
+      const r = els.current[0]?.getBoundingClientRect();
+      if (els.current[0]) els.current[0].style.visibility = "hidden";
+      window.dispatchEvent(new CustomEvent("simba-in", { detail: r ? r.left + r.width / 2 : innerWidth / 2 }));
+    };
+    if (studio && reduce) {
+      render(walkOut(0), performance.now());
+      leave();
+      return () => window.removeEventListener("cat-belly", onBelly);
+    }
+
     // Reduced motion: the last scene's ending, held. Groomed, together, done.
     if (reduce) {
       render({ simba: { x: 18, pose: "loaf", face: 1, fx: "♥" }, cream: { x: 52, pose: "loaf", face: -1 } }, 0);
@@ -474,7 +504,10 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
     const tick = (now: number) => {
       clock += Math.min(0.05, (now - prev) / 1000);
       prev = now;
-      render(beatAt(clock), now);
+      if (studio) {
+        if (clock >= OUT) return leave();
+        render(walkOut(clock), now);
+      } else render(beatAt(clock), now);
       if (visible) raf = requestAnimationFrame(tick);
     };
     const io = new IntersectionObserver(([e]) => {
@@ -483,18 +516,18 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
       if (visible) { prev = performance.now(); raf = requestAnimationFrame(tick); }
     });
     io.observe(el);
-    render(beatAt(0), performance.now());
+    render(studio ? walkOut(0) : beatAt(0), performance.now());
 
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();
       window.removeEventListener("cat-belly", onBelly);
     };
-  }, [reduce, sh, sw]);
+  }, [reduce, sh, sw, studio]); // eslint-disable-line react-hooks/exhaustive-deps -- cats follows studio
 
   return (
     <div ref={box} aria-hidden className={`pointer-events-none absolute inset-0 ${className}`}>
-      {CATS.map((name, i) => (
+      {cats.map((name, i) => (
         <div
           key={name}
           ref={(n) => void (els.current[i] = n)}

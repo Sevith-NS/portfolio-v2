@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { Archivo, Bodoni_Moda } from "next/font/google";
+import { Archivo, Bodoni_Moda, Silkscreen } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./provider";
 import { TransitionProvider } from "@/components/transition/TransitionProvider";
@@ -26,6 +26,9 @@ const display = Archivo({
   variable: "--font-display",
   display: "swap",
 });
+
+// The studio's pixel font: text inside the 16-bit room.
+const pixel = Silkscreen({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-pixel", display: "swap" });
 
 export const metadata: Metadata = {
   title: {
@@ -62,7 +65,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} ${display.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} ${display.variable} ${pixel.variable}`}
     >
       <body>
         {/* Internal design notes: kept out of production HTML. */}

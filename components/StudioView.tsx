@@ -16,7 +16,10 @@ const HINTS: Record<Hotspot, string> = {
   lamp: "The lamp. Click to switch it.",
   monitor: "Polaris, still cooking. Click to open.",
   cream: "Cream. Don't. (She will.)",
+  simba: "Simba, head of QA. He has notes.",
 };
+
+const GRUMBLES = ["Simba: mrrrow.", "Simba: MRRROW. Who touched me.", "Simba: filing this with HR. Grooming now."];
 
 const btn =
   "inline-flex h-10 items-center gap-2 rounded-full border border-rule bg-paper px-4 font-mono text-[0.75rem] uppercase tracking-[0.1em] text-ink transition-colors hover:border-ink";
@@ -25,6 +28,9 @@ export default function StudioView() {
   const [lampOn, setLampOn] = useState(true);
   const [chaos, setChaos] = useState(0);
   const [hint, setHint] = useState<Hotspot | null>(null);
+  // Simba walks up out of the contact card into the room (see PixelCats).
+  const [simbaX, setSimbaX] = useState<number | null>(null);
+  const [simbaFuss, setSimbaFuss] = useState(0);
   const { navigate } = usePageTransition();
 
   // Cream does laps and the mug goes over: when she's clicked, or when "cream" is typed anywhere.
@@ -34,20 +40,29 @@ export default function StudioView() {
   };
   useEffect(() => {
     const go = () => setChaos((n) => n + 1);
+    const inside = (e: Event) => setSimbaX((e as CustomEvent<number>).detail);
     window.addEventListener("cream", go);
-    return () => window.removeEventListener("cream", go);
+    window.addEventListener("simba-in", inside);
+    return () => {
+      window.removeEventListener("cream", go);
+      window.removeEventListener("simba-in", inside);
+    };
   }, []);
 
   const pick = (h: Hotspot) => {
     if (h === "lamp") setLampOn((v) => !v);
     else if (h === "cream") cream();
-    else navigate("/work/polaris", "Polaris");
+    else if (h === "simba") {
+      setSimbaFuss((n) => n + 1);
+      // He talks a lot. Each note replaces the last, so they land one after another.
+      GRUMBLES.forEach((line, i) => setTimeout(() => catNote(line), i * 1400));
+    } else navigate("/work/polaris", "Polaris");
   };
 
   return (
     <div>
       <div className="relative aspect-square overflow-hidden rounded-[1.75rem] border border-rule bg-sheet sm:aspect-[4/3] lg:aspect-[16/10]">
-        <Room lampOn={lampOn} chaos={chaos} onHover={setHint} onPick={pick} />
+        <Room lampOn={lampOn} chaos={chaos} simbaX={simbaX} simbaFuss={simbaFuss} onHover={setHint} onPick={pick} />
 
         {/* What's under the pointer, in the corner like a caption. */}
         <div aria-hidden className="pointer-events-none absolute bottom-4 left-4 right-4 flex justify-start">

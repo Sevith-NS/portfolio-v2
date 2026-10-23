@@ -16,6 +16,14 @@ export type V3 = [number, number, number];
 // Draco or Meshopt decoders, which would need WASM and the CSP forbids it.
 export const M = "/models/";
 
+// Three hard light steps: every surface in the room is cel-shaded like a 16-bit sprite.
+export const TOON = (() => {
+  const t = new THREE.DataTexture(new Uint8Array([90, 170, 255]), 3, 1, THREE.RedFormat);
+  t.magFilter = t.minFilter = THREE.NearestFilter;
+  t.needsUpdate = true;
+  return t;
+})();
+
 // ---------- models ----------
 const shadowAll = (o: THREE.Object3D) =>
   o.traverse((m) => {
@@ -34,6 +42,13 @@ export function useModel(name: string) {
     const c = box.getCenter(new THREE.Vector3());
     o.position.set(-c.x, -box.min.y, -c.z);
     shadowAll(o);
+    // The kit's materials become toon ones, so models shade in the same flat steps as everything else.
+    o.traverse((m) => {
+      const mesh = m as THREE.Mesh;
+      if (!mesh.isMesh || Array.isArray(mesh.material)) return;
+      const src = mesh.material as THREE.MeshStandardMaterial;
+      mesh.material = new THREE.MeshToonMaterial({ color: src.color, map: src.map, gradientMap: TOON });
+    });
     const g = new THREE.Group();
     g.add(o);
     g.updateMatrixWorld(true);
@@ -94,7 +109,8 @@ function SeatedOn({ obj, p = [0, 0, 0], r = 0, s = 1, still, face }: { obj: THRE
 // Every block in the diorama is bevelled rather than a raw cube: the soft edge
 // catches a highlight and stops the whole thing reading as programmer art. The
 // radius is clamped to the thinnest side so slivers don't collapse.
-export const Box = ({ p, s, c, r = [0, 0, 0], rough = 0.8, metal = 0, cast = true }: { p: V3; s: V3; c: string; r?: V3; rough?: number; metal?: number; cast?: boolean }) => (
+// rough and metal are kept for callers but ignored: toon shading has no gloss.
+export const Box = ({ p, s, c, r = [0, 0, 0], cast = true }: { p: V3; s: V3; c: string; r?: V3; rough?: number; metal?: number; cast?: boolean }) => (
   <RoundedBox
     args={s}
     radius={Math.min(0.013, Math.min(s[0], s[1], s[2]) * 0.34)}
@@ -105,7 +121,7 @@ export const Box = ({ p, s, c, r = [0, 0, 0], rough = 0.8, metal = 0, cast = tru
     castShadow={cast}
     receiveShadow
   >
-    <meshStandardMaterial color={c} roughness={rough} metalness={metal} />
+    <meshToonMaterial color={c} gradientMap={TOON} />
   </RoundedBox>
 );
 
@@ -135,15 +151,15 @@ export function useFontsReady() {
   return ready;
 }
 
-// Text drawn to a canvas in the site's own faces, crisp at 4x.
-export function Label({ text, size, color, p = [0, 0, 0], r = [0, 0, 0], maxWidth, face = "sans" }: { text: string; size: number; color: string; p?: V3; r?: V3; maxWidth?: number; face?: "sans" | "serif" }) {
+// Text drawn to a canvas in the pixel font, so it survives the 16-bit render.
+export function Label({ text, size, color, p = [0, 0, 0], r = [0, 0, 0], maxWidth }: { text: string; size: number; color: string; p?: V3; r?: V3; maxWidth?: number }) {
   const fonts = useFontsReady();
   const tex = useMemo(() => {
     const lines = text.split("\n");
-    const px = 96;
+    const px = 24; // small on purpose: at 320 rows the label is only ~10 pixels tall
     const lh = px * 1.12;
-    const family = face === "serif" ? fontVar("--font-serif", "Georgia, serif") : fontVar("--font-sans", "system-ui, sans-serif");
-    const font = `${face === "serif" ? 400 : 600} ${px}px ${family}`;
+    const family = fontVar("--font-pixel", "monospace");
+    const font = `700 ${px}px ${family}`;
     const c = document.createElement("canvas");
     const g = c.getContext("2d")!;
     g.font = font;
@@ -157,9 +173,8 @@ export function Label({ text, size, color, p = [0, 0, 0], r = [0, 0, 0], maxWidt
     lines.forEach((l, i) => g.fillText(l, w / 2, 4 + lh * (i + 0.5)));
     const t = new THREE.CanvasTexture(c);
     t.colorSpace = THREE.SRGBColorSpace;
-    t.anisotropy = 4;
     return { t, aspect: w / c.height, lines: lines.length };
-  }, [text, color, face, fonts]); // eslint-disable-line react-hooks/exhaustive-deps -- redraw once fonts load
+  }, [text, color, fonts]); // eslint-disable-line react-hooks/exhaustive-deps -- redraw once fonts load
   useEffect(() => () => tex.t.dispose(), [tex]);
   let h = size * 1.12 * tex.lines;
   let w = h * tex.aspect;

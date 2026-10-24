@@ -5,105 +5,32 @@ export const email = "sevithns@gmail.com";
 
 export const navItems = [
   { name: "Work", link: "#projects" },
-  { name: "About", link: "#about" },
-  { name: "Experience", link: "#experience" },
   { name: "Studio", link: "/studio" },
-  { name: "Contact", link: "#contact" },
+  { name: "Gallery", link: "/gallery" },
 ];
 
-// Margin notes beside the hero, oldest first.
-export const heroNotes = [
-  { when: "Dec 2024", what: "Shipped a real-estate platform at Ceyone" },
-  { when: "Mar 2025", what: "Joined Digital.ai, owning product docs" },
-  { when: "2025", what: "Led 0-to-1 docs for Ask Release GA" },
-  { when: "Now", what: "Building Flint OS" },
-  { when: "Next", what: "AI PM or product design role", highlight: true },
-];
-
-// Every number here comes from the resume.
-export const ledger = [
-  { value: "300+", label: "user stories and defects prioritized" },
-  { value: "30+", label: "Agile sprints" },
-  { value: "50+", label: "customer-reported defects resolved" },
-  { value: "3", label: "major release cycles, 25.1 to 26.3" },
-];
-
-export const gridItems = [
-  {
-    id: 1,
-    title: "Product builder aiming for AI PM and product design roles, currently a Technical Writer at Digital.ai",
-    description: "BCA, Christ University",
-  },
-  {
-    id: 4,
-    title: "Tech and Finance enthusiast with a passion for development.",
-    description: "",
-  },
-  {
-    id: 5,
-    title: "Currently building Flint OS, an AI-powered quant investing platform",
-    description: "",
-  },
-  {
-    id: 6,
-    title: "Talent meets opportunity. Shall we begin?",
-    description: "",
-  },
-];
-
-// The About intro as switchable facets, sanvithi.com-style. Drafted from the
-// facts above (gridItems, approach, interests) — edit the copy freely.
-export const selfPortrait = [
-  {
-  id: "who-i-am",
-  label: "Who I am",
-  tag: "who i am",
-  headline: "Product builder working toward AI PM and Product Design roles, currently a Technical Writer at Digital.ai.",
-  body: "BCA from Christ University. I write docs for enterprise DevOps products (Deploy, Release, TeamForge) and led content for Ask Release, Digital.ai's GenAI assistant. Docs taught me to start from the customer's confusion and work back to the fix.",
-},
-{
-  id: "what-i-care-about",
-  label: "What I care about",
-  tag: "what i care about",
-  headline: "Tech, finance, and where the two collide.",
-  body: "I'm into markets, typography, and building a personal brand in public. I love designing intuitive, clean, and aesthetic interfaces that feel as good as they look.",
-},
-{
-  id: "what-i-believe-in",
-  label: "What I believe in",
-  tag: "what i believe in",
-  headline: "Start from the customer's confusion, work back to the fix.",
-  body: "Ship in small, reviewable slices. Write while things are still moving. Let what customers report shape the next plan.",
-},
-{
-  id: "what-i-can-cook",
-  label: "What I can cook",
-  tag: "what i can cook",
-  headline: "Docs, products and tools that make complex software easier to use.",
-  body: "Product documentation for enterprise DevOps, GenAI assistant content, and AI-powered products built end to end, from the idea to the interface to the first working version.",
-},
-{
-  id: "whats-up",
-  label: "What I'm upto",
-  tag: "what i'm upto",
-  headline: "Building Flint OS, an AI-powered quant investing platform.",
-  body: "A multi-factor signal engine and risk analytics that explain every trade they suggest. I'm also building Tesseract, an AI mock-interview platform. Next up: an AI PM or product design role.",
-},
-];
+// Home, section two: who I am, the whole story in one paragraph (there is no
+// /story page). First person, punchy, and the first joke is allowed here
+// because the visitor has already scrolled once (Q7). Edit freely.
+export const intro = {
+  kicker: "Who I am",
+  text: "Hi, I'm Sevith, a *self-taught designer* and *product engineer* in Bangalore. I learn it at 2am and ship it by morning. I design the interface, decide what the product should *actually do*, and write the code, so what you signed off on is what ships. By day I'm a *Technical Writer at Digital.ai*. After hours I build *Polaris* and *Tesseract AI*. Four cats, zero personal space. Not everyone has great taste. Fortunately, I do.",
+  photo: { src: "/story/pool-table.webp", alt: "Sevith in a dark shirt and sunglasses, standing by a pool table under amber blinds", caption: "Lining up the shot. Missed it, obviously." },
+};
 
 export const projects = [
   {
     id: 7,
-    title: "Flint OS",
-    slug: "flint-os",
+    title: "Polaris",
+    slug: "polaris",
     tint: "sage",
     year: "2026",
-    outcome: "I'm designing and building a quant investing platform that explains every trade it suggests.",
-    des: "An AI-powered quant investing platform, multi-factor signal engine, VaR/CVaR risk analytics, XGBoost and Prophet forecasts, an event-driven backtester, and a Gemini-powered research assistant.",
-    img: "/flint.png",
+    outcome: "I'm designing and building Polaris: see everything you own, test everything you don't.",
+    des: "Polaris reads your broker holdings from Zerodha and Upstox, tracks India and US markets, and gives you a paper desk for every idea before real money moves.",
+    img: "/polaris.png",
     iconLists: ["/next.svg", "/ts.svg", "/tail.svg", "/python.svg", "/gemini.svg"],
-    link: "https://github.com/Sevith-NS/algo-trader",
-    parts: ["Signal engine", "Risk analytics", "ML forecasts", "Backtester", "Flint AI assistant", "Trading desk agents"],
+    link: "https://algo-trader-frontend-sable.vercel.app/",
+    parts: ["Signal engine", "Risk analytics", "Broker sync", "Backtester", "AI desk agents", "Ask Polaris"],
   },
   {
     id: 1,
@@ -130,18 +57,6 @@ export const projects = [
     link: "https://github.com/Sevith-NS/vercel-clone",
   },
   {
-    id: 3,
-    title: "Zenfinance",
-    slug: "zenfinance",
-    tint: "mint",
-    year: "2024",
-    outcome: "I designed a finance dashboard that pairs ML predictions with live data visualization.",
-    des: "A MERN finance dashboard that pairs machine-learning predictions with real-time data visualization.",
-    img: "/1.png",
-    iconLists: ["/re.svg", "/tail.svg", "/javascript.svg", "/nodejs.svg", "/mongodb.svg"],
-    link: "https://zenfinance-five.vercel.app/",
-  },
-  {
     id: 4,
     title: "Ochi",
     slug: "ochi",
@@ -153,128 +68,53 @@ export const projects = [
     iconLists: ["/tail.svg", "/javascript.svg", "/re.svg", "/fm.svg"],
     link: "https://ochi-front.vercel.app/",
   },
-  {
-    id: 5,
-    title: "Learn2Lead",
-    slug: "learn2lead",
-    tint: "garnet",
-    year: "2024",
-    outcome: "I scoped and built an interview-prep platform, from courses to a startup pitch module.",
-    des: "An e-learning platform for interview prep: courses, quizzes, mock interviews, progress dashboards, internship listings, and a PitchIt module for startup ideas.",
-    img: "/3.png",
-    iconLists: ["/html5.svg", "/css.svg", "/javascript.svg", "/php.svg", "/stripe.svg"],
-    link: "https://github.com/Sevith-NS/learn2lead",
-  },
-  {
-    id: 6,
-    title: "Spotify",
-    slug: "spotify",
-    tint: "clover",
-    year: "2023",
-    outcome: "I built a full-stack music app with playback, playlists and Stripe subscriptions.",
-    des: "A Spotify clone with music playback, curated playlists and Stripe subscriptions.",
-    img: "/4.png",
-    iconLists: ["/next.svg", "/tail.svg", "/ts.svg", "/re.svg", "/stripe.svg"],
-    link: "https://spotify-clone-sooty-mu.vercel.app/",
-  },
 ];
 
-export const workExperience = [
-  {
-    id: 1,
-    title: "Technical Writer (Product Documentation)",
-    company: "Digital.ai",
-    duration: "Mar 2025 – Present",
-    desc: "Own the docs roadmap for Deploy, Release and TeamForge across 4 major release cycles. Led 0-to-1 content for Ask Release, Digital.ai's GenAI assistant, through its GA launch.",
-    link: "https://docs.digital.ai/release/docs/release-notes/release-notes-release",
-    points: [
-      "Prioritize 300+ user stories and defects across 30+ Agile sprints in Agility.",
-      "Defined the information architecture for Ask Release, covering agent customization, LLM guardrails, BYOM and Kubernetes deployment, through GA.",
-      "Write release notes for every GA and monthly maintenance release, plus deprecation and support-matrix communications.",
-      "Closed the customer feedback loop on 50+ reported defects with engineering and product.",
-      "Shipped MCP integration guides and Copilot/Claude agent instructions, plus content-QA automation scripts.",
-    ],
-    decision: "Led 0-to-1 content for AI Assistant through GA",
-  },
-  {
-    id: 2,
-    title: "Software Developer Intern",
-    company: "Ceyone Marketing",
-    duration: "Dec 2024 – Mar 2025",
-    desc: "Built a responsive real-estate platform in React, TypeScript, Tailwind and Zustand with Google Maps integration, improving user engagement by 30%.",
-    link: "https://www.onlyvillas.in/",
-    points: [
-      "Translated business requirements into a responsive real-estate platform; iterative UI/UX changes lifted engagement 30%.",
-      "Built the frontend in React, TypeScript, Tailwind and Zustand with Google Maps and Places APIs; reusable components cut dev time 10%.",
-    ],
-    decision: "Engagement up 30%",
-  },
-];
-
-// How I work: the three phases, rewritten from what Sevith actually does.
+// How I build: three phases, shown on my own products. Every artifact row below
+// is a confirmed fact from data/work.ts — illustrative layout, real content.
 export const approach = [
   {
     phase: "Phase 1",
-    title: "Planning & Strategy",
-    des: "Start with the customer, not the feature. I read support tickets, defect reports and feedback, then frame the problem and prioritize the backlog with engineering and product before anything gets built.",
-    proof: "300+ user stories and defects prioritized in Agility",
+    title: "Find the real problem",
+    des: "*Start with the confusion, not the feature.* Who is stuck, where, and why, worked out before a single screen exists, so the thing I build is the thing people actually needed.",
+    proof: "Polaris started as four tools that never explained themselves",
     artifact: {
-      heading: "Backlog, sorted by customer impact",
       rows: [
-        { tag: "Defect", text: "RHEL 8.x and Windows Server 2022 end-of-support" },
-        { tag: "Story", text: "AI Assistant: on-premises install guide" },
-        { tag: "Story", text: "Deploy: Helm OCI registry support" },
-        { tag: "Defect", text: "Standalone MCP Server sunset date missing" },
+        { tag: "Pain", text: "Investors juggle a chart site, a screener, news and a spreadsheet" },
+        { tag: "Pain", text: "None of them say why a trade makes sense" },
+        { tag: "Pain", text: "None of them say how much to risk" },
+        { tag: "Fix", text: "Every suggestion explains itself, factor by factor" },
       ],
     },
   },
   {
     phase: "Phase 2",
-    title: "Development & Progress Update",
-    des: "Build in small, reviewable slices and keep everyone updated. I work sprint by sprint with engineers, write while features are still moving, and flag gaps early rather than at release.",
-    proof: "30+ sprints, 0-to-1 content for AI Assistant",
+    title: "Design it",
+    des: "*Wireframes first, then the UI.* Clean, intuitive, and deliberately boring wherever boring is kinder. I design the flows I am about to build, so nothing gets lost in a handoff.",
+    proof: "Tesseract AI, designed around one nervous student",
     artifact: {
-      heading: "Sprint update",
       rows: [
-        { tag: "Done", text: "AI Assistant (on-prem) install guide" },
-        { tag: "Done", text: "Release MCP Server: OAuth2 authentication" },
-        { tag: "Review", text: "Deploy on Event (Tech Preview) walkthrough" },
-        { tag: "Next", text: "Kubernetes ingress controller migration guide" },
+        { tag: "Screen", text: "Pick a role and an experience level" },
+        { tag: "Screen", text: "Questions read aloud, like a real interview" },
+        { tag: "Screen", text: "Dashboard: start a mock, revisit feedback" },
+        { tag: "Screen", text: "Sign in with Clerk, history kept in Postgres" },
       ],
     },
   },
   {
     phase: "Phase 3",
-    title: "Deployment & Launch",
-    des: "Launch is where learning starts. I ship the release notes, support matrices and end-of-support communications, then route what customers report straight back into the next plan.",
-    proof: "4 major release cycles, AI Assistant GA",
+    title: "Build it in small chunks",
+    des: "*Rome wasn't built in a day,* and neither is a product. Small, reviewable slices, each one working before the next starts. Then real use decides what gets built after.",
+    proof: "Polaris, shipped in slices and run on my own money",
     artifact: {
-      heading: "Release notes",
       rows: [
-        { tag: "New", text: "AI Assistant, formerly Ask Release, is GA" },
-        { tag: "Improved", text: "Release MCP Server now bundled by default" },
-        { tag: "Fixed", text: "Deploy: staged file.Folder artifact handling" },
-        { tag: "Notice", text: "TLS 1.0/1.1 removed JDK 21 and 25 only" },
+        { tag: "Shipped", text: "Two services: Next.js frontend, FastAPI quant API" },
+        { tag: "Shipped", text: "Backtester running 13 strategies" },
+        { tag: "Shipped", text: "AI desk: agents argue before they commit" },
+        { tag: "Live", text: "Paper portfolio, +5% in the first month" },
       ],
     },
   },
-];
-
-// Off the clock. Edit freely: empty values are hidden on the site.
-export const interests = [
-  "Sports",
-  "Video editing",
-  "Cinema",
-  "Fonts & type",
-  "Marketing & Personal brand",
-  "Finance",
-  "Cooking",
-];
-
-export const nowLine = [
-  { label: "Now building", value: "Flint OS" },
-  { label: "Now watching", value: "" }, // e.g. a series or film
-  { label: "Now listening", value: "" }, // e.g. an album or playlist
 ];
 
 export const socialMedia = [

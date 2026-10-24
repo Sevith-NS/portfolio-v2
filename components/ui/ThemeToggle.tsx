@@ -1,188 +1,162 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { useTheme } from "next-themes";
 import { useReducedMotion } from "framer-motion";
 import { Moon, Sun } from "@phosphor-icons/react";
+import { themes, type Side } from "@/lib/theme";
+import { FLASH, maskFor, pixelGrid } from "@/lib/pixels";
 
-// Switching sides is a moment, not a colour swap: a pixel mosaic eats the
-// screen, the theme flips behind it, a line of the creed lands, and the mosaic
-// clears tile by tile onto the other side.
-const SPREAD_MS = 800; // diagonal sweep from one corner to the other
-const JITTER_MS = 420; // per-tile scatter, so the advancing edge is never a straight line
-const TILE_MS = 350; // one tile's own snap-in
-const COVER_MS = SPREAD_MS + JITTER_MS + TILE_MS + 30; // the last tile has landed: screen is opaque
-const HOLD_MS = 1240; // the line stays up
-const CLEAR_MS = SPREAD_MS + JITTER_MS + 200;
+// Switching sides is a moment, not a colour swap: the other side shows through
+// the page one pixel at a time, spreading out from the button you pressed and
+// slowing as it goes. The old page stays frozen as a snapshot (a view
+// transition); a ragged front of pixels cuts through it to the new theme
+// underneath. The new page gathers out of dust the size of the landing
+// headline's: specks of it drift in toward the button from the old side,
+// fading up and slowing as they land, and flash the new side's accent for a
+// beat: lapis into the light, light blue into the dark.
+const REVEAL_MS = 4200;
+const FLY = 0.09; // share of the sweep a speck spends in the air, about the headline's 330ms
+const DRIFT = 110; // px a speck travels, at most, as in the headline
+const LEAD = 0.012; // a cell's specks land up to this much before it opens; under FLASH, so no gap
 
-type Side = "light" | "dark";
-type Tile = { delay: number; fill: string };
-
-// Both quotes are the lines as spoken, with the mouth they came out of.
-const SIDES: Record<Side, {
-  welcome: string;
-  quote: string;
-  said: string;
-  base: [string, string];
-  ember: string;
-  ink: string;
-  dim: string;
-}> = {
-  dark: {
-    welcome: "Welcome to the dark side",
-    quote: "If you only knew the power of the dark side.",
-    said: "Darth Vader · The Empire Strikes Back",
-    base: ["#090D1E", "#111730"],
-    ember: "#2c6fcd",
-    ink: "#F2F2F0",
-    dim: "#969AAA",
-  },
-  light: {
-    welcome: "Welcome to the light side",
-    quote: "Happiness can be found, even in the darkest of times, if one only remembers to turn on the light.",
-    said: "Albus Dumbledore · Harry Potter and the Prisoner of Azkaban",
-    base: ["#F3EEE4", "#EDE5D8"],
-    ember: "#002DB4",
-    ink: "#111111",
-    dim: "#6E6E6E",
-  },
-};
-
-// A tile per cell, each carrying its own delay and one of three fills.
-function buildTiles(side: Side, cols: number, rows: number): Tile[] {
-  const { base, ember } = SIDES[side];
-  const tiles: Tile[] = [];
-  const lastCol = Math.max(cols - 1, 1);
-  const lastRow = Math.max(rows - 1, 1);
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      const reach = (col / lastCol + row / lastRow) / 2;
-      const tone = Math.random();
-      // The creed sits dead centre, so no ember lands under it: the two base
-      // tones still vary there, they just never fight the text for contrast.
-      const quiet = Math.abs(row / lastRow - 0.5) < 0.2;
-      tiles.push({
-        delay: Math.round(reach * SPREAD_MS + Math.random() * JITTER_MS),
-        fill: tone < 0.05 && !quiet ? ember : tone < 0.32 ? base[1] : base[0],
-      });
-    }
+function pixelReveal(origin: { x: number; y: number }, target: Side, flip: () => void) {
+  const root = document.documentElement;
+  const { span, cols, rows, due } = pixelGrid(window.innerWidth, window.innerHeight, origin);
+  // The front eases out like the landing headline's dust settling, 1 - (1 - t)²:
+  // each cell opens when the front reaches it, and every flash stays as short.
+  due.forEach((d, i) => (due[i] = 1 - Math.sqrt(1 - d)));
+  // Four specks to a cell, each half its size (the headline's 7px, 5 on phones),
+  // setting off beyond the cell on the side away from the button, scattered.
+  const s = span / 2, n = due.length * 4;
+  const sx = new Float32Array(n), sy = new Float32Array(n), fx = new Float32Array(n), fy = new Float32Array(n), sd = new Float32Array(n);
+  for (let k = 0; k < n; k++) {
+    const i = k >> 2;
+    sx[k] = (i % cols) * span + (k & 1) * s;
+    sy[k] = Math.floor(i / cols) * span + ((k >> 1) & 1) * s;
+    const a = Math.atan2(sy[k] - origin.y, sx[k] - origin.x) + (Math.random() - 0.5) * Math.PI * 0.5;
+    const away = DRIFT * (0.35 + Math.random() * 0.65);
+    fx[k] = Math.cos(a) * away;
+    fy[k] = Math.sin(a) * away;
+    sd[k] = due[i] - Math.random() * LEAD;
   }
-  return tiles;
+
+  // The new page is masked to the open cells; the old snapshot sits under it
+  // untouched. The hold animation keeps the transition alive for the sweep.
+  const style = document.createElement("style");
+  style.textContent = `
+    ::view-transition-old(root) { animation: none; }
+    ::view-transition-new(root) {
+      animation: theme-reveal-hold ${Math.round(REVEAL_MS * (1 + FLASH)) + 80}ms linear;
+      mix-blend-mode: normal;
+      -webkit-mask: var(--reveal) 0 0 / ${cols * span}px ${rows * span}px no-repeat;
+      mask: var(--reveal) 0 0 / ${cols * span}px ${rows * span}px no-repeat;
+    }
+    ::view-transition-new(theme-dust) { animation: none; }
+    @keyframes theme-reveal-hold { to { opacity: 1; } }
+  `;
+  document.head.appendChild(style);
+  root.style.setProperty("--reveal", maskFor(due, cols, rows, () => false));
+
+  // The specks and flashes. Anything on the new page is masked to the open
+  // cells, so this gets a view transition layer of its own, above both sides.
+  const cv = document.createElement("canvas");
+  cv.width = cols * span;
+  cv.height = rows * span;
+  cv.setAttribute("aria-hidden", "true");
+  Object.assign(cv.style, {
+    position: "fixed", left: "0", top: "0", zIndex: "300", pointerEvents: "none",
+    width: `${cols * span}px`, height: `${rows * span}px`, imageRendering: "pixelated", viewTransitionName: "theme-dust",
+  });
+  const ctx = cv.getContext("2d");
+  const paper = themes[target].hex("paper"), flash = themes[target].hex("warm");
+
+  const vt = document.startViewTransition(() => {
+    // Flip the class directly so the new snapshot is ready at once; next-themes
+    // catches up and stores the choice.
+    root.classList.toggle("dark", target === "dark");
+    root.style.colorScheme = target;
+    // Added on the new side only, so it is captured as its own layer.
+    document.body.appendChild(cv);
+    flip();
+  });
+
+  let raf = 0;
+  vt.ready.then(() => {
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const p = ((now - t0) / REVEAL_MS) * (1 + FLY + FLASH) - FLY;
+      root.style.setProperty("--reveal", maskFor(due, cols, rows, (d) => p >= d));
+      if (ctx) {
+        ctx.clearRect(0, 0, cv.width, cv.height);
+        // Two passes, so the colour is set twice a frame rather than per speck.
+        ctx.fillStyle = paper;
+        for (let k = 0; k < n; k++) {
+          const d = sd[k];
+          if (p >= d || d - p >= FLY) continue;
+          const q = (d - p) / FLY, e = q * q; // slows as it lands
+          ctx.globalAlpha = 1 - q;
+          ctx.fillRect(Math.round(sx[k] + fx[k] * e), Math.round(sy[k] + fy[k] * e), s, s);
+        }
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = flash;
+        for (let k = 0; k < n; k++) if (p >= sd[k] && p < sd[k] + FLASH) ctx.fillRect(sx[k], sy[k], s, s);
+      }
+      if (p < 1 + FLASH) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+  });
+
+  return vt.finished.finally(() => {
+    cancelAnimationFrame(raf);
+    cv.remove();
+    style.remove();
+    root.style.removeProperty("--reveal");
+  });
 }
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const reduce = useReducedMotion();
   const [mounted, setMounted] = useState(false);
-  const [phase, setPhase] = useState<"cover" | "clear" | null>(null);
-  const [side, setSide] = useState<Side>("dark");
-  const [grid, setGrid] = useState({ cols: 0, rows: 0 });
-  const [tiles, setTiles] = useState<Tile[]>([]);
   const busy = useRef(false);
-  const timers = useRef<number[]>([]);
+  const button = useRef<HTMLButtonElement>(null);
 
   useEffect(() => setMounted(true), []);
-  useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
 
   const dark = mounted && resolvedTheme === "dark";
 
   const cross = useCallback(() => {
     const target: Side = dark ? "light" : "dark";
-    if (reduce) {
+    // No view transitions, or reduced motion: just switch.
+    if (reduce || !document.startViewTransition) {
       setTheme(target);
       return;
     }
-    // One crossing at a time: clicks while the mosaic is moving are ignored.
+    // One crossing at a time: clicks while the pixels are moving are ignored.
     if (busy.current) return;
     busy.current = true;
-
-    const span = window.innerWidth < 640 ? 44 : 64;
-    const cols = Math.ceil(window.innerWidth / span);
-    const rows = Math.ceil(window.innerHeight / span);
-    setSide(target);
-    setGrid({ cols, rows });
-    setTiles(buildTiles(target, cols, rows));
-    setPhase("cover");
-
-    timers.current = [
-      // The flip happens unseen, under a screen with no gaps left in it.
-      window.setTimeout(() => setTheme(target), COVER_MS),
-      window.setTimeout(() => setPhase("clear"), COVER_MS + HOLD_MS),
-      window.setTimeout(() => {
-        setPhase(null);
-        setTiles([]);
-        busy.current = false;
-      }, COVER_MS + HOLD_MS + CLEAR_MS),
-    ];
+    // The reveal starts from the centre of the button that was pressed.
+    const r = button.current?.getBoundingClientRect();
+    const origin = r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: 0, y: 0 };
+    pixelReveal(origin, target, () => setTheme(target)).finally(() => {
+      busy.current = false;
+    });
   }, [dark, reduce, setTheme]);
 
-  const creed = SIDES[side];
-
   return (
-    <>
-      <button
-        type="button"
-        onClick={cross}
-        aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
-        className="grid size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-ink/[0.06] hover:text-ink active:scale-95"
-      >
-        {mounted ? (
-          dark ? <Sun size={18} weight="regular" /> : <Moon size={18} weight="regular" />
-        ) : (
-          <span className="size-[18px]" />
-        )}
-      </button>
-
-      {mounted && phase
-        ? createPortal(
-            <div
-              aria-hidden
-              data-mosaic={phase === "cover" ? "in" : "out"}
-              className="pointer-events-auto fixed inset-0 z-[150] overflow-hidden"
-            >
-              <div
-                className="absolute inset-0 grid"
-                style={{
-                  gridTemplateColumns: `repeat(${grid.cols}, 1fr)`,
-                  gridTemplateRows: `repeat(${grid.rows}, 1fr)`,
-                }}
-              >
-                {tiles.map((tile, i) => (
-                  <span
-                    key={i}
-                    className="mosaic-tile"
-                    style={{ backgroundColor: tile.fill, animationDelay: `${tile.delay}ms` }}
-                  />
-                ))}
-              </div>
-
-              <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
-                <div className="max-w-2xl">
-                  <p
-                    className="mosaic-say wordmark text-[1.75rem] leading-[1.05] md:text-[3.25rem]"
-                    style={{ color: creed.ink, "--say-delay": "0ms" } as React.CSSProperties}
-                  >
-                    {creed.welcome}
-                  </p>
-                  <p
-                    className="mosaic-say mt-5 font-serif text-xl italic leading-snug md:mt-7 md:text-3xl"
-                    style={{ color: creed.ink, "--say-delay": "70ms" } as React.CSSProperties}
-                  >
-                    &ldquo;{creed.quote}&rdquo;
-                  </p>
-                  <p
-                    className="mosaic-say label mt-4 md:mt-5"
-                    style={{ color: creed.dim, "--say-delay": "130ms" } as React.CSSProperties}
-                  >
-                    {creed.said}
-                  </p>
-                </div>
-              </div>
-            </div>,
-            document.body
-          )
-        : null}
-    </>
+    <button
+      ref={button}
+      type="button"
+      onClick={cross}
+      aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
+      className="grid size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-ink/[0.06] hover:text-ink active:scale-95"
+    >
+      {mounted ? (
+        dark ? <Sun size={18} weight="regular" /> : <Moon size={18} weight="regular" />
+      ) : (
+        <span className="size-[18px]" />
+      )}
+    </button>
   );
 }

@@ -1,17 +1,22 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { Archivo, Instrument_Serif, Nothing_You_Could_Do } from "next/font/google";
+import { Archivo, Bodoni_Moda, Silkscreen } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "./provider";
 import { TransitionProvider } from "@/components/transition/TransitionProvider";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { Cursor } from "@/components/motion/Cursor";
+import { EasterEggs } from "@/components/EasterEggs";
+import { dark, light } from "@/lib/theme";
 
-const serif = Instrument_Serif({
+// Statements only. Extreme contrast, set large: film credits, not a newspaper.
+const serif = Bodoni_Moda({
   subsets: ["latin"],
-  weight: "400",
   style: ["normal", "italic"],
+  // next/font has no metric overrides for Bodoni Moda; skip the fallback shim.
+  adjustFontFallback: false,
   variable: "--font-serif",
   display: "swap",
 });
@@ -22,7 +27,13 @@ const display = Archivo({
   variable: "--font-display",
   display: "swap",
 });
-const script = Nothing_You_Could_Do({ subsets: ["latin"], weight: "400", variable: "--font-script", display: "swap" });
+
+// The studio's pixel font: text inside the 16-bit room.
+const pixel = Silkscreen({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-pixel", display: "swap" });
+
+// The footer's "sevith.", in Neue Montreal Medium (free for a personal portfolio).
+// shortcut: subset to the letters of "sevith." (2 KB), re-export the full font if it ever sets other text.
+const mark = localFont({ src: "./fonts/NeueMontreal-Medium-sevith.woff", weight: "500", variable: "--font-mark", display: "swap" });
 
 export const metadata: Metadata = {
   title: {
@@ -30,21 +41,21 @@ export const metadata: Metadata = {
     template: "%s · Sevith Sadashiva",
   },
   description:
-    "Product builder in Bangalore: I design, define and ship AI products. Technical Writer at Digital.ai, aspiring AI PM and product designer.",
+    "Product engineer in Bangalore: I design the interface, define the product and ship the code. Technical Writer at Digital.ai, building AI products end to end.",
   icons: ["/1.svg"],
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
-    { media: "(prefers-color-scheme: dark)", color: "#090D1E" },
+    { media: "(prefers-color-scheme: light)", color: light.hex("paper") },
+    { media: "(prefers-color-scheme: dark)", color: dark.hex("paper") },
   ],
 };
 
 const contract = `
 THESIS: A product builder's portfolio with studio-grade polish: calm white space, warm serif statements, one lapis accent, and motion that feels physical (Lenis scroll, spring cursor, blur-in reveals).
 OWN-WORLD: White by day, lapis-navy by night. Lapis #002DB4 is the only accent. Instrument Serif for statements (italic for outcomes), Archivo expanded for wordmarks and rails, Geist for labels and body, one lapis handwritten note per section. Project plates are soft pastel gradients with the product rising behind frosted glass.
-STORY: Visitor meets a product builder aiming for AI PM and product design roles, scrolls through case plates, sees how Sevith works and who Sevith is off the clock, then emails or downloads the resume.
+STORY: Visitor meets a product engineer who does the design, the product definition and the build himself, scrolls through case plates, sees how Sevith works and who Sevith is off the clock, then emails or downloads the resume.
 FIRST VIEWPORT: Centered serif statement, a lapis scribble crossing it, pill nav with the active item in lapis, a quiet scroll cue.
 FORM: Brief-pinned to the design language of the user's reference (not its content), seed 43f73bd6.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
@@ -59,14 +70,14 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} ${display.variable} ${script.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} ${display.variable} ${pixel.variable} ${mark.variable}`}
     >
       <body>
         {/* Internal design notes: kept out of production HTML. */}
         {process.env.NODE_ENV === "development" && <div hidden dangerouslySetInnerHTML={{ __html: `<!--${contract}-->` }} />}
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-on-hl"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-lamp focus:px-4 focus:py-2 focus:text-on-hl"
         >
           Skip to content
         </a>
@@ -75,6 +86,7 @@ export default function RootLayout({
             <TransitionProvider>{children}</TransitionProvider>
           </SmoothScroll>
           <Cursor />
+          <EasterEggs />
         </ThemeProvider>
       </body>
     </html>

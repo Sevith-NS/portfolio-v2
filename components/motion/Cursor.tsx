@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } 
 
 type Mode = "idle" | "link" | "view" | "text";
 
-// A lapis dot that trails the pointer on a spring. Over links it swells into a ring;
+// A coral dot that trails the pointer on a spring. Over links it swells into a ring;
 // over anything marked data-cursor it becomes a labelled pill. Fine pointers only.
 export function Cursor() {
   const reduce = useReducedMotion();
@@ -76,8 +76,8 @@ export function Cursor() {
       <motion.div
         className={
           mode === "link"
-            ? "flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-accent/70"
-            : "flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-on-hl"
+            ? "flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-lamp"
+            : "flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-lamp text-on-hl"
         }
         animate={{
           width: size,

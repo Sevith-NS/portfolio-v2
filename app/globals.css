@@ -2,56 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* White by day, lapis-navy by night. Lapis is the one accent. Pastels live only on project plates. */
+/* AFTER HOURS, lapis. Colour tokens (--paper, --ink, --lamp...) live in
+   lib/theme.ts and are emitted for :root and .dark by the Tailwind plugin in
+   tailwind.config.ts. Never write a colour here; reference a token. */
 @layer base {
-  :root {
-    --paper: 243 238 228;
-    --sheet: 237 229 216;
-    --ink: 17 17 17;
-    --ink-2: 71 71 71;
-    --ink-3: 110 110 110;
-    --rule: 226 219 206;
-    --hl: 0 45 180;
-    --on-hl: 255 255 255;
-    --accent: 0 45 180;
-    --tint-sage: 213 227 218;
-    --tint-butter: 234 241 198;
-    --tint-blush: 245 225 218;
-    --tint-lapis: 221 227 246;
-    --tint-stone: 236 236 234;
-    --tint-rose: 244 222 228;
-    --tint-mint: 214 238 229;
-    --tint-amber: 246 230 204;
-    --tint-garnet: 248 217 212;
-    --tint-clover: 200 236 208;
-    color-scheme: light;
-  }
-
-  .dark {
-    --paper: 9 13 30;
-    --sheet: 17 23 46;
-    --ink: 242 242 240;
-    --ink-2: 190 192 200;
-    --ink-3: 150 154 170;
-    --rule: 36 44 74;
-    --hl: 128 155 255;
-    --on-hl: 9 13 30;
-    --accent: 128 155 255;
-    --tint-sage: 28 48 44;
-    --tint-butter: 44 50 30;
-    --tint-blush: 56 38 40;
-    --tint-lapis: 26 38 88;
-    --tint-stone: 34 38 52;
-    --tint-rose: 54 32 48;
-    --tint-mint: 20 50 52;
-    --tint-amber: 52 42 26;
-    --tint-garnet: 56 32 30;
-    --tint-clover: 18 50 34;
-    color-scheme: dark;
-  }
-
   html {
     -webkit-text-size-adjust: 100%;
+    /* Glows reach past their boxes on purpose; the page itself never may. */
+    overflow-x: clip;
   }
 
   body {
@@ -97,19 +55,26 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
 
-@layer components {
-  /* The lapis marker: a solid band that sweeps in behind the key phrase. */
-  .hl {
-    background-image: linear-gradient(rgb(var(--hl)), rgb(var(--hl)));
-    background-repeat: no-repeat;
-    background-position: 0 85%;
-    background-size: 0% 12%;
-    transition: background-size 900ms cubic-bezier(0.16, 1, 0.3, 1);
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
-  }
-  .hl[data-on="true"] { background-size: 100% 12%; }
 
+/* Grain on everything, as one fixed layer, so texture never changes at a
+   section edge. Static and blend-free, so it costs nothing while scrolling. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>");
+}
+
+/* Archivo run wide: the geometric all-caps voice (the Azonix / Stretch Pro
+   register, without the extra font file). */
+@layer utilities {
+  .font-wide { font-variation-settings: "wdth" 125; }
+}
+
+@layer components {
   .section-title {
     @apply font-serif text-[2.4rem] md:text-[3.75rem] font-normal tracking-[-0.025em] leading-[1.05] text-ink;
     text-wrap: balance;
@@ -117,6 +82,16 @@ html.lenis, html.lenis body { height: auto; }
 
   .note {
     @apply font-sans text-[0.8125rem] font-medium leading-5 text-ink-3 tabular;
+  }
+
+  /* Keyword emphasis in prose: bold ink with a lamp-coloured rule under it. */
+  .key {
+    @apply font-semibold text-ink;
+    text-decoration-line: underline;
+    text-decoration-color: rgb(var(--lamp) / 0.8);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.2em;
+    text-decoration-skip-ink: auto;
   }
 
   /* Small uppercase tracked label with tabular numerals: rails, counters, chapter marks. */
@@ -150,8 +125,80 @@ html.lenis, html.lenis body { height: auto; }
       transition-[transform,background-color,color,border-color] duration-200 ease-out
       active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
   }
-  .btn-primary { @apply bg-accent text-on-hl hover:bg-accent/90; }
-  .btn-ghost { @apply border border-rule text-ink hover:border-ink bg-paper; }
+  /* Primary is lit: warm ink that catches the lamp on hover. */
+  .btn-primary { @apply bg-ink text-paper hover:bg-lamp hover:text-on-hl; }
+  .btn-ghost { @apply border border-rule bg-paper/40 text-ink backdrop-blur-sm hover:border-ink; }
+
+  /* Liquid glass on the page colour itself. Built from --on-hl, which is the
+     same off-white in both modes, so only the text changes with the theme. */
+  .liquid {
+    position: relative;
+    isolation: isolate;
+    border-radius: 1.75rem;
+    background: linear-gradient(155deg, rgb(var(--on-hl) / 0.34), rgb(var(--on-hl) / 0.1) 55%, rgb(var(--on-hl) / 0.2));
+    backdrop-filter: blur(24px) saturate(1.6);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    box-shadow:
+      inset 0 0 28px rgb(var(--on-hl) / 0.14),
+      0 0 0 1px rgb(var(--shade) / 0.06), /* keeps the edge on a light page */
+      0 28px 56px -30px rgb(var(--shade) / 0.5);
+  }
+  /* The rim: bright at the top-left, fading round the sides, catching again bottom-right. */
+  .liquid::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(140deg, rgb(var(--on-hl) / 0.9), rgb(var(--on-hl) / 0.12) 40%, rgb(var(--on-hl) / 0.08) 65%, rgb(var(--on-hl) / 0.5));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Dark mode: near-clear glass lit from the top-left. A white fill over navy
+     reads as milky plastic, so the feel comes from light, not from the fill. */
+  .dark .liquid {
+    background: linear-gradient(165deg, rgb(var(--on-hl) / 0.09), rgb(var(--on-hl) / 0.015) 40%, rgb(var(--on-hl) / 0.04));
+    backdrop-filter: blur(28px) saturate(1.8) brightness(1.08);
+    -webkit-backdrop-filter: blur(28px) saturate(1.8) brightness(1.08);
+    box-shadow:
+      inset 0 1px 0 rgb(var(--on-hl) / 0.4),
+      inset 0 -18px 32px -24px rgb(var(--shade) / 0.7),
+      inset 0 0 0 1px rgb(var(--on-hl) / 0.05),
+      0 40px 80px -36px rgb(var(--shade) / 0.9),
+      0 0 60px -24px rgb(var(--lamp) / 0.35);
+  }
+  .dark .liquid::before {
+    background: linear-gradient(135deg, rgb(var(--on-hl) / 0.85), rgb(var(--on-hl) / 0.18) 22%, rgb(var(--on-hl) / 0.04) 50%, rgb(var(--on-hl) / 0.1) 78%, rgb(var(--on-hl) / 0.45));
+  }
+  /* The specular bloom where the curved edge catches the light. */
+  .dark .liquid::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background:
+      radial-gradient(90% 55% at 12% 0%, rgb(var(--on-hl) / 0.14), transparent 60%),
+      radial-gradient(70% 45% at 100% 100%, rgb(var(--lamp) / 0.12), transparent 70%);
+    pointer-events: none;
+  }
+  @supports not (backdrop-filter: blur(1px)) {
+    .liquid { background: rgb(var(--sheet)); }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .liquid { background: rgb(var(--sheet)); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  }
+
+  .glow-soft {
+    -webkit-mask-image: radial-gradient(closest-side, #000 35%, transparent);
+    mask-image: radial-gradient(closest-side, #000 35%, transparent);
+  }
+  .vignette {
+    background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(var(--shade) / 0.35) 100%);
+  }
 
   /* Film grain for colour fields: a tiny SVG noise tile, not a scrolling filter. */
   .grain::after {
@@ -166,26 +213,7 @@ html.lenis, html.lenis body { height: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hl { transition: none; }
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-}
-
-/* Handwritten lapis annotation, written on with a left-to-right mask wipe. */
-.scribble {
-  font-family: var(--font-script), cursive;
-  color: rgb(var(--accent));
-  line-height: 1;
-  mask-image: linear-gradient(90deg, #000 45%, transparent 55%);
-  mask-size: 240% 100%;
-  mask-position: 100% 0;
-  -webkit-mask-image: linear-gradient(90deg, #000 45%, transparent 55%);
-  -webkit-mask-size: 240% 100%;
-  -webkit-mask-position: 100% 0;
-  transition: mask-position 1.6s cubic-bezier(0.65, 0, 0.35, 1), -webkit-mask-position 1.6s cubic-bezier(0.65, 0, 0.35, 1);
-}
-.scribble[data-on="true"] { mask-position: 0 0; -webkit-mask-position: 0 0; }
-@media (prefers-reduced-motion: reduce) {
-  .scribble { mask-image: none; -webkit-mask-image: none; }
 }
 
 /* A solid layer that only shows through a circle of "clear glass" at the
@@ -208,43 +236,4 @@ html.lenis, html.lenis body { height: auto; }
 @media (hover: hover) and (pointer: fine) {
   .has-cursor, .has-cursor a, .has-cursor button { cursor: none; }
   .has-cursor input, .has-cursor textarea { cursor: text; }
-}
-
-/* The side-switch mosaic: chunky tiles snap in on a diagonal sweep, cover the
-   screen while the theme flips behind them, then snap away to reveal the new
-   side. Tile delays come from JS (one per tile); the motion lives here so 700
-   tiles cost 700 divs and no per-frame JS. */
-@keyframes mosaic-in {
-  from { opacity: 0; transform: scale(0.3); }
-  to { opacity: 1; transform: scale(1.06); }
-}
-@keyframes mosaic-out {
-  from { opacity: 1; transform: scale(1.06); }
-  to { opacity: 0; transform: scale(0.3); }
-}
-.mosaic-tile { animation-fill-mode: both; }
-[data-mosaic="in"] .mosaic-tile {
-  animation-name: mosaic-in;
-  animation-duration: 220ms;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-}
-[data-mosaic="out"] .mosaic-tile {
-  animation-name: mosaic-out;
-  animation-duration: 200ms;
-  animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
-}
-
-@keyframes mosaic-say-in {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes mosaic-say-out {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-12px); }
-}
-[data-mosaic="in"] .mosaic-say {
-  animation: mosaic-say-in 520ms cubic-bezier(0.16, 1, 0.3, 1) calc(420ms + var(--say-delay, 0ms)) both;
-}
-[data-mosaic="out"] .mosaic-say {
-  animation: mosaic-say-out 220ms cubic-bezier(0.76, 0, 0.24, 1) both;
 }

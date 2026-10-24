@@ -1,6 +1,6 @@
 import type { Config } from "tailwindcss";
 import plugin from "tailwindcss/plugin";
-import { Palette, dark, light } from "./lib/theme";
+import { Palette, band, dark, light } from "./lib/theme";
 
 const config = {
   darkMode: ["class"],
@@ -23,6 +23,8 @@ const config = {
         // Archivo on its width axis: the wide geometric caps voice.
         wide: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],
+        // Neue Montreal, subset to "sevith.": the footer wordmark and nothing else.
+        mark: ["var(--font-mark)", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       maxWidth: {
         page: "1240px",
@@ -31,7 +33,7 @@ const config = {
   },
   plugins: [
     plugin(({ addBase }) => {
-      addBase({ ":root": light.vars(), ".dark": dark.vars() });
+      addBase({ ":root": light.vars(), ".dark": dark.vars(), ".band": band.light.vars(), ".dark .band": band.dark.vars() });
     }),
   ],
 } satisfies Config;

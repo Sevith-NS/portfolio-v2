@@ -8,8 +8,8 @@ import { RiseSheet } from "./motion/RiseSheet";
 import { PixelCats } from "./PixelCats";
 import { CreamHint } from "./CreamHint";
 
-const wordmark =
-  "select-none whitespace-nowrap text-center font-serif text-[22vw] font-normal leading-[0.8] tracking-[-0.02em] md:text-[15rem] lg:text-[17.5rem]";
+// "sevith." is 2.49em wide in Neue Montreal at this tracking, so 36vw spans ~90% of the screen; capped for big monitors.
+const wordmark = "select-none whitespace-nowrap text-center font-mark text-[min(36vw,40rem)] font-medium leading-[0.86] tracking-[-0.045em]";
 
 const Footer = () => {
   return (

@@ -5,9 +5,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { PixelSprite } from "./PixelCats";
 
 // The cats (Q89, Q34). Cream is chaos: type "cream" anywhere (the footer says so,
-// and lights up a key per letter), tap the footer's keys, or tap her photo
-// on /story three times, and she does zoomies across the screen and knocks the
-// page crooked. Simba lives in the footer as a pixel cat (see PixelCats) and sends notes
+// and lights up a key per letter) or tap the footer's keys, and she does
+// zoomies across the screen and knocks the page crooked. Simba lives in the footer as a pixel cat (see PixelCats) and sends notes
 // through here. Reduced motion skips the animation and keeps the note.
 
 const TOAST_MS = 3600;
@@ -45,7 +44,6 @@ export function EasterEggs() {
   const [note, setNote] = useState<string | null>(null);
   const [zoomies, setZoomies] = useState(0);
   const typed = useRef("");
-  const taps = useRef<number[]>([]);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const say = useCallback((text: string) => {
@@ -81,25 +79,13 @@ export function EasterEggs() {
     };
     // The footer's key hint is a button too, for anyone without a keyboard.
     const onSummon = () => cream();
-    // Phones have no keyboard: three quick taps on her photo do the same.
-    const onTap = (e: MouseEvent) => {
-      if (!(e.target as HTMLElement | null)?.closest("[data-cream]")) return;
-      const now = Date.now();
-      taps.current = [...taps.current.filter((t) => now - t < 1500), now];
-      if (taps.current.length >= 3) {
-        taps.current = [];
-        cream();
-      }
-    };
     const onNote = (e: Event) => say((e as CustomEvent<string>).detail);
     window.addEventListener("keydown", onKey);
-    window.addEventListener("click", onTap);
     window.addEventListener("cat-note", onNote);
     window.addEventListener("cream-summon", onSummon);
     return () => {
       window.removeEventListener("cream-summon", onSummon);
       window.removeEventListener("keydown", onKey);
-      window.removeEventListener("click", onTap);
       window.removeEventListener("cat-note", onNote);
       clearTimeout(timer.current);
     };

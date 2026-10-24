@@ -10,13 +10,16 @@ const Home = () => {
   return (
     <main id="main" className="relative">
       <FloatingNav navItems={navItems} />
-      {/* What I offer, who I am, the work, how I build it, then say hi (Q72, Q73, Q82).
-          Experience and Off the clock move to /story. */}
+      {/* What I offer, who I am, the work, how I build it, then say hi (Q72, Q73, Q82). */}
       <Hero />
       <Intro />
       <Projects />
       <Approach />
-      <Footer />
+      {/* The band carries on behind the contact sheet as it rises; flow-root
+          keeps the footer's top margin inside the colour. */}
+      <div className="flow-root bg-band">
+        <Footer />
+      </div>
     </main>
   );
 };

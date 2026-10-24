@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "framer-motion";
 import { useLenis } from "lenis/react";
-import { PixelReveal } from "@/components/motion/PixelDissolve";
+import { DustReveal } from "@/components/motion/PixelDissolve";
 
 type Phase = "idle" | "cover" | "reveal";
 type Ctx = { navigate: (href: string, label?: string) => void };
@@ -16,10 +16,9 @@ export const usePageTransition = () => useContext(TransitionContext);
 const CURTAIN = [0.76, 0, 0.24, 1] as const;
 const COVER_MS = 620;
 // The curtain stays shut at least this long, so the page name finishes
-// building itself in pixels before it opens.
-const NAME_DELAY_MS = 200;
+// assembling from dust before it opens.
 const NAME_MS = 1100;
-const HOLD_MS = NAME_DELAY_MS + NAME_MS * 1.1 + 250;
+const HOLD_MS = NAME_MS + 250;
 const SAFETY_MS = 3500;
 
 // Page changes play like a film slate: a curtain closes, names the next scene, and opens.
@@ -113,25 +112,26 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
           <motion.div
             key="curtain"
             aria-hidden
-            // Between pages the next page's name settles in on the page colour.
-            className="pointer-events-auto fixed inset-0 z-[100] flex items-end overflow-hidden bg-paper text-ink"
+            // Between pages the next page's name settles in on the page colour,
+            // in the side's accent, so the type and its dust are one colour.
+            className="pointer-events-auto fixed inset-0 z-[100] flex items-end overflow-hidden bg-paper text-warm"
             initial={{ clipPath: "inset(100% 0% 0% 0%)" }}
             animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
             exit={{ clipPath: "inset(0% 0% 100% 0%)" }}
             transition={{ duration: 0.62, ease: CURTAIN }}
           >
-            {/* A soft lapis glow rising from under the page name, like light
-                spilling in from the next room as it opens. */}
+            {/* A soft glow of the accent rising from under the page name, like
+                light spilling in from the next room as it opens. */}
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ delay: 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_22%_105%,rgb(var(--lamp)/0.34),transparent_70%)] dark:bg-[radial-gradient(70%_60%_at_22%_105%,rgb(var(--lamp)/0.38),transparent_70%)]"
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_22%_105%,rgb(var(--warm)/0.34),transparent_70%)] dark:bg-[radial-gradient(70%_60%_at_22%_105%,rgb(var(--warm)/0.38),transparent_70%)]"
             />
             <div className="relative mx-auto flex w-full max-w-page items-end justify-between gap-6 px-4 pb-10 md:px-8 md:pb-14">
-              {/* The next page's name builds itself in pixels, left to right. */}
-              <PixelReveal delay={NAME_DELAY_MS} duration={NAME_MS}>
+              {/* The next page's name assembles from dust, like the landing headline. */}
+              <DustReveal duration={NAME_MS}>
                 <motion.p
                   exit={{ opacity: 0, y: -16 }}
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
@@ -139,7 +139,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
                 >
                   {label || "Sevith"}
                 </motion.p>
-              </PixelReveal>
+              </DustReveal>
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.7 }}

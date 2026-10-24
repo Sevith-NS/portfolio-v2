@@ -24,8 +24,9 @@ const TOKENS = [
   "on-hl", // text on hl and lamp fills
   "accent", // accent text: links, kickers, keywords
   "lamp", // accent fills: nav pill, cursor, active states
-  "warm", // the lamp's big moments: "actually", the footer wordmark
+  "warm", // the lamp's big moments: "actually", the footer wordmark, the dust's blink
   "deep", // deep accent tone
+  "band", // the How I build band, carried on behind the contact sheet
   "shade", // shadow colour
   "danger", // form errors
   "tint-sage",
@@ -66,10 +67,20 @@ export class Palette {
     for (const t of TOKENS) out[`--${t}`] = this.channels(t);
     return out;
   }
+
+  /** The same palette with some tokens swapped. */
+  with(over: Partial<Record<Token, Rgb>>) {
+    return new Palette(this.side, { ...this.values, ...over });
+  }
 }
 
+// The How I build band: lapis in the light, off-white in the dark.
+const BAND_LIGHT: Rgb = [0, 45, 180];
+const BAND_DARK: Rgb = [242, 238, 230];
+const OAT: Rgb = [239, 233, 222]; // the light page, and the light band's type
+
 export const light = new Palette("light", {
-  paper: [239, 233, 222], // #EFE9DE oat
+  paper: OAT, // #EFE9DE oat
   sheet: [247, 243, 236],
   ink: [26, 22, 18], // #1A1612
   "ink-2": [78, 70, 61],
@@ -83,6 +94,7 @@ export const light = new Palette("light", {
   lamp: [0, 45, 180],
   warm: [0, 45, 180],
   deep: [20, 34, 100],
+  band: BAND_LIGHT,
   shade: [0, 0, 0],
   danger: [178, 58, 12],
   "tint-sage": [213, 227, 218],
@@ -112,6 +124,7 @@ export const dark = new Palette("dark", {
   lamp: [47, 91, 255],
   warm: [128, 155, 255],
   deep: [26, 40, 120],
+  band: BAND_DARK,
   shade: [0, 0, 0],
   danger: [255, 138, 91],
   "tint-sage": [24, 34, 32],
@@ -127,3 +140,32 @@ export const dark = new Palette("dark", {
 });
 
 export const themes: Record<Side, Palette> = { light, dark };
+
+// How I build is a band of its own, the page turned inside out: lapis with
+// oat type in the light, off-white with lapis type in the dark. Every text
+// tone clears 4.5:1 on its band. The dust lands in the type's own colour
+// (warm = ink), with no second tone.
+export const band: Record<Side, Palette> = {
+  light: light.with({
+    paper: BAND_LIGHT,
+    ink: OAT,
+    "ink-2": [203, 205, 216], // oat 15% toward lapis, 6.5:1
+    "ink-3": [163, 173, 209], // oat 32% toward lapis, 4.65:1
+    rule: [55, 90, 195],
+    accent: [180, 198, 255],
+    lamp: OAT,
+    warm: OAT,
+    hl: OAT, // selection: oat on lapis, lapis text
+    "on-hl": [0, 45, 180],
+  }),
+  dark: dark.with({
+    paper: BAND_DARK,
+    ink: [0, 45, 180],
+    "ink-2": [48, 84, 190],
+    "ink-3": [68, 99, 194],
+    rule: [198, 203, 221],
+    accent: [24, 70, 230],
+    lamp: [0, 45, 180],
+    warm: [0, 45, 180],
+  }),
+};

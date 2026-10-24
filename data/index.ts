@@ -5,21 +5,17 @@ export const email = "sevithns@gmail.com";
 
 export const navItems = [
   { name: "Work", link: "#projects" },
-  { name: "Story", link: "/story" },
   { name: "Studio", link: "/studio" },
-  { name: "Contact", link: "#contact" },
+  { name: "Gallery", link: "/gallery" },
 ];
 
-// Home, section two: who I am, short. The long version lives on /story.
-// First person, punchy, and the first joke is allowed here because the
-// visitor has already scrolled once (Q7). Edit freely.
+// Home, section two: who I am, the whole story in one paragraph (there is no
+// /story page). First person, punchy, and the first joke is allowed here
+// because the visitor has already scrolled once (Q7). Edit freely.
 export const intro = {
   kicker: "Who I am",
-  headline: "Self-taught designer. Learn it at 2am, ship it by morning.",
-  body: "I'm Sevith. I design the interface, decide what the product should *actually do*, and write the code, so what you signed off on is what ships. *Startups, small businesses*, anyone who wants a clean UI built *end to end*. Freelance or full-time, either works.",
-  aside: "Not everyone has great taste. Fortunately, I do.",
-  photo: { src: "/cats/simba.webp", alt: "Simba, Sevith's orange cat, looking thoroughly unimpressed", caption: "Simba, head of quality assurance." },
-  more: "The long version",
+  text: "Hi, I'm Sevith, a *self-taught designer* and *product engineer* in Bangalore. I learn it at 2am and ship it by morning. I design the interface, decide what the product should *actually do*, and write the code, so what you signed off on is what ships. By day I'm a *Technical Writer at Digital.ai*. After hours I build *Polaris* and *Tesseract AI*. Four cats, zero personal space. Not everyone has great taste. Fortunately, I do.",
+  photo: { src: "/story/pool-table.webp", alt: "Sevith in a dark shirt and sunglasses, standing by a pool table under amber blinds", caption: "Lining up the shot. Missed it, obviously." },
 };
 
 export const projects = [
@@ -83,7 +79,6 @@ export const approach = [
     des: "*Start with the confusion, not the feature.* Who is stuck, where, and why, worked out before a single screen exists, so the thing I build is the thing people actually needed.",
     proof: "Polaris started as four tools that never explained themselves",
     artifact: {
-      heading: "Polaris \u00b7 problem notes",
       rows: [
         { tag: "Pain", text: "Investors juggle a chart site, a screener, news and a spreadsheet" },
         { tag: "Pain", text: "None of them say why a trade makes sense" },
@@ -98,7 +93,6 @@ export const approach = [
     des: "*Wireframes first, then the UI.* Clean, intuitive, and deliberately boring wherever boring is kinder. I design the flows I am about to build, so nothing gets lost in a handoff.",
     proof: "Tesseract AI, designed around one nervous student",
     artifact: {
-      heading: "Tesseract AI \u00b7 screens",
       rows: [
         { tag: "Screen", text: "Pick a role and an experience level" },
         { tag: "Screen", text: "Questions read aloud, like a real interview" },
@@ -113,7 +107,6 @@ export const approach = [
     des: "*Rome wasn't built in a day,* and neither is a product. Small, reviewable slices, each one working before the next starts. Then real use decides what gets built after.",
     proof: "Polaris, shipped in slices and run on my own money",
     artifact: {
-      heading: "Polaris \u00b7 build log",
       rows: [
         { tag: "Shipped", text: "Two services: Next.js frontend, FastAPI quant API" },
         { tag: "Shipped", text: "Backtester running 13 strategies" },

@@ -23,17 +23,17 @@ export type Hotspot = "lamp" | "monitor" | "cream" | "simba";
 // ---------- the two hours ----------
 type Hour = {
   floor: string; floorLine: string; wall: string; wall2: string; trim: string; paper: string; ink: string; accent: string;
-  screen: string; sky: [string, string]; city: string; cityLit: string[]; moon: string | null;
+  screen: string; sky: [string, string]; city: string; cityLit: string[]; moon: string | null; niche: [string, string];
   amb: number; hemi: [string, string, number]; key: { color: string; i: number; p: V3 }; lamp: number;
 };
 const NIGHT: Hour = {
   floor: "#6B5442", floorLine: "#56432F", wall: "#232838", wall2: "#1C2030", trim: "#161925", paper: "#EDE6DA", ink: "#1A1612", accent: dark.hex("lamp"),
-  screen: "#0B0F1C", sky: ["#070A18", "#1A2048"], city: "#0C0F1D", cityLit: ["#FFC37A", "#FFD9A0", "#9FB4FF"], moon: "#F4F1E6",
+  screen: "#0B0F1C", sky: ["#070A18", "#1A2048"], city: "#0C0F1D", cityLit: ["#FFC37A", "#FFD9A0", "#9FB4FF"], moon: "#F4F1E6", niche: ["#FFC27A", "#6E4430"],
   amb: 0.55, hemi: ["#5A6AAA", "#1A1C28", 0.7], key: { color: "#9FB2FF", i: 1.5, p: [-4.5, 3.6, 0.8] }, lamp: 1.6,
 };
 const GOLDEN: Hour = {
   floor: "#C9A27E", floorLine: "#B08967", wall: "#EFE6D8", wall2: "#E4D9C8", trim: "#D6C9B4", paper: "#FBF7F0", ink: "#1A1612", accent: light.hex("accent"),
-  screen: "#0B0F1C", sky: ["#F7C98F", "#E8875A"], city: "#7A4C42", cityLit: ["#FFE2A8"], moon: null,
+  screen: "#0B0F1C", sky: ["#F7C98F", "#E8875A"], city: "#7A4C42", cityLit: ["#FFE2A8"], moon: null, niche: ["#FFF0D2", "#D9B48A"],
   amb: 0.7, hemi: ["#FFE2B8", "#7A5A48", 0.8], key: { color: "#FFC896", i: 2.0, p: [-4.5, 2.6, 0.9] }, lamp: 0.3,
 };
 
@@ -573,6 +573,125 @@ function Gym({ h }: { h: Hour }) {
   );
 }
 
+// ---------- the shelves ----------
+// Staggered cubes on the side wall, walnut and ebony, each lit warm from inside
+// like modern cube shelving. Books in small groups, the odd vase or plant. The
+// ebony cubes stand a little prouder of the wall than the walnut ones. Shallow,
+// because the camera looks across them from high up and deep cubes hide their light.
+const BOARD = 0.022;
+const WALNUT = "#5A3D2B", EBONY = "#211C19";
+
+// A cube's inside, lit by a strip under its top: the light falls off in bands
+// down the back and sides, the way it reads at 16 bits, and pools on the floor.
+// It's a box seen from within, so of its faces (+x, -x, +y, -y, +z, -z) only
+// the back, the floor and the far side draw.
+function useNiche(h: Hour) {
+  const inside = useMemo(() => {
+    const cv = document.createElement("canvas");
+    cv.width = 1;
+    cv.height = 8;
+    const g = cv.getContext("2d")!;
+    const grad = g.createLinearGradient(0, 0, 0, 8);
+    grad.addColorStop(0, h.niche[0]);
+    grad.addColorStop(1, h.niche[1]);
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 1, 8);
+    const t = new THREE.CanvasTexture(cv);
+    t.colorSpace = THREE.SRGBColorSpace;
+    const glow = new THREE.MeshBasicMaterial({ map: blocky(t), side: THREE.BackSide, toneMapped: false });
+    const floor = new THREE.MeshBasicMaterial({ color: h.niche[1], side: THREE.BackSide, toneMapped: false });
+    return [glow, glow, glow, floor, glow, glow];
+  }, [h]);
+  useEffect(
+    () => () => {
+      inside[0].map?.dispose();
+      inside[0].dispose();
+      inside[3].dispose();
+    },
+    [inside]
+  );
+  return inside;
+}
+
+// One cube, open to the room: four boards round its lit inside, and what it
+// holds standing on its floor. z and y are its edges on the wall.
+function Cube({ z, y, dark, inside, children }: { z: [number, number]; y: [number, number]; dark?: boolean; inside: THREE.Material[]; children: React.ReactNode }) {
+  const w = z[1] - z[0], ht = y[1] - y[0], d = dark ? 0.14 : 0.12, c = dark ? EBONY : WALNUT;
+  return (
+    <group position={[-H + d / 2, (y[0] + y[1]) / 2, (z[0] + z[1]) / 2]}>
+      {[1, -1].map((side) => (
+        <group key={side}>
+          <Box p={[0, (side * (ht - BOARD)) / 2, 0]} s={[d, BOARD, w]} c={c} />
+          <Box p={[0, 0, (side * (w - BOARD)) / 2]} s={[d, ht - BOARD * 2, BOARD]} c={c} />
+        </group>
+      ))}
+      <mesh material={inside}>
+        <boxGeometry args={[d - 0.004, ht - BOARD * 2 - 0.004, w - BOARD * 2 - 0.004]} />
+      </mesh>
+      <group position={[0, BOARD - ht / 2, 0]}>{children}</group>
+    </group>
+  );
+}
+
+// Upright books in a group, spines out, in the room's own colours.
+function Books({ n, z = 0, h }: { n: number; z?: number; h: Hour }) {
+  const spines = [h.paper, h.ink, h.accent, STEEL, PAD];
+  return (
+    <>
+      {Array.from({ length: n }, (_, i) => {
+        const tall = 0.12 + ((i * 5 + n) % 4) * 0.014;
+        return <Box key={i} p={[0, tall / 2, z + (i - (n - 1) / 2) * 0.024]} s={[0.08, tall, 0.022]} c={spines[(i + n) % spines.length]} cast={false} />;
+      })}
+    </>
+  );
+}
+
+// A few books lying flat, each a little smaller up the pile.
+function Stack({ n = 3, z = 0, h }: { n?: number; z?: number; h: Hour }) {
+  const covers = [h.ink, h.paper, h.accent];
+  return (
+    <>
+      {Array.from({ length: n }, (_, i) => (
+        <Box key={i} p={[0, 0.011 + i * 0.022, z]} s={[0.085 - i * 0.008, 0.022, 0.15 - i * 0.02]} c={covers[i % 3]} cast={false} />
+      ))}
+    </>
+  );
+}
+
+// A round vase with a short neck.
+function Vase({ z = 0, c }: { z?: number; c: string }) {
+  return (
+    <>
+      <mesh position={[0, 0.035, z]}>
+        <sphereGeometry args={[0.035, 16, 12]} />
+        <meshToonMaterial color={c} gradientMap={TOON} />
+      </mesh>
+      <Cyl p={[0, 0.08, z]} rad={0.012} len={0.03} c={c} seg={12} />
+    </>
+  );
+}
+
+// Between the back corner and the window. Neighbours touch along an edge and
+// alternate wood, so the wall reads as one interlocking piece.
+function Shelves({ h }: { h: Hour }) {
+  const inside = useNiche(h);
+  return (
+    <>
+      <Cube z={[-1.42, -1.12]} y={[0.5, 0.76]} inside={inside}><Books n={5} z={-0.04} h={h} /><Vase z={0.075} c={h.ink} /></Cube>
+      <Cube z={[-1.42, -1.18]} y={[0.76, 1.08]} inside={inside} dark><Model name="pottedPlant" s={0.3} /></Cube>
+      <Cube z={[-1.42, -1.14]} y={[1.14, 1.36]} inside={inside} dark><Stack h={h} /></Cube>
+      <Cube z={[-1.12, -0.8]} y={[0.6, 0.84]} inside={inside} dark><Books n={4} h={h} /></Cube>
+      <Cube z={[-1.18, -0.88]} y={[0.84, 1.14]} inside={inside}><Books n={3} z={-0.08} h={h} /><Stack n={2} z={0.045} h={h} /></Cube>
+      <Cube z={[-1.06, -0.74]} y={[1.14, 1.44]} inside={inside} dark><Model name="pottedPlant" s={0.3} p={[0, 0, 0.06]} /><Books n={3} z={-0.08} h={h} /></Cube>
+      <Cube z={[-0.8, -0.52]} y={[0.44, 0.74]} inside={inside}><Books n={6} h={h} /></Cube>
+      <Cube z={[-0.74, -0.46]} y={[0.74, 1.0]} inside={inside} dark><Vase c={h.paper} /></Cube>
+      <Cube z={[-0.74, -0.42]} y={[1.0, 1.24]} inside={inside}><Stack h={h} /></Cube>
+      <Cube z={[-0.46, -0.2]} y={[0.56, 0.82]} inside={inside}><Books n={4} h={h} /></Cube>
+      <Cube z={[-0.42, -0.2]} y={[0.82, 1.06]} inside={inside} dark><Stack n={2} h={h} /></Cube>
+    </>
+  );
+}
+
 // The monitor, showing Polaris: dark UI, a headline, two cards.
 function Monitor({ h, onPick, onHover }: { h: Hour; onPick: () => void; onHover: (v: Hotspot | null) => void }) {
   return (
@@ -636,12 +755,13 @@ function Rug({ h }: { h: Hour }) {
   );
 }
 
-// The mug: on the desk, until Cream happens to it.
+// The mug: on the desk's front corner by Cream, the edge she jumps off, until she
+// happens to it. It lands clear of her laps.
 function Mug({ knocked, still }: { knocked: boolean; still: boolean }) {
   const g = useRef<THREE.Group>(null);
   const t0 = useRef(0);
-  const from = useMemo(() => new THREE.Vector3(0.6, DESK_Y, -1.24), []);
-  const to = useMemo(() => new THREE.Vector3(0.95, 0.02, -0.66), []);
+  const from = useMemo(() => new THREE.Vector3(-0.43, DESK_Y, -0.9), []);
+  const to = useMemo(() => new THREE.Vector3(-0.66, 0.02, -0.76), []);
   useEffect(() => {
     t0.current = 0;
   }, [knocked]);
@@ -770,8 +890,7 @@ function Scene({
 
       <Model name="pillowBlue" p={[-1.0, 0, 0.82]} r={0.5} />
 
-      <Model name="bookcaseOpen" p={[-1.3, 0, -0.75]} r={Math.PI / 2} />
-      <Model name="books" p={[-1.3, 0.46, -0.8]} r={Math.PI / 2} />
+      <Shelves h={h} />
       <Model name="pottedPlant" p={[1.15, 0, -1.2]} />
     </group>
   );
@@ -835,7 +954,7 @@ export default function Room({
       ref={wrap}
       className="relative h-full w-full [&_canvas]:[image-rendering:pixelated]"
       role="img"
-      aria-label={`Sevith's room ${h === NIGHT ? "at 2am" : "at golden hour"}: at the desk with the lamp ${lampOn ? "on" : "off"}, Cream loafed by the lamp,${simba ? " Simba loafed on the rug," : ""} a cushion by the window, and a bench, barbell and dumbbells in the corner.`}
+      aria-label={`Sevith's room ${h === NIGHT ? "at 2am" : "at golden hour"}: at the desk with the lamp ${lampOn ? "on" : "off"}, Cream loafed by the lamp,${simba ? " Simba loafed on the rug," : ""} a cushion by the window, lit cube shelves on the side wall, and a bench, barbell and dumbbells in the corner.`}
     >
       <Canvas
         orthographic
@@ -868,6 +987,6 @@ export default function Room({
 // Fetch every model up front so the room appears whole.
 const MODELS = [
   "chairDesk", "computerScreen", "computerKeyboard", "computerMouse", "lampRoundTable",
-  "pillowBlue", "bookcaseOpen", "books", "pottedPlant", "food/mug",
+  "pillowBlue", "pottedPlant", "food/mug",
 ];
 if (typeof window !== "undefined") MODELS.forEach((m) => useGLTF.preload(`${M}${m}.glb`, false, false));

@@ -49,7 +49,7 @@ intake answers in `ART-DIRECTION.md`. The open work is in `TASK.md`.
 - **Palette swapped from lapis to a racing-green set,** three colours per mode from a car interior: emerald paint, cognac leather, cream or near-black base. Light: cream `#F1ECE2`, near-black text, emerald `#0F5C45`, cognac `#9A4E24`. Dark: near-black, off-white text, emerald `#13805C` fills and `#4FC496` small text, cognac `#D07A45`.
 - **Emerald** does every interactive job (nav pill, cursor, links, labels, markers, tags). **Cognac** is the lamp: the hero's "actually", "Shipped it.", the logo dot, the footer sign-off, the warm glows. New token `--warm` / `text-warm`.
 - **Dark-mode pixel scan** now uses the site's near-black (`#0A0B0E` / `#14161B`) instead of navy, with a cognac `#D07A45` scan flash. The light-mode scan flashes emerald.
-- Tried a pixel scan inside the footer name on hover. Sevith rejected it, so the fogged-glass `GlassPaint` wipe is back.
+- Tried a pixel scan inside the footer name on hover. Sevith rejected it, so the fogged-glass `GlassPaint` wipe is back. A cursor-trail pixel version (2026-10-23) was rejected too: leave the footer name's effect alone.
 - To undo, `git checkout -- .` returns to the committed lapis version.
 - **Studio "not loading":** could not reproduce. It loads in dev, in a production build, on direct load and through page navigation, with no hydration warnings.
 

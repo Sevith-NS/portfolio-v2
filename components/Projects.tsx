@@ -100,7 +100,7 @@ function Plate({ p, index, total }: { p: (typeof projects)[number]; index: numbe
 
 const Projects = () => {
   return (
-    <section id="projects" className="mx-auto max-w-page px-4 pb-24 pt-16 md:px-8 md:pt-24">
+    <section id="projects" className="mx-auto max-w-page px-4 pb-24 pt-16 md:px-8 md:pt-8">
       <Reveal className="mx-auto mb-16 max-w-[48rem] text-center md:mb-24">
         <p className="font-mono text-[0.75rem] uppercase tracking-[0.18em] text-accent">The work</p>
         <h2 className="mt-5 font-wide text-[clamp(2rem,5vw,4rem)] font-semibold uppercase leading-[1] tracking-[-0.01em] text-ink">
@@ -109,7 +109,7 @@ const Projects = () => {
           <span className="block text-warm">Shipped it.</span>
         </h2>
       </Reveal>
-      <div className="flex flex-col gap-24 md:gap-36">
+      <div className="flex flex-col gap-24 md:gap-16">
         {projects.map((p, i) => (
           <Plate key={p.slug} p={p} index={i} total={projects.length} />
         ))}

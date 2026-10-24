@@ -41,14 +41,3 @@ export function maskFor(due: Float32Array, cols: number, rows: number, open: (du
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${cols} ${rows}' preserveAspectRatio='none' shape-rendering='crispEdges'><path d='${d}'/></svg>`;
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 }
-
-// Paint the cells the front is passing right now in the lamp colour, and
-// everything else clear. `hot` is a cell's due time to its glow window.
-export function paintFlash(img: ImageData, due: Float32Array, rgb: number[], hot: (due: number) => boolean) {
-  const d = img.data;
-  for (let i = 0; i < due.length; i++) {
-    const o = i * 4;
-    if (hot(due[i])) { d[o] = rgb[0]; d[o + 1] = rgb[1]; d[o + 2] = rgb[2]; d[o + 3] = 255; }
-    else d[o + 3] = 0;
-  }
-}

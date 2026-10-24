@@ -4,11 +4,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
 import { usePathname } from "next/navigation";
 import {
-  BookOpen,
   Briefcase,
   Cube,
-  EnvelopeSimple,
   FileText,
+  Images,
   List,
   Path,
   Smiley,
@@ -26,10 +25,9 @@ const sections = ["top", "intro", "projects", "approach", "contact"];
 const icons: Record<string, Icon> = {
   Work: Briefcase,
   About: Smiley,
-  Story: BookOpen,
   Experience: Path,
   Studio: Cube,
-  Contact: EnvelopeSimple,
+  Gallery: Images,
 };
 
 // Pill navigation: a name pill on the left, a cluster of icon pills on the right.
@@ -73,8 +71,7 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
         entries.forEach((e) => {
           if (!e.isIntersecting) return;
           const id = e.target.id;
-          if (id === "top") setActive("");
-          else if (anchors.has(`#${id}`)) setActive(`#${id}`);
+          setActive(anchors.has(`#${id}`) ? `#${id}` : "");
         }),
       { rootMargin: "-45% 0px -50% 0px" }
     );

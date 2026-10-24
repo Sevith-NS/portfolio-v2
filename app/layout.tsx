@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Archivo, Bodoni_Moda, Silkscreen } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "./provider";
 import { TransitionProvider } from "@/components/transition/TransitionProvider";
@@ -29,6 +30,10 @@ const display = Archivo({
 
 // The studio's pixel font: text inside the 16-bit room.
 const pixel = Silkscreen({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-pixel", display: "swap" });
+
+// The footer's "sevith.", in Neue Montreal Medium (free for a personal portfolio).
+// shortcut: subset to the letters of "sevith." (2 KB), re-export the full font if it ever sets other text.
+const mark = localFont({ src: "./fonts/NeueMontreal-Medium-sevith.woff", weight: "500", variable: "--font-mark", display: "swap" });
 
 export const metadata: Metadata = {
   title: {
@@ -65,7 +70,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} ${display.variable} ${pixel.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} ${display.variable} ${pixel.variable} ${mark.variable}`}
     >
       <body>
         {/* Internal design notes: kept out of production HTML. */}

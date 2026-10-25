@@ -26,18 +26,18 @@ export function pixelGrid(w: number, h: number, origin: { x: number; y: number }
   return { span, cols, rows, due };
 }
 
-// The open cells as an SVG mask, one path run per unbroken stretch of a row,
-// so it stays a few hundred bytes however many cells are open.
-export function maskFor(due: Float32Array, cols: number, rows: number, open: (due: number) => boolean) {
-  let d = "";
+// The open cells as a clip path, one run per unbroken stretch of a row. A clip
+// path, not an SVG mask image: Safari doesn't repaint a mask image swapped every
+// frame, so masked type stayed hidden or half cut until the sweep ended.
+export function clipFor(due: Float32Array, cols: number, rows: number, span: number, open: (due: number) => boolean) {
+  let d = "M0 0"; // with no cells open, clips everything
   for (let r = 0; r < rows; r++) {
     let start = -1;
     for (let c = 0; c <= cols; c++) {
       const on = c < cols && open(due[r * cols + c]);
       if (on && start < 0) start = c;
-      else if (!on && start >= 0) { d += `M${start} ${r}h${c - start}v1h${start - c}z`; start = -1; }
+      else if (!on && start >= 0) { d += `M${start * span} ${r * span}h${(c - start) * span}v${span}h${(start - c) * span}z`; start = -1; }
     }
   }
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${cols} ${rows}' preserveAspectRatio='none' shape-rendering='crispEdges'><path d='${d}'/></svg>`;
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  return `path("${d}")`;
 }

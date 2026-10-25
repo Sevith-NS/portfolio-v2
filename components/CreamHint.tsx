@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 // The easter egg, spelled out: five keys that light up as you type C-R-E-A-M
-// anywhere on the page. Tapping them does the same, for phones.
+// anywhere on the page. Each tap on them types the next letter, for phones.
 export function CreamHint() {
   const [lit, setLit] = useState(0);
 
@@ -25,11 +25,15 @@ export function CreamHint() {
 
   return (
     <p className="note inline-flex flex-wrap items-center gap-x-2 gap-y-1">
-      <span>psst: type</span>
+      <span>
+        psst: <span className="[@media(hover:none)]:hidden">type</span>
+        <span className="hidden [@media(hover:none)]:inline">tap</span>
+      </span>
       <button
         type="button"
-        onClick={() => window.dispatchEvent(new Event("cream-summon"))}
-        aria-label="Summon Cream, the naughty cat. You can also type cream anywhere on the page."
+        // Typed from the body, so EasterEggs counts it like a real key.
+        onClick={() => document.body.dispatchEvent(new KeyboardEvent("keydown", { key: "cream"[lit % 5], bubbles: true }))}
+        aria-label="Type the next letter of cream, the naughty cat's name. You can also type cream anywhere on the page."
         className="inline-flex gap-1"
       >
         {"CREAM".split("").map((ch, i) => (
@@ -43,7 +47,8 @@ export function CreamHint() {
           </kbd>
         ))}
       </button>
-      <span>on your keyboard, anywhere on the page. No box needed, just type.</span>
+      <span className="[@media(hover:none)]:hidden">on your keyboard, anywhere on the page. No box needed, just type.</span>
+      <span className="hidden [@media(hover:none)]:inline">the keys, one letter at a time.</span>
     </p>
   );
 }

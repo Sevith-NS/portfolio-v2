@@ -2,6 +2,7 @@
 const names: Record<string, string> = {
   re: "React", tail: "Tailwind", javascript: "JavaScript", next: "Next.js", gemini: "Gemini", clerk: "Clerk",
   neon: "Neon", ts: "TypeScript", nodejs: "Node.js", aws: "AWS", fm: "Framer Motion", python: "Python",
+  three: "Three.js", gsap: "GSAP",
 };
 
 export const stack = (icons: string[]) =>

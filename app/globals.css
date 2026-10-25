@@ -225,9 +225,6 @@ body::after {
   transition: opacity 0.35s ease;
 }
 .glass-paint[data-on="true"] { opacity: 1; }
-@media (hover: none) {
-  .glass-paint { display: none; }
-}
 @media (prefers-reduced-motion: reduce) {
   .glass-paint { transition: none; }
 }

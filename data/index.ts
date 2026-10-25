@@ -29,7 +29,7 @@ export const projects = [
     des: "An invite-only portfolio manager. It syncs your holdings read-only from eight brokers, follows India and US markets live, and lets you test every idea on paper before real money moves.",
     img: "/polaris.png",
     iconLists: ["/next.svg", "/ts.svg", "/tail.svg", "/python.svg", "/gemini.svg"],
-    link: "https://algo-trader-frontend-sable.vercel.app/",
+    link: "https://polaris-snowy-three.vercel.app/",
     parts: ["Market pulse", "Broker sync", "Trade plans", "Risk and performance", "AI desk", "Backtester", "Watchlists and alerts"],
   },
   {

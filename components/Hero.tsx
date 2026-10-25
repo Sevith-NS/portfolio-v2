@@ -133,14 +133,14 @@ const Hero = () => {
           </motion.p>
         </motion.div>
 
-        {/* px: room for the italic y's overhang. Ink past a masked box is never
-            masked, so it stayed behind after the dissolve. The mask classes hide
-            the type and its blue copy until the dust has assembled it (useDust). */}
+        {/* px: room for the italic y's overhang, so its ink falls inside the
+            dust's cells. The clip classes hide the type and its blue copy until
+            the dust has assembled it (useDust). */}
         <div className="relative mt-8">
           <h1
             ref={headline}
             style={{ fontVariationSettings: `"wdth" ${REST_W}` }}
-            className={`${HEADLINE} text-ink [mask-image:linear-gradient(#0000,#0000)] motion-reduce:[mask-image:none]`}
+            className={`${HEADLINE} text-ink [clip-path:inset(50%)] motion-reduce:[clip-path:none]`}
           >
             <span className="sr-only">I design it, then I actually build it.</span>
             <span aria-hidden>{lines}</span>
@@ -149,7 +149,7 @@ const Hero = () => {
             ref={blue}
             aria-hidden
             style={{ fontVariationSettings: `"wdth" ${REST_W}` }}
-            className={`${HEADLINE} pointer-events-none absolute inset-0 select-none text-warm [mask-image:linear-gradient(#0000,#0000)] [&_*]:!text-warm`}
+            className={`${HEADLINE} pointer-events-none absolute inset-0 select-none text-warm [clip-path:inset(50%)] [&_*]:!text-warm`}
           >
             {lines}
           </div>

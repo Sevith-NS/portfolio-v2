@@ -51,32 +51,35 @@ const cases: CaseStudy[] = [
   {
     slug: "polaris",
     role: "Market research, product design, product definition, UX, frontend and backend",
-    status: "Still cooking",
+    status: "Invite-only beta",
     problem: {
-      text: "Retail investors bounce between a charting site, a screener, a news app and a spreadsheet. Not one of them answers the only two questions that matter: *why does this trade make sense*, and *how much should I risk on it*.",
+      text: "Retail investors bounce between a broker app, a charting site, a screener, a news app and a spreadsheet. Not one of them answers the only two questions that matter: *why does this trade make sense*, and *how much should I risk on it*. And if your money sits with more than one broker, nothing shows it all in one place.",
     },
     process: [
       {
-        text: "It started with *tab fatigue*: one laptop, a tab for every piece of information, juggling all of them to make one call. I don't have a Bloomberg terminal on my desk. So I built one with whatever I had.",
+        text: "It started with *tab fatigue*. One laptop, a tab for every minute piece of information, and all of them juggled to make one call. I don't have a Bloomberg terminal on my desk. So I built one with whatever I had.",
       },
       {
-        text: "Then the rule that decided what stays on screen: *every number is earned*. No figure ships without its source and its age, and a backtest that never saw out-of-sample data says so on the result. Other apps headline a single *Strong Buy*, a score with hidden weights, an analyst's upside %. Polaris shows none of them, because none of them can show their working.",
-        draft: true,
+        text: "Then the rule that decides what stays on screen: *every number is earned*. No figure ships without its source and age. A backtest that hasn't seen out-of-sample data says so on the result. Other apps headline a single *Strong Buy*, a score with hidden weights or an analyst's upside. Polaris shows none of them, because none can show their working.",
       },
       {
         text: "Some things didn't earn it. I built *next-day price forecasts* on XGBoost and Prophet, looked at what they cost, and cut them: two large libraries carrying one feature.",
       },
       {
-        text: "Then I put *real money* on its recommendations. The strategy was deliberately simple: *buy at support, sell at resistance*, plus basic smart money concepts and key levels. Everything I'd learnt by *losing a lot of money* went into it, so I never have to learn it that way again.",
+        text: "Then I put *real money* on its recommendations. The strategy was deliberately simple: *buy at support, sell at resistance*, plus basic smart money concepts and key levels. Everything I'd learned by *losing a lot of money* went into it, so I never have to learn it that way again.",
+      },
+      {
+        text: "Then it stopped being just mine. I rebuilt the backend on *FastAPI*, added sign-in with Clerk and a Postgres database where every user sees only their own rows, and opened it as an *invite-only beta*.",
       },
     ],
     approach: [
-      { text: "*Real and paper, never summed*: real holdings sync read-only from Zerodha and Upstox, paper books sit beside them, and no total ever adds the two together." },
-      { text: "*Terminal*: candlestick charting with a systematic Quant Trade Plan: limit entry, ATR and swing-based stop loss, two targets projected in ATR from a fair-value anchor and labelled with their R multiple, a *factor vote breakdown* and half-Kelly position sizing." },
-      { text: "*Portfolio*: paper trading on live prices with risk analytics: 95% VaR and CVaR, Sharpe, Sortino, max drawdown, beta against the S&P 500, and Markowitz max-Sharpe optimization." },
-      { text: "*AI desk*: a multi-agent research desk. Four analysts file reports, a bull and a bear argue it out, three risk seats fight over position size, and a portfolio manager approves or refuses with a share count." },
+      { text: "*Market pulse first*: Home opens on what the market is doing, with India and US indices, USD/INR, breadth, sector heat and the day's movers." },
+      { text: "*Real and paper, never summed*: holdings sync read-only from eight brokers, including Zerodha, Upstox, Groww and Dhan. Paper books sit beside them, marked in blue, and no total ever adds the two together." },
+      { text: "*The plan comes before the button*: open a symbol and get an entry, a stop, two targets and a size that risks exactly what you chose. You pick the method and the risk. Polaris does the arithmetic and shows it." },
+      { text: "*Performance and risk*: time-weighted and money-weighted returns against a benchmark, plus VaR, max drawdown and concentration, each with one plain sentence about what it means." },
+      { text: "*AI desk*: four seats (technical, fundamentals, news and a risk committee) explain what they see, with their sources on the table. A bull and a bear argue it out before anything gets a size. When a model is down, the card says so instead of guessing." },
       { text: "*Backtest*: an event-driven backtester running 13 strategies, costs on both sides, plus out-of-sample, walk-forward and Monte Carlo robustness passes." },
-      { text: "*Ask Polaris*: a Gemini assistant that can see the paper portfolio, the symbol on screen, live signals and news sentiment, and answers grounded questions about risk and sizing." },
+      { text: "*Watchlists and alerts*: named lists with sparklines, and price or percentage-move alerts that land in the bell." },
     ],
     walkthrough: [
       {
@@ -104,33 +107,114 @@ const cases: CaseStudy[] = [
     insights: [
       {
         text: "*Surface candidates, never verdicts.* A single rating built from untested indicators is a recommendation engine wearing a lab coat. So the plan shows which factors voted for the trade and which voted against, and you weigh them yourself.",
-        draft: true,
       },
       {
-        text: "*AI observes and explains; it never trades.* One model handing down one verdict has nobody checking it. On the desk, every round of debate needs a rebuttal, the risk seats argue size against half-Kelly and portfolio VaR, and the manager can still refuse.",
-        draft: true,
+        text: "*AI observes and explains. It never trades.* One model handing down one verdict has nobody checking it. On the desk, every round of debate needs a rebuttal, the risk seats argue size against half-Kelly and portfolio VaR, and the manager can still refuse.",
+      },
+      {
+        text: "*Honesty is a feature.* Polaris isn't registered with SEBI, so it never recommends a stock. Every figure says where it came from and how old it is. Where something isn't built yet, like US broker sync, the app says so instead of pretending.",
       },
     ],
     decisions: [
-      { text: "Split the product into *two independently deployable services*, a Next.js frontend and a FastAPI quant API, talking only over HTTP." },
-      { text: "Trade plan targets are *one continuous function of the measured state*: signal strength, trend and mean reversion move them smoothly, and a 52-week high or low in the way pulls them back. No fixed 1.5R and 3R." },
-      { text: "Every AI desk decision is *journalled*, then scored on realized alpha against the S&P 500. Past hits and misses feed the next run's prompts." },
+      { text: "*Read-only by design*: Polaris can see the holdings on a real account but can never place an order there. The API rejects any write to a real account." },
+      { text: "*Row-level security* in Postgres, so even a bug in the API can't show one user another user's portfolio." },
+      { text: "Trade plan targets *move smoothly with the market*. Signal strength, trend and mean reversion shift them, and a nearby 52-week high or low pulls them back. No fixed 1.5R and 3R." },
+      { text: "Every AI desk decision is *journaled*, then scored on realized alpha against the S&P 500. Past hits and misses feed the next run's prompts." },
       { text: "When a bar touches both the stop and the target, the backtester assumes *the stop was hit*. Results err on the side of caution." },
     ],
     wins: [
-      { text: "Ran it on my own money as the first user: *5% return in the first month*, after tuning the portfolio." },
+      { text: "Ran it on my own money as the first user: *13.45% return on a single stock*, after tuning the portfolio." },
       { text: "The part I'd rebuild exactly the same way: the *AI desk debate*. It argues both sides of a trade before anything gets a share count." },
     ],
     misses: [
       {
         text: "*I didn't build another Bloomberg.* I built something that tells me why a trade makes sense, and why it doesn't. It has a long way to go, and I'm still learning the *quant and finance* to get it there.",
       },
+      { text: "*Not everything syncs yet.* US markets are live, but US broker holdings can't sync, and alerts only fire while the app is open." },
     ],
     outcome: {
-      text: "Personally tested and optimized the portfolio, reaching a *5% return within the first month*.",
+      text: "Personally tested and optimized the portfolio, reaching a *13.45% return within the first month*.",
     },
     why: {
       text: "*One platform for every market I trade*, India and the US, real and paper, instead of a tab for every tool. The simpler version is the tab fatigue I started with.",
+    },
+  },
+  {
+    slug: "esdeekid",
+    role: "Concept, art direction, motion and frontend build",
+    status: "Fan concept",
+    problem: {
+      text: "Most artist sites are a tour list and a merch link. EsDeeKid keeps his *name, face and age* to himself, so a normal fan page would miss the most interesting thing about him. I wanted a site that *keeps the secret too*.",
+    },
+    process: [
+      { text: "I found him through a *4 Raws edit with Timothée*, and the hook was instant: the accent, the dark sound, the *flash effects*. That's the mood I wanted the site to have." },
+      {
+        text: "I watched the music videos frame by frame and pulled the shots that carry each song. Every chapter on the site is *built from that video's own frames*, so nothing is stock and nothing is made up.",
+      },
+      {
+        text: "Then I wrote down what the site should feel like before writing any code: a *classified file on someone who doesn't want to be found*. Every effect had to fit that, or it was cut.",
+      },
+    ],
+    approach: [
+      { text: "*A gate first*: a counter runs to 100 while the fonts and portrait load, a flashing-images warning shows, and you choose to enter with sound on or off." },
+      { text: "*A depth portrait*: the balaclava photo becomes a 3D surface in Three.js, with a target lock on his face and Liverpool's coordinates in the corner. Scroll dives into his eyes, then hard cuts." },
+      { text: "*The file*: a dossier page where his name is a *redaction bar* and the heading decrypts out of random glyphs. The bio, stats and tour dates sit beside it, each with a date and a source." },
+      { text: "*A chapter per track*: nine sections, from Dirty to Bandit, each with its own song, palette and grain. The music changes as you scroll, and every cut flashes negative." },
+      { text: "*Live, then out*: the live show plays as a 3D tunnel of frames, and the page ends on a red outro." },
+    ],
+    walkthrough: [
+      {
+        title: "Choose your volume first",
+        text: "A counter runs to 100 while the portrait loads, under a flashing-images warning. Then you pick: enter with sound on, or off. He's already watching when you get in.",
+        media: { kind: "video", src: "/work/esdeekid/enter.mp4", poster: "/work/esdeekid/enter-poster.webp", label: "The EsDeeKid gate counting to 100, then the hero with a target lock on his eyes" },
+        aside: "Sound off is a valid choice. Wrong, but valid.",
+      },
+      {
+        title: "Dive into the file",
+        text: "Scroll and you fall into his eyes, then hard cut to his file. The name decrypts out of random glyphs, and every stat carries the date it was read.",
+        media: { kind: "video", src: "/work/esdeekid/file.mp4", poster: "/work/esdeekid/file-poster.webp", label: "The hero cutting to the File page as the name decrypts" },
+        aside: "The only field left blank is the one everyone wants.",
+      },
+      {
+        title: "A chapter per track",
+        text: "Each song gets its own chapter, built from frames of its own video. The music switches as you scroll in, and every cut flashes negative.",
+        media: { kind: "video", src: "/work/esdeekid/chapter.mp4", poster: "/work/esdeekid/chapter-poster.webp", label: "Scrolling into the Dirty chapter: its title, then frames from the video" },
+      },
+      {
+        title: "The live show, as a tunnel",
+        text: "Lithuania plays as a 3D corridor of frames. Scroll moves you down it, past the crowd and the stage lights.",
+        media: { kind: "video", src: "/work/esdeekid/live.mp4", poster: "/work/esdeekid/live-poster.webp", label: "Moving through the 3D tunnel of frames from the Lithuania show" },
+      },
+      {
+        title: "Out on red",
+        text: "The page ends the way it started, with his name and the balaclava, now on red. Then the credits and every source.",
+        media: { kind: "video", src: "/work/esdeekid/outro.mp4", poster: "/work/esdeekid/outro-poster.webp", label: "The red outro, then the credits and sources" },
+      },
+    ],
+    insights: [
+      {
+        text: "*Personality isn't a color palette.* It's what the site refuses to show you. The most EsDeeKid thing on the page is the redaction bar where his name should be.",
+      },
+      {
+        text: "A drill track is *cut, not scrolled*. Smooth fades felt wrong against the music, so sections hand over with hard cuts and a negative flash, the way his videos edit.",
+        draft: true,
+      },
+    ],
+    decisions: [
+      { text: "*Sound is opt-in*. Audio starts only from the Enter click, so browsers allow it and nobody gets a drill track blasting in an open office." },
+      { text: "*Reduced motion gets a calm version*: the flat cutout instead of the 3D portrait, and the name already decrypted." },
+      { text: "*Facts are dated and sourced*: stats say when they were read, and the sources are listed. It's a fan site, not a rumor mill." },
+      { text: "Labeled an *unofficial fan concept* on the first screen, so nobody mistakes it for his real site." },
+    ],
+    wins: [
+      { text: "*The dive into his eyes*, the live tunnel, and landing on a *brutalist design* that suits him." },
+    ],
+    misses: [],
+    outcome: {
+      text: "Live as an *unofficial fan concept*, sound on recommended.",
+    },
+    why: {
+      text: "A product engineer's job is to work out *what something should feel like*, then build exactly that. This was the same job with a rapper instead of a portfolio.",
     },
   },
   {
@@ -154,7 +238,7 @@ const cases: CaseStudy[] = [
     approach: [
       { text: "A *jobs feed* of fresh postings, pulled nightly from open job boards, so practice starts from a real role." },
       { text: "*Paste a LinkedIn link* or a job description, and the interview is built around that exact posting." },
-      { text: "*Gemini* writes the questions (technical, behavioural or mixed) and can *tailor them to your resume*, which is read once and reused everywhere." },
+      { text: "*Gemini* writes the questions (technical, behavioral, or mixed) and can *tailor them to your resume*, which is read once and reused everywhere." },
       { text: "Questions are *read aloud*, the camera is optional, and *video never leaves the browser*: only the text transcript of your answers is saved." },
       { text: "*Feedback on every answer*: a score, filler words, skipped questions, and a critique of what you actually said." },
     ],
@@ -200,7 +284,7 @@ const cases: CaseStudy[] = [
       { text: "*Next.js on Vercel*, so the whole product ships as one deployable app." },
     ],
     wins: [
-      { text: "I practised on it before my own placement rounds. In one, the recruiter called out *how confident I was* answering every question." },
+      { text: "I practiced on it before my own placement rounds. In one, the recruiter called out *how confident I was* answering every question." },
       { text: "My faculty asked me to present it to the *university board*, as a way to help more students prepare the same way." },
     ],
     misses: [
@@ -210,7 +294,7 @@ const cases: CaseStudy[] = [
       },
     ],
     outcome: {
-      text: "Live, and proven on exactly one user: *me, in a real interview*. The build is done; distribution is not.",
+      text: "Live, and proven on exactly one user: *me, in a real interview*. The build is done, but distribution isn't.",
     },
     why: {
       text: "A fixed question bank lets you rehearse the answers. Recording yourself lets you rehearse on the bed. Friends let you rehearse laughing. Tesseract writes the questions from *the job you want and the resume you have*, says them out loud, hears you answer, and then tells you *what was actually wrong*. That's the only one of the four that feels like the interview.",
@@ -282,7 +366,7 @@ const cases: CaseStudy[] = [
       },
       {
         title: "The eyes",
-        text: "Two pupils that follow your cursor anywhere on the page. Find the centre of each eye, find the cursor, point the pupil, every frame.",
+        text: "Two pupils that follow your cursor anywhere on the page. Find the center of each eye, find the cursor, point the pupil, every frame.",
         media: { kind: "video", src: "/work/ochi/eyes.mp4", poster: "/work/ochi/eyes-poster.webp", label: "The cartoon eyes tracking the cursor as it moves" },
         aside: "They watch you scroll. Rude, honestly.",
       },
@@ -294,18 +378,18 @@ const cases: CaseStudy[] = [
     ],
     insights: [
       {
-        text: "It landed with *the eyes that follow your cursor*. Find the centre of each eye, find the cursor, work out where the pupil should point, every frame. One hell of a thing to pull off, and the first time *math felt like a design tool*.",
+        text: "It landed with *the eyes that follow your cursor*. Find the center of each eye, find the cursor, work out where the pupil should point, every frame. One hell of a thing to pull off, and the first time *math felt like a design tool*.",
       },
     ],
     decisions: [
       { text: "Recreated the motion with *Framer Motion* rather than reaching for heavier animation libraries." },
     ],
     wins: [
-      { text: "One of my biggest learning jumps for interactive sites: I learnt how to *use math to drive animation*." },
+      { text: "One of my biggest learning jumps for interactive sites: I learned how to *use math to drive animation*." },
     ],
     misses: [
       {
-        text: "*A study piece, not original design.* The layout and motion are Ochi's. I was building scroll-animated sites before they got famous; this one showed me exactly how complex, and how simple, they can be.",
+        text: "*A study piece, not original design.* The layout and motion are Ochi's. I was building scroll-animated sites before they got famous. This one showed me exactly how complex, and how simple, they can be.",
       },
     ],
     outcome: {

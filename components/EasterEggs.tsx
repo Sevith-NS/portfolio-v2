@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { PixelSprite } from "./PixelCats";
 
 // The cats (Q89, Q34). Cream is chaos: type "cream" anywhere (the footer says so,
-// and lights up a key per letter) or tap the footer's keys, and she does
+// and lights up a key per letter) or tap it out on the footer's keys, and she does
 // zoomies across the screen and knocks the page crooked. Simba lives in the footer as a pixel cat (see PixelCats) and sends notes
 // through here. Reduced motion skips the animation and keeps the note.
 
@@ -77,14 +77,10 @@ export function EasterEggs() {
         cream();
       }
     };
-    // The footer's key hint is a button too, for anyone without a keyboard.
-    const onSummon = () => cream();
     const onNote = (e: Event) => say((e as CustomEvent<string>).detail);
     window.addEventListener("keydown", onKey);
     window.addEventListener("cat-note", onNote);
-    window.addEventListener("cream-summon", onSummon);
     return () => {
-      window.removeEventListener("cream-summon", onSummon);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("cat-note", onNote);
       clearTimeout(timer.current);

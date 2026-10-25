@@ -2,21 +2,16 @@
 
 import { useLayoutEffect, useRef, type ReactNode, type RefObject } from "react";
 import { useMotionValue, useReducedMotion, type MotionValue } from "framer-motion";
-import { maskFor, pixelGrid } from "@/lib/pixels";
+import { clipFor, pixelGrid } from "@/lib/pixels";
 
-// Pixel motion for type, cutting it in or out cell by cell. Chrome paints ink
-// past a masked element's own box without the mask, so type has to fit its box.
+// Pixel motion for type, cutting it in or out cell by cell. Ink outside the
+// cells is clipped, so type has to fit its box.
 
 type Grid = ReturnType<typeof pixelGrid>;
 
 // Show only the cells `open` keeps.
-function applyMask(el: HTMLElement, grid: Grid, open: (d: number) => boolean) {
-  const { span, cols, rows, due } = grid;
-  el.style.maskImage = el.style.webkitMaskImage = maskFor(due, cols, rows, open);
-  el.style.maskSize = el.style.webkitMaskSize = `${cols * span}px ${rows * span}px`;
-  el.style.maskRepeat = el.style.webkitMaskRepeat = "no-repeat";
-  // Masks clip to the box by default; overhanging type should still paint.
-  el.style.maskClip = el.style.webkitMaskClip = "no-clip";
+function applyClip(el: HTMLElement, grid: Grid, open: (d: number) => boolean) {
+  el.style.clipPath = clipFor(grid.due, grid.cols, grid.rows, grid.span, open);
 }
 
 // The landing headline as dust. On load it assembles one letter at a time from
@@ -51,7 +46,7 @@ export function useDust(
     const ctx = cv?.getContext("2d");
     if (!el || !lit || !cv || !ctx) return;
     if (reduce) {
-      el.style.maskImage = "none";
+      el.style.clipPath = "none";
       return;
     }
     let raf = 0, dead = false, q = -FLY, w = 0, h = 0, B = 0;
@@ -151,15 +146,15 @@ export function useDust(
       const p = raw * (1 + BLUE + FLY) - BLUE; // a bit turns blue at d - BLUE, flies off at d
       ctx.clearRect(-B, -B, w + B * 2, h + B * 2);
       if (q >= 1 + BLUE && raw <= 0) {
-        el.style.maskImage = "none"; // beats the class that hides it until the first landing
-        lit.style.maskImage = ""; // back to the class: the blue copy hidden
+        el.style.clipPath = "none"; // beats the class that hides it until the first landing
+        lit.style.clipPath = ""; // back to the class: the blue copy hidden
         return;
       }
       // A bit of letter is blue from its landing for a beat, and for a beat
       // before it breaks off; its own colour in between.
       const own = (d: number) => q >= d + BLUE && p < d - BLUE;
-      applyMask(el, grid, own);
-      applyMask(lit, grid, (d) => q >= d && p < d && !own(d));
+      applyClip(el, grid, own);
+      applyClip(lit, grid, (d) => q >= d && p < d && !own(d));
       // Re-read the letters' colours when the theme flips, not every frame.
       const dark = document.documentElement.classList.contains("dark");
       if (dark !== readFor) {
@@ -220,10 +215,10 @@ export function DustReveal({ children, duration, out }: { children: ReactNode; d
 
   return (
     <div className="relative">
-      <div ref={text} className="[mask-image:linear-gradient(#0000,#0000)] motion-reduce:[mask-image:none]">
+      <div ref={text} className="[clip-path:inset(50%)] motion-reduce:[clip-path:none]">
         {children}
       </div>
-      <div ref={blue} aria-hidden className="pointer-events-none absolute inset-0 select-none text-warm [mask-image:linear-gradient(#0000,#0000)] [&_*]:!text-warm">
+      <div ref={blue} aria-hidden className="pointer-events-none absolute inset-0 select-none text-warm [clip-path:inset(50%)] [&_*]:!text-warm">
         {children}
       </div>
       <canvas ref={dust} aria-hidden className="pointer-events-none absolute z-10" />

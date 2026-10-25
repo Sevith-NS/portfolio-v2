@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 import { useReducedMotion } from "framer-motion";
 import { Moon, Sun } from "@phosphor-icons/react";
 import { themes, type Side } from "@/lib/theme";
-import { FLASH, maskFor, pixelGrid } from "@/lib/pixels";
+import { FLASH, clipFor, pixelGrid } from "@/lib/pixels";
 
 // Switching sides is a moment, not a colour swap: the other side shows through
 // the page one pixel at a time, spreading out from the button you pressed and
@@ -49,14 +49,13 @@ function pixelReveal(origin: { x: number; y: number }, target: Side, flip: () =>
     ::view-transition-new(root) {
       animation: theme-reveal-hold ${Math.round(REVEAL_MS * (1 + FLASH)) + 80}ms linear;
       mix-blend-mode: normal;
-      -webkit-mask: var(--reveal) 0 0 / ${cols * span}px ${rows * span}px no-repeat;
-      mask: var(--reveal) 0 0 / ${cols * span}px ${rows * span}px no-repeat;
+      clip-path: var(--reveal);
     }
     ::view-transition-new(theme-dust) { animation: none; }
     @keyframes theme-reveal-hold { to { opacity: 1; } }
   `;
   document.head.appendChild(style);
-  root.style.setProperty("--reveal", maskFor(due, cols, rows, () => false));
+  root.style.setProperty("--reveal", clipFor(due, cols, rows, span, () => false));
 
   // The specks and flashes. Anything on the new page is masked to the open
   // cells, so this gets a view transition layer of its own, above both sides.
@@ -86,7 +85,7 @@ function pixelReveal(origin: { x: number; y: number }, target: Side, flip: () =>
     const t0 = performance.now();
     const tick = (now: number) => {
       const p = ((now - t0) / REVEAL_MS) * (1 + FLY + FLASH) - FLY;
-      root.style.setProperty("--reveal", maskFor(due, cols, rows, (d) => p >= d));
+      root.style.setProperty("--reveal", clipFor(due, cols, rows, span, (d) => p >= d));
       if (ctx) {
         ctx.clearRect(0, 0, cv.width, cv.height);
         // Two passes, so the colour is set twice a frame rather than per speck.

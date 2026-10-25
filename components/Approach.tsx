@@ -50,7 +50,9 @@ const Approach = () => {
         <h2 className="font-mono text-[0.75rem] uppercase tracking-[0.18em] text-accent">
           How I build <span className="text-ink-3">· {step.phase}</span>
         </h2>
-        <div ref={verb} aria-hidden className="mt-4 h-[0.92em] font-wide text-[min(calc((100vw-2rem)/4.8),13rem)] font-semibold uppercase leading-[0.92] tracking-[-0.01em] text-ink">
+        {/* "DESIGN." with its dust padding is 5.4em wide, so that's what fits the
+            screen. The -ml cancels the padding: the letters line up with the heading. */}
+        <div ref={verb} aria-hidden className="-ml-[0.17em] mt-4 h-[0.92em] font-wide text-[min(calc((100vw-2rem)/5.4),13rem)] font-semibold uppercase leading-[0.92] tracking-[-0.01em] text-ink">
           <AnimatePresence mode="wait">{seen && <Verb key={active} word={step.title.split(" ")[0]} />}</AnimatePresence>
         </div>
         <AnimatePresence mode="wait">

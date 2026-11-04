@@ -77,31 +77,52 @@ const cases: CaseStudy[] = [
       { text: "*Real and paper, never summed*: holdings sync read-only from eight brokers, including Zerodha, Upstox, Groww and Dhan. Paper books sit beside them, marked in blue, and no total ever adds the two together." },
       { text: "*The plan comes before the button*: open a symbol and get an entry, a stop, two targets and a size that risks exactly what you chose. You pick the method and the risk. Polaris does the arithmetic and shows it." },
       { text: "*Performance and risk*: time-weighted and money-weighted returns against a benchmark, plus VaR, max drawdown and concentration, each with one plain sentence about what it means." },
-      { text: "*AI desk*: four seats (technical, fundamentals, news and a risk committee) explain what they see, with their sources on the table. A bull and a bear argue it out before anything gets a size. When a model is down, the card says so instead of guessing." },
+      { text: "*AI desk*: four analysts (fundamentals, technical, news, and sentiment and flow) say what they see, and every figure comes from Polaris's own engines. The case for strength opens, the case for caution has to answer it, and the summary picks no winner. Your own risk rule sizes the trade with arithmetic, not a model. When a model is down, the card says so instead of guessing." },
+      { text: "*Ask Polaris*: a chat that reads the stock on screen, your paper portfolio and any company you name, then explains in plain words. Chats are kept per user, behind the same row-level security as everything else." },
       { text: "*Backtest*: an event-driven backtester running 13 strategies, costs on both sides, plus out-of-sample, walk-forward and Monte Carlo robustness passes." },
-      { text: "*Watchlists and alerts*: named lists with sparklines, and price or percentage-move alerts that land in the bell." },
+      { text: "*Watchlists and alerts*: named lists with sparklines, and price or percentage-move alerts that land in the bell. Right-click a price on any chart to set one there." },
     ],
     walkthrough: [
       {
         title: "Read the market first",
-        text: "Top gainers and losers, then a heatmap of the day's change. Green and red before a single chart, so you know what kind of day it is.",
-        media: { kind: "video", src: "/work/polaris/markets.mp4", poster: "/work/polaris/markets-poster.webp", label: "The Polaris markets page: top movers, then the US equities heatmap" },
+        text: "Pick a universe and the overview opens on breadth, then a heat grid sorted by the day's move and the biggest gains and falls. Green and red before a single chart, so you know what kind of day it is.",
+        media: { kind: "video", src: "/work/polaris/markets.mp4", poster: "/work/polaris/markets-poster.webp", label: "The Polaris markets overview: picking the US Large Cap universe, then breadth, the heat grid and the day's gains and falls" },
       },
       {
         title: "Click a ticker, get a plan",
         text: "Open a symbol from the watchlist and the chart arrives with a trade plan beside it: side, entry, stop, two targets and a size, drawn on the chart as lines.",
-        media: { kind: "video", src: "/work/polaris/terminal.mp4", poster: "/work/polaris/terminal-poster.webp", label: "Opening PLTR from the watchlist and zooming into its trade plan" },
+        media: { kind: "video", src: "/work/polaris/terminal.mp4", poster: "/work/polaris/terminal-poster.webp", label: "Opening GOOGL from the watchlist and zooming into its trade plan" },
         aside: "Entry, stop, targets. Shown before the paper trade button, not after.",
+      },
+      {
+        title: "Then ask the desk",
+        text: "Four analysts file first, on fundamentals, technicals, news, and sentiment and flow. The case for strength opens and the case for caution has to answer one of its claims. Then your own risk per trade turns the plan into shares and the amount at risk.",
+        media: { kind: "video", src: "/work/polaris/desk.mp4", poster: "/work/polaris/desk-poster.webp", label: "The AI desk working on GOOGL: four analysts file, strength and caution argue, then the summary and Your rules" },
+      },
+      {
+        title: "Test it on the past",
+        text: "Pick one of 13 strategies and run it over years of daily history. The verdict against buy and hold comes first, and a result that hasn't seen out-of-sample data says so.",
+        media: { kind: "video", src: "/work/polaris/backtest.mp4", poster: "/work/polaris/backtest-poster.webp", label: "Running a MACD backtest on GOOGL: the verdict against buy and hold, the growth chart, then monthly returns" },
       },
       {
         title: "Then check what's underneath",
         text: "Every reading side by side, then a fundamental x-ray built from four years of raw statements: growth, profitability, cash quality and the balance sheet.",
-        media: { kind: "video", src: "/work/polaris/fundamentals.mp4", poster: "/work/polaris/fundamentals-poster.webp", label: "Scrolling the PLTR fundamentals tab: readings, then the fundamental x-ray" },
+        media: { kind: "video", src: "/work/polaris/fundamentals.mp4", poster: "/work/polaris/fundamentals-poster.webp", label: "Scrolling the GOOGL fundamentals tab: readings, then the fundamental x-ray" },
+      },
+      {
+        title: "A teardown in plain English",
+        text: "The Deep Dive reads the company profile and a dozen dated headlines first, then writes the teardown and lists its sources. It opens with one line, then what's going well and what could go wrong.",
+        media: { kind: "video", src: "/work/polaris/deepdive.mp4", poster: "/work/polaris/deepdive-poster.webp", label: "Writing the GOOGL Deep Dive: the one-line summary, what's going well and what could go wrong" },
+      },
+      {
+        title: "Ask in plain words",
+        text: "Ask Polaris reads the stock on your screen, your paper portfolio and any company you name, then explains. It doesn't advise. Every chat is saved to your account alone, in a side pane like any chat app.",
+        media: { kind: "video", src: "/work/polaris/ask.mp4", poster: "/work/polaris/ask-poster.webp", label: "Asking Polaris to explain the GOOGL trade plan in plain words, then opening the chats pane" },
       },
       {
         title: "News, scored for tone",
         text: "Headlines from public feeds, each scored by a sentiment model, rolled up into an overall tone and a tone for every category.",
-        media: { kind: "video", src: "/work/polaris/news.mp4", poster: "/work/polaris/news-poster.webp", label: "The Polaris news page, zooming into tone by category" },
+        media: { kind: "video", src: "/work/polaris/news.mp4", poster: "/work/polaris/news-poster.webp", label: "The Polaris news page, then tone by category as the tabs change" },
       },
     ],
     insights: [
@@ -109,7 +130,7 @@ const cases: CaseStudy[] = [
         text: "*Surface candidates, never verdicts.* A single rating built from untested indicators is a recommendation engine wearing a lab coat. So the plan shows which factors voted for the trade and which voted against, and you weigh them yourself.",
       },
       {
-        text: "*AI observes and explains. It never trades.* One model handing down one verdict has nobody checking it. On the desk, every round of debate needs a rebuttal, the risk seats argue size against half-Kelly and portfolio VaR, and the manager can still refuse.",
+        text: "*AI observes and explains. It never trades.* One model handing down one verdict has nobody checking it. On the desk, the case for caution has to answer a specific claim from the case for strength, the summary picks no winner, and no seat is allowed a rating, a target or a size.",
       },
       {
         text: "*Honesty is a feature.* Polaris isn't registered with SEBI, so it never recommends a stock. Every figure says where it came from and how old it is. Where something isn't built yet, like US broker sync, the app says so instead of pretending.",
@@ -119,7 +140,8 @@ const cases: CaseStudy[] = [
       { text: "*Read-only by design*: Polaris can see the holdings on a real account but can never place an order there. The API rejects any write to a real account." },
       { text: "*Row-level security* in Postgres, so even a bug in the API can't show one user another user's portfolio." },
       { text: "Trade plan targets *move smoothly with the market*. Signal strength, trend and mean reversion shift them, and a nearby 52-week high or low pulls them back. No fixed 1.5R and 3R." },
-      { text: "Every AI desk decision is *journaled*, then scored on realized alpha against the S&P 500. Past hits and misses feed the next run's prompts." },
+      { text: "Every desk run is *journaled* as a note: the summary, what to watch and the readings, so you can look back. Nothing gets scored, because the desk never makes a call to grade." },
+      { text: "*One exchange, not four rounds*: every extra round re-read the same cards and restated round one, at two model calls a round. The desk now runs one exchange in 7 model calls." },
       { text: "When a bar touches both the stop and the target, the backtester assumes *the stop was hit*. Results err on the side of caution." },
     ],
     wins: [

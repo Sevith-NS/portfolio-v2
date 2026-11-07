@@ -37,6 +37,7 @@ const LIFT = 0.18; // how much bigger a card is at the top of its arc
 const SPIN = 26; // most degrees of spin a throw puts on a card
 const TILT = 11; // most degrees a card rests at, either way; spread evenly, so most visibly lean
 const DOWN = 0.07; // share of cards that land face down
+const DEALT = 0.2; // share of the screen past each edge where cards are still dealt
 const FACE = "perspective(1000px) rotateY(0deg)", BACK = "perspective(1000px) rotateY(180deg)";
 
 const mod = (a: number, n: number) => ((a % n) + n) % n;
@@ -63,6 +64,9 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
   const [first, setFirst] = useState({ c: 0, r: 0 });
   const [open, setOpen] = useState<number | null>(null);
   const [turned, setTurned] = useState(() => new Set<string>()); // face-down cards already turned over
+  // Once the deal has landed, only face-down cards keep a back. Safari's view transition
+  // (the theme switch) flattens 3D and ignores backface-visibility, so a back would cover the photo.
+  const [dealt, setDealt] = useState(false);
   const plane = useRef<HTMLElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const tiles = useRef(new Map<string, Tile>());
@@ -78,7 +82,11 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
     const now = performance.now();
     tiles.current.forEach((t) => {
       let left = t.x + a.x, top = t.y + a.y, turn = t.rest, lift = 1;
-      if (a.deal) {
+      // Only cards that land on screen are dealt (on a phone about 20 of 60); the rest wait where
+      // they lie, off screen. The margin covers the bend pulling edge cards in.
+      // shortcut: decided each frame, so a drag during the deal can pop a card; decide once per tile if that shows.
+      const mx = v.w * DEALT, my = v.h * DEALT;
+      if (a.deal && left + t.w > -mx && left < v.w + mx && top + t.h > -my && top < v.h + my) {
         const p = a.deal < 0 ? 0 : Math.min(1, Math.max(0, (now - a.deal - t.delay) / THROW));
         // Friction: most of the way is covered in the air, the rest is a slide along the table.
         const e = 1 - (1 - p) ** 3, fromX = (v.w - t.w) / 2 + t.jx, fromY = (v.h - t.h) / 2 + t.jy;
@@ -94,12 +102,14 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
         (t.el.firstElementChild as HTMLElement).style.transform = `perspective(1000px) rotateY(${180 * (1 - over * over * (3 - 2 * over))}deg)`;
         // The deck stacks top card first, a card in the air is above everything, then it rests in deal order.
         t.el.style.zIndex = String(p >= AIR ? t.z : p > 0 ? 400 : 100 + Math.round((1 - t.delay / DEAL) * 99));
-        t.el.style.boxShadow = p >= 1 ? "" : `0 ${12 + 30 * air}px ${32 + 36 * air}px -14px rgb(var(--shade)/${0.5 - 0.18 * air})`;
       }
       const nx = (left + t.w / 2 - v.w / 2) / R, ny = (top + t.h / 2 - v.h / 2) / R;
       t.el.style.transform = `translate3d(${left}px,${top}px,${-SINK * (nx * nx + ny * ny)}px) rotateY(${nx * BEND}deg) rotateX(${-ny * BEND}deg) rotate(${turn}deg) scale(${lift})`;
     });
-    if (a.deal > 0 && now - a.deal > DEAL + THROW) a.deal = 0;
+    if (a.deal > 0 && now - a.deal > DEAL + THROW) {
+      a.deal = 0;
+      setDealt(true);
+    }
     const c = Math.floor(-a.x / v.cw) - 1, r = Math.floor(-a.y / v.ch) - 2;
     if (c !== a.c || r !== a.r) {
       a.c = c;
@@ -137,6 +147,7 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
     if (!view || covered || a.deal !== -1) return;
     if (reduce) {
       a.deal = 0;
+      setDealt(true);
       place();
       return;
     }
@@ -284,12 +295,17 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
               if (!down) return setOpen(i);
               // A face-down card turns over first, lifting off the table as it goes.
               const el = e.currentTarget, card = el.firstElementChild as HTMLElement;
+              if (card.getAnimations().length) return; // already turning
               el.style.zIndex = "500";
               card.animate(
                 [{ transform: `${BACK} scale(1)` }, { transform: "perspective(1000px) rotateY(90deg) scale(1.12)", offset: 0.45 }, { transform: `${FACE} scale(1)` }],
                 { duration: reduce ? 0 : 650, easing: "cubic-bezier(0.3, 0.6, 0.3, 1)" },
-              ).onfinish = () => void (el.style.zIndex = String(z));
-              setTurned((s) => new Set(s).add(k));
+              ).onfinish = () => {
+                // Turned only once it lands, so its back stays for the turn. FACE now, or it shows BACK until React renders.
+                el.style.zIndex = String(z);
+                card.style.transform = FACE;
+                setTurned((s) => new Set(s).add(k));
+              };
             }}
             style={{ width: w, height: h, zIndex: z }}
             className="absolute left-0 top-0 rounded-md shadow-[0_12px_32px_-14px_rgb(var(--shade)/0.5)] will-change-transform"
@@ -301,12 +317,14 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
               </span>
               {/* The card back: an aurora of lapis and light blue under film grain, the favicon in the corner.
                   Sized off the card's short side; only a card lying face down drifts, the rest never show it. */}
-              <span className="grain absolute inset-0 overflow-hidden rounded-md bg-deck [backface-visibility:hidden] [container-type:size] [transform:rotateY(180deg)]">
-                <span className={`absolute -left-[30cqmin] -top-[25cqmin] size-[90cqmin] rounded-full bg-deck-glow/85 blur-[14cqmin] ${down ? "deck-drift-a" : ""}`} />
-                <span className={`absolute -bottom-[30cqmin] -right-[35cqmin] size-[80cqmin] rounded-full bg-deck-deep blur-[14cqmin] ${down ? "deck-drift-b" : ""}`} />
-                <span className={`absolute left-[30cqmin] top-[45cqmin] size-[55cqmin] rounded-full bg-on-hl/30 blur-[14cqmin] dark:bg-on-hl/15 ${down ? "deck-drift-c" : ""}`} />
-                <span className="absolute left-[8cqmin] top-[8cqmin] size-[16cqmin] bg-on-hl [mask:url('/1.svg')_center/contain_no-repeat]" />
-              </span>
+              {(down || !dealt) && (
+                <span className="grain absolute inset-0 overflow-hidden rounded-md bg-deck [backface-visibility:hidden] [container-type:size] [transform:rotateY(180deg)]">
+                  <span className={`absolute -left-[30cqmin] -top-[25cqmin] size-[90cqmin] rounded-full bg-deck-glow/85 blur-[14cqmin] ${down ? "deck-drift-a" : ""}`} />
+                  <span className={`absolute -bottom-[30cqmin] -right-[35cqmin] size-[80cqmin] rounded-full bg-deck-deep blur-[14cqmin] ${down ? "deck-drift-b" : ""}`} />
+                  <span className={`absolute left-[30cqmin] top-[45cqmin] size-[55cqmin] rounded-full bg-on-hl/30 blur-[14cqmin] dark:bg-on-hl/15 ${down ? "deck-drift-c" : ""}`} />
+                  <span className="absolute left-[8cqmin] top-[8cqmin] size-[16cqmin] bg-on-hl [mask:url('/1.svg')_center/contain_no-repeat]" />
+                </span>
+              )}
             </span>
           </button>,
         );

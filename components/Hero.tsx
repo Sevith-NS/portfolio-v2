@@ -69,14 +69,13 @@ const Hero = () => {
   const fade = useTransform(scrollYProgress, [0.04, 0.3], [1, 0]);
 
   const headline = useRef<HTMLHeadingElement>(null);
-  const blue = useRef<HTMLDivElement>(null);
   const dust = useRef<HTMLCanvasElement>(null);
-  useDust(headline, blue, dust, scrollYProgress);
+  // No blue blink here: only "actually" is blue, in its own colour.
+  useDust(headline, null, dust, scrollYProgress);
   useEffect(() => {
     const h = headline.current;
     if (!h || reduce) return;
-    // The headline's letters and its blue copy's, so the two stay in step.
-    const letters = Array.from(h.parentElement!.querySelectorAll<HTMLElement>("[data-l]"));
+    const letters = Array.from(h.querySelectorAll<HTMLElement>("[data-l]"));
     let px = FAR, py = FAR, raf = 0;
 
     const paint = () => {
@@ -134,8 +133,8 @@ const Hero = () => {
         </motion.div>
 
         {/* px: room for the italic y's overhang, so its ink falls inside the
-            dust's cells. The clip classes hide the type and its blue copy until
-            the dust has assembled it (useDust). */}
+            dust's cells. The clip class hides the type until the dust has
+            assembled it (useDust). */}
         <div className="relative mt-8">
           <h1
             ref={headline}
@@ -145,14 +144,6 @@ const Hero = () => {
             <span className="sr-only">I design it, then I actually build it.</span>
             <span aria-hidden>{lines}</span>
           </h1>
-          <div
-            ref={blue}
-            aria-hidden
-            style={{ fontVariationSettings: `"wdth" ${REST_W}` }}
-            className={`${HEADLINE} pointer-events-none absolute inset-0 select-none text-warm [clip-path:inset(50%)] [&_*]:!text-warm`}
-          >
-            {lines}
-          </div>
           <canvas ref={dust} aria-hidden className="pointer-events-none absolute z-10" />
         </div>
 

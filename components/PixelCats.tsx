@@ -215,7 +215,7 @@ function paint(cv: HTMLCanvasElement, coat: Coat, look: Look) {
 // it's posed, which way it faces, and what's floating over its head. Every
 // scene starts and ends with Simba sitting at 0 and Cream sitting at REST.
 
-type Beat = { x: number; y?: number; pose: Pose; face: 1 | -1; tail?: Tail; blink?: boolean; ears?: boolean; shake?: number; spin?: number; fx?: string };
+type Beat = { x: number; y?: number; pose: Pose; face: 1 | -1; tail?: Tail; blink?: boolean; ears?: boolean; shake?: number; spin?: number; fx?: string; scale?: number };
 type Scene = { name: string; s: number; at: (t: number) => { simba: Beat; cream: Beat } };
 
 const REST = 240;
@@ -354,16 +354,22 @@ const SCENES: Scene[] = [
 const LOOP = SCENES.reduce((s, c) => s + c.s, 0);
 
 // The studio page: Cream is already in the room, so Simba goes to join her. He
-// sits, wanders over, crouches and leaps up and forward out of the card, into the
-// studio above. Where the arc ends on screen is where he climbs into the room.
-const OUT = 3.9;
-const walkOut = (t: number) => ({
-  simba: t < 1.2 ? sit(0, 1, { blink: blinkAt(t, 0.6) })
-    : t < 2.6 ? go(t, 1.2, 2.6, 0, 70, "walk")
-    : t < 3.2 ? { x: 70, pose: "crouch" as const, face: 1 as const, shake: wiggle(t), fx: t > 2.8 ? "!" : undefined }
-    : { ...hop(t, 3.2, OUT, 70, 300, 90, 0, 280), face: 1 as const },
-  cream: sit(REST, -1),
-});
+// sits, wanders toward the room's door if it's far off, crouches and leaps up out
+// of the card, shrinking to his size in the room, and lands on the door: the spot
+// on screen where the room's Simba climbs onto the floor (see Room's Door).
+// `door` is in scene units: x along the card, y px above it, s his size there.
+const LEAP = 3.2, OUT = 3.9;
+const walkOut = (t: number, door = { x: 300, y: 280, s: 1 }) => {
+  const off = Math.abs(door.x) > 120 ? door.x - Math.sign(door.x) * 100 : 0; // where he takes off
+  const face: 1 | -1 = door.x >= off ? 1 : -1;
+  return {
+    simba: t < 1.2 || (t < 2.6 && !off) ? sit(0, face, { blink: blinkAt(t, 0.6, 2) })
+      : t < 2.6 ? { ...go(t, 1.2, 2.6, 0, off, Math.abs(off) > 100 ? "run" : "walk"), face }
+      : t < LEAP ? { x: off, pose: "crouch" as const, face, shake: wiggle(t), fx: t > 2.8 ? "!" : undefined }
+      : { ...hop(t, LEAP, OUT, off, door.x, 90, 0, door.y), face, scale: lerp(1, door.s, ease(seg(t, LEAP, OUT))) },
+    cream: sit(REST, -1),
+  };
+};
 
 function beatAt(time: number) {
   let t = time % LOOP;
@@ -420,16 +426,37 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
     // After getting up, how far the cat still is from where the scene wants it.
     // It runs that gap down instead of jumping.
     const gaps: Record<CatName, number> = { simba: 0, cream: 0 };
-    let last = 0;
+    let last = 0, clock = 0;
+
+    // Simba's spot, and how far the scenes may spread: everything squeezes
+    // to fit on a phone.
+    const layout = () => {
+      const w = el.clientWidth;
+      const span = Math.min(1, (w - sw) / (REST + 200 + sw));
+      return { span, anchor: Math.min(w - (REST * span + sw / 2), Math.max(sw / 2 + 180 * span, w * 0.1)) };
+    };
+
+    // The room's way in for Simba, sent by the studio: a point on its canvas and his height there in px.
+    let door: { el: HTMLElement; x: number; y: number; h: number } | null = null;
+    const onDoor = (e: Event) => void (door = (e as CustomEvent<NonNullable<typeof door>>).detail);
+    window.addEventListener("simba-door", onDoor);
+    // That point in scene units, read each frame as the page scrolls. The card can be scaled (RiseSheet).
+    const doorAt = () => {
+      if (!door) return undefined;
+      const { span, anchor } = layout();
+      const r = door.el.getBoundingClientRect(), b = el.getBoundingClientRect();
+      const k = b.width / el.offsetWidth || 1;
+      return {
+        x: ((r.left + door.x - b.left) / k - anchor) / span,
+        y: (b.top - r.top - door.y) / k,
+        s: Math.min(1, door.h / k / (sh * SIZE.simba)),
+      };
+    };
 
     const render = (beats: { simba: Beat; cream: Beat }, now: number) => {
       const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
       last = now;
-      const w = el.clientWidth;
-      // Simba's spot, and how far the scenes may spread: everything squeezes
-      // to fit on a phone.
-      const span = Math.min(1, (w - sw) / (REST + 200 + sw));
-      const anchor = Math.min(w - (REST * span + sw / 2), Math.max(sw / 2 + 180 * span, w * 0.1));
+      const { span, anchor } = layout();
       cats.forEach((name, i) => {
         const b = { ...beats[name] };
         const wrap = els.current[i], cv = cvs.current[i], fx = fxs.current[i];
@@ -455,7 +482,7 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
         const frame = Math.floor(now / frameMs(b.pose)) % 4;
         const x = anchor + b.x * span + (b.shake ?? 0);
         const y = -(b.y ?? 0);
-        wrap.style.transform = `translate3d(${Math.round(x - cw / 2)}px, ${Math.round(y - ch)}px, 0)`;
+        wrap.style.transform = `translate3d(${Math.round(x - cw / 2)}px, ${Math.round(y - ch)}px, 0) scale(${b.scale ?? 1})`;
         cv.style.transform = `scaleX(${b.face}) rotate(${b.spin ?? 0}deg)`;
         if (fx) {
           fx.textContent = b.fx ?? "";
@@ -472,41 +499,46 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
 
     const onBelly = (e: Event) => {
       const name = (e as CustomEvent<CatName>).detail;
-      if (bellies[name] >= 0) return;
+      // Mid-leap into the studio there's no flopping over.
+      if (bellies[name] >= 0 || (studio && clock >= LEAP)) return;
       bellies[name] = performance.now();
       catNote(NOTE[name]);
     };
     window.addEventListener("cat-belly", onBelly);
+    const unlisten = () => {
+      window.removeEventListener("cat-belly", onBelly);
+      window.removeEventListener("simba-door", onDoor);
+    };
 
     // Simba has left the card for the room: hide him and tell the studio, once.
     let gone = false;
     const leave = () => {
       if (gone) return;
       gone = true;
-      const r = els.current[0]?.getBoundingClientRect();
       if (els.current[0]) els.current[0].style.visibility = "hidden";
-      window.dispatchEvent(new CustomEvent("simba-in", { detail: r ? r.left + r.width / 2 : innerWidth / 2 }));
+      window.dispatchEvent(new CustomEvent("simba-in"));
     };
     if (studio && reduce) {
       render(walkOut(0), performance.now());
       leave();
-      return () => window.removeEventListener("cat-belly", onBelly);
+      return unlisten;
     }
 
     // Reduced motion: the last scene's ending, held. Groomed, together, done.
     if (reduce) {
       render({ simba: { x: 18, pose: "loaf", face: 1, fx: "♥" }, cream: { x: 52, pose: "loaf", face: -1 } }, 0);
-      return () => window.removeEventListener("cat-belly", onBelly);
+      return unlisten;
     }
 
     // Only animate while the footer is on screen; the story picks up where it left off.
-    let raf = 0, visible = false, clock = 0, prev = 0;
+    let raf = 0, visible = false, prev = 0;
     const tick = (now: number) => {
-      clock += Math.min(0.05, (now - prev) / 1000);
+      // In the studio his walk out waits while he's belly up, so he can't leave mid-flop.
+      if (!(studio && bellies.simba >= 0)) clock += Math.min(0.05, (now - prev) / 1000);
       prev = now;
       if (studio) {
         if (clock >= OUT) return leave();
-        render(walkOut(clock), now);
+        render(walkOut(clock, doorAt()), now);
       } else render(beatAt(clock), now);
       if (visible) raf = requestAnimationFrame(tick);
     };
@@ -516,12 +548,12 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
       if (visible) { prev = performance.now(); raf = requestAnimationFrame(tick); }
     });
     io.observe(el);
-    render(studio ? walkOut(0) : beatAt(0), performance.now());
+    render(studio ? walkOut(0, doorAt()) : beatAt(0), performance.now());
 
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();
-      window.removeEventListener("cat-belly", onBelly);
+      unlisten();
     };
   }, [reduce, sh, sw, studio]); // eslint-disable-line react-hooks/exhaustive-deps -- cats follows studio
 
@@ -531,7 +563,7 @@ export function PixelCats({ scale = 3, className = "" }: { scale?: number; class
         <div
           key={name}
           ref={(n) => void (els.current[i] = n)}
-          className="pointer-events-auto absolute left-0 top-0 cursor-pointer will-change-transform"
+          className="pointer-events-auto absolute left-0 top-0 origin-bottom cursor-pointer will-change-transform"
           style={{ width: sw * SIZE[name], height: sh * SIZE[name] }}
           data-cursor={LABEL[name]}
           onClick={(e) => {

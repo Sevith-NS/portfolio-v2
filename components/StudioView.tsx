@@ -19,7 +19,7 @@ const HINTS: Record<Hotspot, string> = {
   simba: "Simba, head of QA. He has notes.",
 };
 
-const GRUMBLES = ["Simba: mrrrow.", "Simba: MRRROW. Who touched me.", "Simba: filing this with HR. Grooming now."];
+const GRUMBLES = ["Simba: mrrrow.", "Simba: MRRROW. Who touched me.", "Simba: MRRRROOOOWWW. I am not amused.", "Simba: Mrrrow. I will be watching you."];
 
 const btn =
   "inline-flex h-10 items-center gap-2 rounded-full border border-rule bg-paper px-4 font-mono text-[0.75rem] uppercase tracking-[0.1em] text-ink transition-colors hover:border-ink";
@@ -29,7 +29,7 @@ export default function StudioView() {
   const [chaos, setChaos] = useState(0);
   const [hint, setHint] = useState<Hotspot | null>(null);
   // Simba walks up out of the contact card into the room (see PixelCats).
-  const [simbaX, setSimbaX] = useState<number | null>(null);
+  const [simbaIn, setSimbaIn] = useState(false);
   const [simbaFuss, setSimbaFuss] = useState(0);
   const { navigate } = usePageTransition();
 
@@ -40,7 +40,7 @@ export default function StudioView() {
   };
   useEffect(() => {
     const go = () => setChaos((n) => n + 1);
-    const inside = (e: Event) => setSimbaX((e as CustomEvent<number>).detail);
+    const inside = () => setSimbaIn(true);
     window.addEventListener("cream", go);
     window.addEventListener("simba-in", inside);
     return () => {
@@ -62,7 +62,7 @@ export default function StudioView() {
   return (
     <div>
       <div className="relative aspect-square overflow-hidden rounded-[1.75rem] border border-rule bg-sheet sm:aspect-[4/3] lg:aspect-[16/10]">
-        <Room lampOn={lampOn} chaos={chaos} simbaX={simbaX} simbaFuss={simbaFuss} onHover={setHint} onPick={pick} />
+        <Room lampOn={lampOn} chaos={chaos} simba={simbaIn} simbaFuss={simbaFuss} onHover={setHint} onPick={pick} />
 
         {/* What's under the pointer, in the corner like a caption. */}
         <div aria-hidden className="pointer-events-none absolute bottom-4 left-4 right-4 flex justify-start">

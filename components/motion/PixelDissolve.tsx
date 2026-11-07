@@ -23,6 +23,7 @@ function applyClip(el: HTMLElement, grid: Grid, open: (d: number) => boolean) {
 // under the specks, so at rest it's just the text. Each speck is its letter's
 // own colour in the current theme, and like the curtain each bit of letter shows
 // blue for a beat as it lands and before it breaks off (a blue copy, masked).
+// Without a blue copy (`blue` null) the letters keep their own colour throughout.
 const ASSEMBLE = 1800; // ms from the first speck setting off to the last landing
 const LETTER = 0.3; // share of a sweep one letter takes
 const FLY = 0.25; // share of a sweep a speck spends in the air
@@ -34,7 +35,7 @@ type Speck = { x: number; y: number; d: number; ix: number; iy: number; ox: numb
 
 export function useDust(
   text: RefObject<HTMLElement | null>,
-  blue: RefObject<HTMLElement | null>,
+  blue: RefObject<HTMLElement | null> | null,
   dust: RefObject<HTMLCanvasElement | null>,
   scroll: MotionValue<number>,
   assemble = ASSEMBLE,
@@ -42,9 +43,10 @@ export function useDust(
   const reduce = useReducedMotion();
 
   useLayoutEffect(() => {
-    const el = text.current, lit = blue.current, cv = dust.current;
+    const el = text.current, lit = blue?.current, cv = dust.current;
     const ctx = cv?.getContext("2d");
-    if (!el || !lit || !cv || !ctx) return;
+    if (!el || !cv || !ctx) return;
+    const beat = lit ? BLUE : 0; // no blue copy: the ink shows the moment a speck lands
     if (reduce) {
       el.style.clipPath = "none";
       return;
@@ -147,14 +149,14 @@ export function useDust(
       ctx.clearRect(-B, -B, w + B * 2, h + B * 2);
       if (q >= 1 + BLUE && raw <= 0) {
         el.style.clipPath = "none"; // beats the class that hides it until the first landing
-        lit.style.clipPath = ""; // back to the class: the blue copy hidden
+        if (lit) lit.style.clipPath = ""; // back to the class: the blue copy hidden
         return;
       }
       // A bit of letter is blue from its landing for a beat, and for a beat
       // before it breaks off; its own colour in between.
-      const own = (d: number) => q >= d + BLUE && p < d - BLUE;
+      const own = (d: number) => q >= d + beat && p < d - beat;
       applyClip(el, grid, own);
-      applyClip(lit, grid, (d) => q >= d && p < d && !own(d));
+      if (lit) applyClip(lit, grid, (d) => q >= d && p < d && !own(d));
       // Re-read the letters' colours when the theme flips, not every frame.
       const dark = document.documentElement.classList.contains("dark");
       if (dark !== readFor) {

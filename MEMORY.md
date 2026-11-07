@@ -27,6 +27,13 @@ intake answers in `ART-DIRECTION.md`. The open work is in `TASK.md`.
 
 ---
 
+## Session: 4 Nov 2026 (branch `polaris-nov-demo`, shipped)
+
+- **Polaris case brought up to the 3 Nov build.** Both Polaris repos pulled (frontend `main` `52e16d2`, backend `736a043`). The walkthrough is now eight steps cut from Sevith's 4 Nov demo (`Desktop/Polaris.mp4`, 9:15, silent): markets, symbol plan, AI desk, backtest, fundamentals, Deep Dive, Ask Polaris, news. Each clip is a 1280×582 H.264 loop of 7 to 10 s (0.25 to 1.1 MB), cut from several segments with short crossfades and punch-in crops, with a webp poster from the same crop.
+- **Three AI claims the code no longer backs were rewritten** against `agents_desk.py`: the risk committee and bull and bear (approach), the risk seats and the manager (insights), and scoring on realized alpha (decisions). Ask Polaris and chart alerts joined the approach list, and the one-exchange desk became a decision. Sevith confirmed every changed line the same day, so none carries a `draft` flag.
+- **Approved and shipped on 4 Nov:** the case page, plus both process boards (artifact version 2, Polaris brought up to 3 Nov, Tesseract unchanged). Next is a Process section on both case studies, in `TASK.md` §9.
+- **Noticed, not fixed (Polaris):** in the demo, the Ask Polaris answer prints GOOGL prices in rupees ("₹280.03").
+
 ## Session: 17 Oct 2026
 
 - **Tungsten (warm black, bone, amber) tried and rejected outright.** Now lapis only, in both modes. Carrot is gone. Dark mode: only the page background is navy `#081028`; every other dark token is the original.

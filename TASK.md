@@ -66,6 +66,29 @@ Legend: **[S]** needs something from Sevith first.
 
 - [ ] **One more egg,** for example the cats reacting to the theme switch. Done when it's discoverable without reading the source.
 
+## 9. Polaris November update and the process boards (branch `polaris-nov-demo`, 4 Nov 2026)
+
+### Case study
+
+- [x] **Pull the latest Polaris.** Done when both repos' `main` match GitHub (frontend `52e16d2`, backend `736a043`, both 3 Nov) and the case study has been checked against them.
+- [x] **Recut the four loops from the 4 Nov demo** (markets, symbol plan, fundamentals, news). Done when each is 1280 wide, silent, about 1 MB or less, and its label names what it shows.
+- [x] **Add four walkthrough steps:** AI desk run, backtest verdict, Deep Dive, Ask Polaris. Done when every caption traces to a Polaris commit note or the code.
+- [x] **Fix the AI claims the code no longer backs:** the risk committee, bull and bear, the risk seats and the manager, and scoring on realized alpha. Done when each line matches `agents_desk.py` at `736a043`.
+- [x] **[S] Confirm the six `draft` lines in the Polaris case:** AI desk, Ask Polaris, alerts, the desk insight, the journal and the one-exchange decision. Done when every `draft` flag is gone or rewritten. *(Confirmed 4 Nov, flags removed.)*
+- [x] **[S] The rupee bug in the Ask Polaris clip.** The answer prints GOOGL at "₹280.03". Done when the clip is re-recorded after a fix in Polaris, or Sevith accepts it. *(Shipped as is on 4 Nov. The fix belongs in Polaris.)*
+- [ ] **Eight steps on a phone.** Done when the walkthrough reads well at 375px, each clip plays only on screen, and the page doesn't drag.
+- [x] **[S] Commit the branch.** Done when Sevith has seen the case page and says ship. *(Shipped 4 Nov.)*
+
+### Process boards (artifact and PNGs)
+
+- [x] **Polaris board, 28 Oct to 3 Nov:** timeline, IA, flows, the review round, cuts, visual system, captures from the 4 Nov demo. Done when every new item carries a provenance chip. *(Artifact version 2, 4 Nov: new frame 12, "The review round".)*
+- [x] **Tesseract board unchanged,** as asked.
+- [x] **PNG export refreshed** in `D:\College\Projects\process-boards`. Done when every Polaris frame has a PNG named like the 27 Oct set. *(13 Polaris PNGs; the 27 Oct ones are in `_27-oct`.)*
+- [x] **[S] Approve both boards.** Done when Sevith signs off. *(Approved 4 Nov.)*
+- [ ] **After approval: a Process section on the Polaris and Tesseract case studies** (IA, flows, before and after), with the boards as the source. Done when each case shows at least three frames and links the full board.
+- [ ] **[S] Tesseract frame 09:** five reasons still read "Not written down". Done when Sevith gives them or decides they stay.
+- [ ] **[S] Usability tests on both boards:** planned, not run. Done when real sessions fill the empty rows.
+
 ## 8. Phase 7 (owed): quality and security
 
 - [ ] **Install the Cloudflare security-audit skill** (github.com/cloudflare/security-audit-skill) and run the full audit. Done when every finding is fixed or explicitly accepted.

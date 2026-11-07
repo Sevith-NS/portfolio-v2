@@ -3,10 +3,16 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useReducedMotion } from "framer-motion";
 import { X } from "@phosphor-icons/react";
+import { usePageTransition } from "@/components/transition/TransitionProvider";
 
 type Photo = { src: string; thumb: string; alt: string; w: number; h: number };
 type View = { w: number; h: number; tw: number; cw: number; ch: number };
-type Tile = { el: HTMLElement; x: number; y: number; w: number; h: number };
+type Tile = {
+  el: HTMLElement; x: number; y: number; w: number; h: number;
+  z: number; // stacking at rest: cards dealt later lie on top
+  delay: number; deck: number; spin: number; rest: number; jx: number; jy: number;
+  down: boolean; // lands face down, showing the card back
+};
 
 // One endless plane of photos, like Pamidor's Art Lab: drag it any way (mouse,
 // touch, trackpad, arrow keys) and the set repeats forever. Each photo keeps its
@@ -19,7 +25,19 @@ const BEND = 20; // degrees a tile turns at the edge of the screen
 const SINK = 160; // px it sits back there
 const EASE = 0.14; // share of the way to the target the plane covers each frame
 const DECAY = 0.92; // share of a flick's speed kept each frame
-const SCATTER = 0.25; // share of a spot a photo can land off its centre, either way
+const SCATTER = 0.33; // share of a spot a photo can land off its centre, either way
+// The photos are cards. On arrival they're a face-down deck in the middle, dealt from
+// the top in a random order: each is thrown up, turns face up in the air, drops onto the
+// table with a little give and slides to a stop at a slight tilt. Now and then one lands
+// face down on its card back; a click turns it over.
+const DEAL = 900; // ms over which the throws start
+const THROW = 950; // ms one card takes from the deck to rest
+const AIR = 0.6; // share of a throw spent in the air
+const LIFT = 0.18; // how much bigger a card is at the top of its arc
+const SPIN = 26; // most degrees of spin a throw puts on a card
+const TILT = 11; // most degrees a card rests at, either way; spread evenly, so most visibly lean
+const DOWN = 0.07; // share of cards that land face down
+const FACE = "perspective(1000px) rotateY(0deg)", BACK = "perspective(1000px) rotateY(180deg)";
 
 const mod = (a: number, n: number) => ((a % n) + n) % n;
 
@@ -40,25 +58,48 @@ function measure(): View {
 export default function Gallery({ photos }: { photos: Photo[] }) {
   const n = photos.length;
   const reduce = useReducedMotion();
+  const { covered } = usePageTransition();
   const [view, setView] = useState<View | null>(null);
   const [first, setFirst] = useState({ c: 0, r: 0 });
   const [open, setOpen] = useState<number | null>(null);
+  const [turned, setTurned] = useState(() => new Set<string>()); // face-down cards already turned over
   const plane = useRef<HTMLElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const tiles = useRef(new Map<string, Tile>());
   // Where the plane is and where it is heading, for the frame loop; never rendered.
-  const at = useRef({ x: 0, y: 0, tx: 0, ty: 0, vx: 0, vy: 0, drag: false, moved: false, raf: 0, c: NaN, r: NaN, view: null as View | null });
+  // `deal`: -1 while the photos wait in the pile, the start time while they fly, 0 once landed.
+  const at = useRef({ x: 0, y: 0, tx: 0, ty: 0, vx: 0, vy: 0, drag: false, moved: false, raf: 0, c: NaN, r: NaN, view: null as View | null, deal: -1 });
 
   // Every tile's place on the bent plane, and a re-render when new cells come in.
   const place = useCallback(() => {
     const a = at.current, v = a.view;
     if (!v) return;
     const R = Math.max(v.w, v.h) / 2;
+    const now = performance.now();
     tiles.current.forEach((t) => {
-      const left = t.x + a.x, top = t.y + a.y;
+      let left = t.x + a.x, top = t.y + a.y, turn = t.rest, lift = 1;
+      if (a.deal) {
+        const p = a.deal < 0 ? 0 : Math.min(1, Math.max(0, (now - a.deal - t.delay) / THROW));
+        // Friction: most of the way is covered in the air, the rest is a slide along the table.
+        const e = 1 - (1 - p) ** 3, fromX = (v.w - t.w) / 2 + t.jx, fromY = (v.h - t.h) / 2 + t.jy;
+        left = fromX + (left - fromX) * e;
+        top = fromY + (top - fromY) * e;
+        turn = t.deck + (t.rest - t.deck) * e + t.spin * Math.sin(Math.PI * e);
+        // Up and down in an arc, then a little give as it hits the table.
+        const air = p < AIR ? Math.sin((Math.PI * p) / AIR) : 0;
+        const land = p < AIR ? 0 : (p - AIR) / (1 - AIR);
+        lift = 1 + LIFT * air - 0.03 * Math.sin(Math.PI * land) * (1 - land);
+        // Face down in the deck; a face-up card turns over on the way up.
+        const over = t.down ? 0 : Math.min(1, Math.max(0, (p - 0.08) / (AIR * 0.75)));
+        (t.el.firstElementChild as HTMLElement).style.transform = `perspective(1000px) rotateY(${180 * (1 - over * over * (3 - 2 * over))}deg)`;
+        // The deck stacks top card first, a card in the air is above everything, then it rests in deal order.
+        t.el.style.zIndex = String(p >= AIR ? t.z : p > 0 ? 400 : 100 + Math.round((1 - t.delay / DEAL) * 99));
+        t.el.style.boxShadow = p >= 1 ? "" : `0 ${12 + 30 * air}px ${32 + 36 * air}px -14px rgb(var(--shade)/${0.5 - 0.18 * air})`;
+      }
       const nx = (left + t.w / 2 - v.w / 2) / R, ny = (top + t.h / 2 - v.h / 2) / R;
-      t.el.style.transform =`translate3d(${left}px,${top}px,${-SINK * (nx * nx + ny * ny)}px) rotateY(${nx * BEND}deg) rotateX(${-ny * BEND}deg)`;
+      t.el.style.transform = `translate3d(${left}px,${top}px,${-SINK * (nx * nx + ny * ny)}px) rotateY(${nx * BEND}deg) rotateX(${-ny * BEND}deg) rotate(${turn}deg) scale(${lift})`;
     });
+    if (a.deal > 0 && now - a.deal > DEAL + THROW) a.deal = 0;
     const c = Math.floor(-a.x / v.cw) - 1, r = Math.floor(-a.y / v.ch) - 2;
     if (c !== a.c || r !== a.r) {
       a.c = c;
@@ -89,6 +130,30 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
   }, [place, reduce]);
 
   useLayoutEffect(() => place(), [view, first, place]);
+
+  // Deal once the photos are on screen and the page curtain has lifted off them.
+  useEffect(() => {
+    const a = at.current;
+    if (!view || covered || a.deal !== -1) return;
+    if (reduce) {
+      a.deal = 0;
+      place();
+      return;
+    }
+    // The deck waits for its photos, so no card turns over blank; never longer than 1.5 s.
+    let live = true;
+    const imgs = [...(plane.current?.querySelectorAll("img") ?? [])];
+    Promise.race([Promise.allSettled(imgs.map((im) => im.decode())), new Promise((r) => setTimeout(r, 1500))]).then(() => {
+      if (!live || a.deal !== -1) return;
+      a.deal = performance.now() + 150;
+      const run = () => {
+        place();
+        if (a.deal) requestAnimationFrame(run);
+      };
+      requestAnimationFrame(run);
+    });
+    return () => void (live = false);
+  }, [view, covered, reduce, place]);
 
   useEffect(() => {
     const el = plane.current;
@@ -184,35 +249,65 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
       for (let c = first.c; c < first.c + Math.ceil(view.w / view.cw) + 3; c++) {
         const k = `${c}:${r}`, i = mod(c + r * C, n), p = photos[i];
         // Every shape gets about the same area, a little bigger or smaller by spot.
-        const side = view.tw * (0.75 + 0.45 * noise(c, r, 0)), stretch = Math.sqrt(p.w / p.h);
+        const side = view.tw * (0.68 + 0.6 * noise(c, r, 0)), stretch = Math.sqrt(p.w / p.h);
         const w = Math.round(side * stretch), h = Math.round(side / stretch);
         const x = (c + 0.5 + (noise(c, r, 1) - 0.5) * 2 * SCATTER) * view.cw - w / 2;
         const y = (r + 0.5 + (c & 1) / 2 + (noise(c, r, 2) - 0.5) * 2 * SCATTER) * view.ch - h / 2;
         // Each photo is tabbable and announced once; its repeats are only seen.
         const again = seen.has(i);
         seen.add(i);
+        // Cards dealt later lie on top, each resting at its own lean.
+        const delay = noise(c, r, 4) * DEAL, z = 200 + Math.round((delay / DEAL) * 99);
+        const rest = TILT * (noise(c, r, 9) - 0.5) * 2;
+        const down = noise(c, r, 8) < DOWN && !turned.has(k);
         cells.push(
           <button
             key={k}
             ref={(el) => {
-              tiles.current.set(k, { el: el!, x, y, w, h });
+              tiles.current.set(k, {
+                el: el!, x, y, w, h, z, delay, rest, down,
+                deck: (noise(c, r, 5) - 0.5) * 8,
+                spin: (noise(c, r, 10) - 0.5) * 2 * SPIN,
+                jx: (noise(c, r, 6) - 0.5) * 10,
+                jy: (noise(c, r, 7) - 0.5) * 10,
+              });
               return () => void tiles.current.delete(k);
             }}
             type="button"
-            data-cursor="Open"
+            data-cursor={down ? "Flip" : "Open"}
             tabIndex={again ? -1 : undefined}
             aria-hidden={again || undefined}
-            aria-label={`Open ${p.alt}`}
+            aria-label={down ? "Turn over a face-down photo" : `Open ${p.alt}`}
             onClick={(e) => {
               // A drag that ends on a tile is not a click; Enter and Space always are.
-              if (e.detail === 0 || !at.current.moved) setOpen(i);
+              if (e.detail !== 0 && at.current.moved) return;
+              if (!down) return setOpen(i);
+              // A face-down card turns over first, lifting off the table as it goes.
+              const el = e.currentTarget, card = el.firstElementChild as HTMLElement;
+              el.style.zIndex = "500";
+              card.animate(
+                [{ transform: `${BACK} scale(1)` }, { transform: "perspective(1000px) rotateY(90deg) scale(1.12)", offset: 0.45 }, { transform: `${FACE} scale(1)` }],
+                { duration: reduce ? 0 : 650, easing: "cubic-bezier(0.3, 0.6, 0.3, 1)" },
+              ).onfinish = () => void (el.style.zIndex = String(z));
+              setTurned((s) => new Set(s).add(k));
             }}
-            // Overlaps stack in a different order from spot to spot.
-            style={{ width: w, height: h, zIndex: Math.floor(noise(c, r, 3) * 40) }}
-            className="absolute left-0 top-0 overflow-hidden rounded-md bg-sheet shadow-[0_12px_32px_-14px_rgb(var(--shade)/0.5)] will-change-transform"
+            style={{ width: w, height: h, zIndex: z }}
+            className="absolute left-0 top-0 rounded-md shadow-[0_12px_32px_-14px_rgb(var(--shade)/0.5)] will-change-transform"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={p.thumb} alt="" draggable={false} decoding="async" className="size-full object-cover" />
+            <span className="relative block size-full [transform-style:preserve-3d]" style={{ transform: down ? BACK : FACE }}>
+              <span className="absolute inset-0 overflow-hidden rounded-md bg-sheet [backface-visibility:hidden]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p.thumb} alt="" draggable={false} decoding="async" className="size-full object-cover" />
+              </span>
+              {/* The card back: an aurora of lapis and light blue under film grain, the favicon in the corner.
+                  Sized off the card's short side; only a card lying face down drifts, the rest never show it. */}
+              <span className="grain absolute inset-0 overflow-hidden rounded-md bg-deck [backface-visibility:hidden] [container-type:size] [transform:rotateY(180deg)]">
+                <span className={`absolute -left-[30cqmin] -top-[25cqmin] size-[90cqmin] rounded-full bg-deck-glow/85 blur-[14cqmin] ${down ? "deck-drift-a" : ""}`} />
+                <span className={`absolute -bottom-[30cqmin] -right-[35cqmin] size-[80cqmin] rounded-full bg-deck-deep blur-[14cqmin] ${down ? "deck-drift-b" : ""}`} />
+                <span className={`absolute left-[30cqmin] top-[45cqmin] size-[55cqmin] rounded-full bg-on-hl/30 blur-[14cqmin] dark:bg-on-hl/15 ${down ? "deck-drift-c" : ""}`} />
+                <span className="absolute left-[8cqmin] top-[8cqmin] size-[16cqmin] bg-on-hl [mask:url('/1.svg')_center/contain_no-repeat]" />
+              </span>
+            </span>
           </button>,
         );
       }

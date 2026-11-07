@@ -233,4 +233,17 @@ body::after {
 @media (hover: hover) and (pointer: fine) {
   .has-cursor, .has-cursor a, .has-cursor button { cursor: none; }
   .has-cursor input, .has-cursor textarea { cursor: text; }
+  /* An open modal <dialog> sits in the browser's top layer, above the custom
+     cursor, so the system cursor comes back inside it. Outside the photo, a
+     click closes it. */
+  .has-cursor dialog[open] { cursor: default; }
+  .has-cursor dialog[open]::backdrop { cursor: zoom-out; }
+  .has-cursor dialog[open] button { cursor: pointer; }
 }
+
+/* The gallery's card back: three soft lights drifting at different speeds.
+   Reduced motion is covered by the global rule that stops animations. */
+@keyframes deck-drift { to { translate: 18cqmin 14cqmin; } }
+.deck-drift-a { animation: deck-drift 11s ease-in-out infinite alternate; }
+.deck-drift-b { animation: deck-drift 13s ease-in-out infinite alternate-reverse; }
+.deck-drift-c { animation: deck-drift 9s ease-in-out infinite alternate; }

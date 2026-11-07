@@ -85,7 +85,7 @@ Legend: **[S]** needs something from Sevith first.
 - [x] **Tesseract board unchanged,** as asked.
 - [x] **PNG export refreshed** in `D:\College\Projects\process-boards`. Done when every Polaris frame has a PNG named like the 27 Oct set. *(13 Polaris PNGs; the 27 Oct ones are in `_27-oct`.)*
 - [x] **[S] Approve both boards.** Done when Sevith signs off. *(Approved 4 Nov.)*
-- [ ] **After approval: a Process section on the Polaris and Tesseract case studies** (IA, flows, before and after), with the boards as the source. Done when each case shows at least three frames and links the full board.
+- [ ] **After approval: a Process section on the Polaris and Tesseract case studies** (IA, flows, before and after), with the boards as the source. Done when each case shows at least three frames and links the full board. *(4 Nov, branch `process-frames`: a "The process." section between How I worked and What I built, with every board frame as a numbered step beside its text, laid out like the walkthrough. Light and dark, zoomable. The link waits on Sevith sharing the artifact publicly, or dropping the link.)*
 - [ ] **[S] Tesseract frame 09:** five reasons still read "Not written down". Done when Sevith gives them or decides they stay.
 - [ ] **[S] Usability tests on both boards:** planned, not run. Done when real sessions fill the empty rows.
 

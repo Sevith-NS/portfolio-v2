@@ -7,9 +7,10 @@ import { useLenis } from "lenis/react";
 import { DustReveal } from "@/components/motion/PixelDissolve";
 
 type Phase = "idle" | "cover" | "reveal";
-type Ctx = { navigate: (href: string, label?: string) => void };
+// `covered`: the curtain is shut over the page, so an entrance should wait for it to lift.
+type Ctx = { navigate: (href: string, label?: string) => void; covered: boolean };
 
-const TransitionContext = createContext<Ctx>({ navigate: () => {} });
+const TransitionContext = createContext<Ctx>({ navigate: () => {}, covered: false });
 export const usePageTransition = () => useContext(TransitionContext);
 
 // Premium motion personality: one curve for the curtain, in and out.
@@ -100,7 +101,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   );
 
   return (
-    <TransitionContext.Provider value={{ navigate }}>
+    <TransitionContext.Provider value={{ navigate, covered: phase === "cover" }}>
       <MotionConfig reducedMotion="user">{children}</MotionConfig>
       <AnimatePresence
         onExitComplete={() => {

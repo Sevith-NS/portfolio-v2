@@ -43,7 +43,7 @@ export const projects = [
     img: "/esdeekid.png",
     iconLists: ["/next.svg", "/ts.svg", "/three.svg", "/gsap.svg"],
     link: "https://esdeekid.vercel.app/",
-    parts: ["Depth portrait", "Redacted file", "Chapter soundtrack", "Negative cuts", "Live tunnel"],
+    parts: ["Depth portrait", "Redacted file", "Chapter soundtrack", "Negative cuts", "Live carousel"],
   },
   {
     id: 1,

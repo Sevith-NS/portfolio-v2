@@ -16,10 +16,14 @@ export type Block = { text: string; draft?: boolean; todo?: boolean };
 export type Step = {
   title: string;
   text: string;
-  media: { kind: "video"; src: string; poster: string; label: string } | { kind: "image"; src: string; alt: string };
-  /** A personality line under the media, in the caption voice. */
-  aside?: string;
+  media:
+    | { kind: "video"; src: string; poster: string; label: string }
+    | { kind: "image"; src: string; alt: string }
+    | { kind: "board"; src: string; dark: string; alt: string };
 };
+
+// A process-board frame, exported once per theme as <path>.webp and <path>-dark.webp.
+const frame = (path: string, alt: string) => ({ kind: "board" as const, src: `/work/${path}.webp`, dark: `/work/${path}-dark.webp`, alt });
 
 type CaseStudy = {
   slug: string;
@@ -29,6 +33,8 @@ type CaseStudy = {
   problem: Block;
   /** What process did I follow — the real steps, in order. */
   process: Block[];
+  /** The process board, frame by frame, laid out like the walkthrough. */
+  board?: Step[];
   /** What I built. */
   approach: Block[];
   /** The product, shown working. Optional: only cases with real footage get one. */
@@ -72,6 +78,68 @@ const cases: CaseStudy[] = [
         text: "Then it stopped being just mine. I rebuilt the backend on *FastAPI*, added sign-in with Clerk and a Postgres database where every user sees only their own rows, and opened it as an *invite-only beta*.",
       },
     ],
+    board: [
+      {
+        title: "From Flint to Polaris",
+        text: "Flint's fast first build, a written spec, a rebuild, two visual passes, a review round, then a speed pass before shipping.",
+        media: frame("polaris/process/timeline", "A timeline of Polaris, eleven milestones from Flint v1 to ready to ship"),
+      },
+      {
+        title: "Test it before it costs you",
+        text: "Most traders test a strategy with real money. Polaris is the back office where it gets tested first: on history, then on paper, sized to a risk you chose.",
+        media: frame("polaris/process/problem", "The problem statement and the job to be done, above the five tabs Polaris replaces: broker app, charting site, screener, news app and spreadsheet"),
+      },
+      {
+        title: "Who it's for",
+        text: "The self-directed trader who wants proof before funding a strategy. So far that's me, from research through review.",
+        media: frame("polaris/process/users", "A card for the self-directed trader, above a journey map from discover to review"),
+      },
+      {
+        title: "Principles, and how they moved",
+        text: "From the first brief to the shipped build. The number as the hero and discipline over emotion survived every version.",
+        media: frame("polaris/process/principles", "Four cards of design principles from Flint v1 to the shipped build, and a note on which ones survived"),
+      },
+      {
+        title: "Information architecture, four snapshots",
+        text: "Eight destinations in one top bar, then the spec, a glass sidebar with phone tabs, and Ask Polaris on every page. The reason for each change sits under the maps.",
+        media: frame("polaris/process/sitemap", "Four site maps of Polaris from Flint v1's top nav to the shipped build, with the reason for each change"),
+      },
+      {
+        title: "Key flows, as shipped",
+        text: "Signing up, placing a paper trade, running the AI desk and asking Polaris, the way they work in the final build, plus the five states every flow defines.",
+        media: frame("polaris/process/flows", "Four flows as numbered steps: invite to first value, symbol to paper trade, running the desk and Ask Polaris, then the five states every flow defines"),
+      },
+      {
+        title: "Flint v1, the first build",
+        text: "The first build: a 3D field, a ticker that wasn't live, count-up stats, and a dashboard quoting a 62.5% forecast typed into the code.",
+        media: frame("polaris/process/sketch", "Pencil sketches on grid paper of the Flint v1 landing page and dashboard, with handwritten notes in the margin"),
+      },
+      {
+        title: "v2, wireframed before the rebuild",
+        text: "The symbol page, the same page at 360px, and a home built only from real data, all drawn in the spec before any of it was built.",
+        media: frame("polaris/process/wireframes", "Wireframes of the v2 symbol page on a laptop and a phone, and the v2 home page, with numbered notes"),
+      },
+      {
+        title: "Same job, three versions",
+        text: "Where you land after signing in, the symbol page and the front door, from the v1 sketch through the spec to what shipped.",
+        media: frame("polaris/process/evolution", "Three rows comparing the Flint v1 sketch, the v2 spec and the shipped app for the home page, the symbol page and the landing page"),
+      },
+      {
+        title: "What got cut, and why",
+        text: "Geotrade, the community feed, next-day forecasts, the rounds picker and more, and why each one went.",
+        media: frame("polaris/process/cuts", "A table of nine cuts, each with the reason it went"),
+      },
+      {
+        title: "Visual system, v2 to v4",
+        text: "Sharp and precise, then glass, then liquid glass, then icons and a loading spinner. Color only when it means something: gains, losses, stale data and paper money.",
+        media: frame("polaris/process/visual", "Four cards of Polaris visual tokens from v2 to the shipped icons and spinner, above a specimen of each interface state"),
+      },
+      {
+        title: "The review round",
+        text: "I used it as a user and wrote down what bothered me. What I said, what was actually wrong, what changed, then two before-and-afters.",
+        media: frame("polaris/process/review", "A table of what one user flagged and what changed, then the backtest result and the AI desk before and after"),
+      },
+    ],
     approach: [
       { text: "*Market pulse first*: Home opens on what the market is doing, with India and US indices, USD/INR, breadth, sector heat and the day's movers." },
       { text: "*Real and paper, never summed*: holdings sync read-only from eight brokers, including Zerodha, Upstox, Groww and Dhan. Paper books sit beside them, marked in blue, and no total ever adds the two together." },
@@ -92,7 +160,6 @@ const cases: CaseStudy[] = [
         title: "Click a ticker, get a plan",
         text: "Open a symbol from the watchlist and the chart arrives with a trade plan beside it: side, entry, stop, two targets and a size, drawn on the chart as lines.",
         media: { kind: "video", src: "/work/polaris/terminal.mp4", poster: "/work/polaris/terminal-poster.webp", label: "Opening GOOGL from the watchlist and zooming into its trade plan" },
-        aside: "Entry, stop, targets. Shown before the paper trade button, not after.",
       },
       {
         title: "Then ask the desk",
@@ -147,6 +214,7 @@ const cases: CaseStudy[] = [
     wins: [
       { text: "Ran it on my own money as the first user: *13.45% return on a single stock*, after tuning the portfolio." },
       { text: "The part I'd rebuild exactly the same way: the *AI desk debate*. It argues both sides of a trade before anything gets a share count." },
+      { text: "Worked through a 31-item speed checklist on the frontend and the API. The watchlists page now loads in *one request instead of two per row*. Ask Polaris streams its reply, so the *first words show at 2.2 seconds*, before a short answer is done at 2.9." },
     ],
     misses: [
       {
@@ -179,23 +247,21 @@ const cases: CaseStudy[] = [
     ],
     approach: [
       { text: "*A gate first*: a counter runs to 100 while the fonts and portrait load, a flashing-images warning shows, and you choose to enter with sound on or off." },
-      { text: "*A depth portrait*: the balaclava photo becomes a 3D surface in Three.js, with a target lock on his face and Liverpool's coordinates in the corner. Scroll dives into his eyes, then hard cuts." },
+      { text: "*A depth portrait*: the balaclava photo becomes a 3D surface in Three.js, with a target lock on his face and Liverpool's coordinates in the corner. It turns away from your cursor, or with your phone's tilt. Scroll dives into his eyes, then hard cuts." },
       { text: "*The file*: a dossier page where his name is a *redaction bar* and the heading decrypts out of random glyphs. The bio, stats and tour dates sit beside it, each with a date and a source." },
       { text: "*A chapter per track*: nine sections, from Dirty to Bandit, each with its own song, palette and grain. The music changes as you scroll, and every cut flashes negative." },
-      { text: "*Live, then out*: the live show plays as a 3D tunnel of frames, and the page ends on a red outro." },
+      { text: "*Live, then out*: 40 frames from the live show run in a 3D carousel that curls harder the faster you scroll, and the page ends on a red outro." },
     ],
     walkthrough: [
       {
         title: "Choose your volume first",
         text: "A counter runs to 100 while the portrait loads, under a flashing-images warning. Then you pick: enter with sound on, or off. He's already watching when you get in.",
         media: { kind: "video", src: "/work/esdeekid/enter.mp4", poster: "/work/esdeekid/enter-poster.webp", label: "The EsDeeKid gate counting to 100, then the hero with a target lock on his eyes" },
-        aside: "Sound off is a valid choice. Wrong, but valid.",
       },
       {
         title: "Dive into the file",
         text: "Scroll and you fall into his eyes, then hard cut to his file. The name decrypts out of random glyphs, and every stat carries the date it was read.",
         media: { kind: "video", src: "/work/esdeekid/file.mp4", poster: "/work/esdeekid/file-poster.webp", label: "The hero cutting to the File page as the name decrypts" },
-        aside: "The only field left blank is the one everyone wants.",
       },
       {
         title: "A chapter per track",
@@ -203,9 +269,9 @@ const cases: CaseStudy[] = [
         media: { kind: "video", src: "/work/esdeekid/chapter.mp4", poster: "/work/esdeekid/chapter-poster.webp", label: "Scrolling into the Dirty chapter: its title, then frames from the video" },
       },
       {
-        title: "The live show, as a tunnel",
-        text: "Lithuania plays as a 3D corridor of frames. Scroll moves you down it, past the crowd and the stage lights.",
-        media: { kind: "video", src: "/work/esdeekid/live.mp4", poster: "/work/esdeekid/live-poster.webp", label: "Moving through the 3D tunnel of frames from the Lithuania show" },
+        title: "The live show, on a bend",
+        text: "Forty frames from Lithuania run in one 3D row. The middle frame sits flat and the ones beside it curl toward you, harder the faster you scroll. Click one to open it full screen.",
+        media: { kind: "video", src: "/work/esdeekid/live.mp4", poster: "/work/esdeekid/live-poster.webp", label: "Scrolling the Lithuania carousel: frames curl toward the camera and smear on a fast scroll" },
       },
       {
         title: "Out on red",
@@ -229,7 +295,7 @@ const cases: CaseStudy[] = [
       { text: "Labeled an *unofficial fan concept* on the first screen, so nobody mistakes it for his real site." },
     ],
     wins: [
-      { text: "*The dive into his eyes*, the live tunnel, and landing on a *brutalist design* that suits him." },
+      { text: "*The dive into his eyes*, the live carousel, and landing on a *brutalist design* that suits him." },
     ],
     misses: [],
     outcome: {
@@ -257,6 +323,63 @@ const cases: CaseStudy[] = [
         text: "Then I used it. A lot. I did not keep count, but enough that by the real placement round, the hard questions had already happened to me once.",
       },
     ],
+    board: [
+      {
+        title: "Built, used, rebuilt",
+        text: "v1, which I practiced on before my own placement rounds, then a rebuild that improved on it.",
+        media: frame("tesseract/process/timeline", "A timeline of Tesseract, eight milestones from v1 to the rebuild"),
+      },
+      {
+        title: "Knowing it isn't saying it",
+        text: "The problem, then everything I tried first and what each one trains. Tesseract is built for the gap they leave.",
+        media: frame("tesseract/process/problem", "The problem in a quote, above five cards comparing question lists, YouTube, recording yourself, friends and Tesseract"),
+      },
+      {
+        title: "Who it's for, and what I tested",
+        text: "One real user so far, a job to be done, and three assumptions I tested on myself.",
+        media: frame("tesseract/process/users", "A card for the one real user and the job to be done, beside a table of three assumptions with the evidence for each"),
+      },
+      {
+        title: "Principles behind the rebuild",
+        text: "Practice has to feel like the interview, start from the job you want, say what was actually wrong, and keep the video with you.",
+        media: frame("tesseract/process/principles", "Four principle cards, each with the line it came from and where it shows up in the product"),
+      },
+      {
+        title: "Information architecture, three snapshots",
+        text: "Nav links with no page behind them in v1, then a feedback form and a social page, then jobs, a profile and community in the rebuild.",
+        media: frame("tesseract/process/sitemap", "Three site maps of Tesseract, from v1 to the rebuild"),
+      },
+      {
+        title: "The core flow, before and after",
+        text: "Four typed fields became one pasted link, and feedback moved from the end of the interview to after every answer.",
+        media: frame("tesseract/process/flows", "The core flow as numbered steps, eight in v1 beside nine after the rebuild"),
+      },
+      {
+        title: "v1, the first build",
+        text: "The v1 dashboard, the setup dialog with four required fields, the interview room, and feedback that only arrived at the end.",
+        media: frame("tesseract/process/sketch", "Pencil sketches on grid paper of the v1 dashboard, setup dialog, interview room and feedback page, with handwritten notes in the margin"),
+      },
+      {
+        title: "The rebuild, wireframed",
+        text: "A new interview built from a pasted link, a get-ready page with the time it takes, the interview room and feedback on every answer.",
+        media: frame("tesseract/process/wireframes", "Wireframes of the rebuild's new interview form, get-ready page, interview room and feedback page, with numbered notes"),
+      },
+      {
+        title: "Same job, two versions, then the real thing",
+        text: "Setting up, answering and feedback, each as the v1 sketch, the rebuild wireframe and the shipped screen.",
+        media: frame("tesseract/process/evolution", "Three rows comparing the v1 sketch, the rebuild wireframe and the shipped screen for setup, answering and feedback"),
+      },
+      {
+        title: "What changed, and why",
+        text: "Setup, the job source, the camera and the feedback header, from v1 to the rebuild, and why each one changed.",
+        media: frame("tesseract/process/changes", "A table of four changes from v1 to the rebuild, each with its reason"),
+      },
+      {
+        title: "Visual system and states",
+        text: "v1 ran on shadcn defaults. The rebuild has its own tokens: one brand orange for actions and a soft tint for each score tone.",
+        media: frame("tesseract/process/visual", "The v1 and rebuild color tokens side by side, above the empty, error and loading states each version shipped"),
+      },
+    ],
     approach: [
       { text: "A *jobs feed* of fresh postings, pulled nightly from open job boards, so practice starts from a real role." },
       { text: "*Paste a LinkedIn link* or a job description, and the interview is built around that exact posting." },
@@ -274,7 +397,6 @@ const cases: CaseStudy[] = [
         title: "Build the interview around it",
         text: "Paste the job, set the role and company, say how much experience you have, then pick the format and how many questions. Tick one box and the questions come from your own resume.",
         media: { kind: "video", src: "/work/tesseract/setup.mp4", poster: "/work/tesseract/setup-poster.webp", label: "Filling in the new interview form, sped up" },
-        aside: "Sped up 3\u00d7. Nobody needs to watch me type.",
       },
       {
         title: "Your resume, read once",
@@ -290,7 +412,6 @@ const cases: CaseStudy[] = [
         title: "Honest feedback, per answer",
         text: "A score, the filler words, what got skipped, and a critique of what you actually said, with your answer right underneath it.",
         media: { kind: "image", src: "/work/tesseract/feedback.webp", alt: "Tesseract feedback page: a 1.7 out of 5 average score and per-question critique" },
-        aside: "Yes, that 1.7 out of 5 is mine. The coach does not do participation trophies.",
       },
     ],
     insights: [
@@ -390,7 +511,6 @@ const cases: CaseStudy[] = [
         title: "The eyes",
         text: "Two pupils that follow your cursor anywhere on the page. Find the center of each eye, find the cursor, point the pupil, every frame.",
         media: { kind: "video", src: "/work/ochi/eyes.mp4", poster: "/work/ochi/eyes-poster.webp", label: "The cartoon eyes tracking the cursor as it moves" },
-        aside: "They watch you scroll. Rude, honestly.",
       },
       {
         title: "Hover to reveal",

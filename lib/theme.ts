@@ -27,6 +27,9 @@ const TOKENS = [
   "warm", // the lamp's big moments: "actually", the footer wordmark, the dust's blink
   "deep", // deep accent tone
   "band", // the How I build band, carried on behind the contact sheet
+  "deck", // the gallery's card back
+  "deck-glow", // the light that drifts across the card back
+  "deck-deep", // the deep tone it drifts into
   "shade", // shadow colour
   "danger", // form errors
   "tint-sage",
@@ -95,6 +98,9 @@ export const light = new Palette("light", {
   warm: [0, 45, 180],
   deep: [20, 34, 100],
   band: BAND_LIGHT,
+  deck: [0, 45, 180], // lapis
+  "deck-glow": [128, 155, 255], // #809BFF
+  "deck-deep": [0, 26, 122],
   shade: [0, 0, 0],
   danger: [178, 58, 12],
   "tint-sage": [213, 227, 218],
@@ -125,6 +131,9 @@ export const dark = new Palette("dark", {
   warm: [128, 155, 255],
   deep: [26, 40, 120],
   band: BAND_DARK,
+  deck: [10, 22, 64], // a deep lapis navy
+  "deck-glow": [128, 155, 255],
+  "deck-deep": [0, 45, 180],
   shade: [0, 0, 0],
   danger: [255, 138, 91],
   "tint-sage": [24, 34, 32],

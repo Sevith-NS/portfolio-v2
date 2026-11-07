@@ -30,7 +30,7 @@ export function ZoomImage({ src, alt }: { src: string; alt: string }) {
           <X size={18} />
         </button>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt={alt} className="block h-auto w-full" />
+        <img src={src} alt={alt} loading="lazy" className="block h-auto w-full" />
       </dialog>
     </>
   );

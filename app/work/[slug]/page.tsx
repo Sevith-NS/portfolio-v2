@@ -68,26 +68,51 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
 // than stacking identical blocks (Q75, off-grid).
 function WalkStep({ step, index, url }: { step: Step; index: number; url: string }) {
   const flip = index % 2 === 1;
+  const m = step.media;
+  // Board frames can run tall, so their text stays in view beside them.
+  const board = m.kind === "board";
   return (
-    <Reveal as="li" className="grid items-center gap-8 md:grid-cols-12 md:gap-12">
-      <div className={cn("md:col-span-4", flip && "md:order-2 md:col-start-9")}>
+    <Reveal as="li" className={cn("grid gap-8 md:grid-cols-12 md:gap-12", board ? "items-start" : "items-center")}>
+      <div className={cn("md:col-span-4", flip && "md:order-2 md:col-start-9", board && "md:sticky md:top-28")}>
         <p className="font-mono text-[0.75rem] tracking-[0.14em] text-ink-3">{String(index + 1).padStart(2, "0")}</p>
         <h3 className="mt-3 font-wide text-xl font-semibold uppercase leading-tight text-ink md:text-2xl">{step.title}</h3>
-        <p className="mt-4 leading-relaxed text-ink-2">{step.text}</p>
-      </div>
+        <p className="mt-4 leading-relaxed text-ink-2">{step.text}</p>      </div>
       <figure className={cn("md:col-span-8", flip && "md:order-1 md:col-start-1")}>
-        <BrowserFrame url={url}>
-          {step.media.kind === "video" ? (
-            <DemoVideo src={step.media.src} poster={step.media.poster} label={step.media.label} />
-          ) : (
-            <ZoomImage src={step.media.src} alt={step.media.alt} />
-          )}
-        </BrowserFrame>
-        {step.aside && <figcaption className="mt-4 font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-ink-3">{step.aside}</figcaption>}
+        {m.kind === "board" ? (
+          // One image per theme. The other sits in a display:none box and both are lazy, so it is never fetched.
+          <div className="overflow-hidden rounded-xl border border-rule">
+            <div className="dark:hidden"><ZoomImage src={m.src} alt={m.alt} /></div>
+            <div className="hidden dark:block"><ZoomImage src={m.dark} alt={m.alt} /></div>
+          </div>
+        ) : (
+          <BrowserFrame url={url}>
+            {m.kind === "video" ? (
+              <DemoVideo src={m.src} poster={m.poster} label={m.label} />
+            ) : (
+              <ZoomImage src={m.src} alt={m.alt} />
+            )}
+          </BrowserFrame>
+        )}
       </figure>
     </Reveal>
   );
 }
+
+// A full-width run of steps: the walkthrough, and the process board frame by frame.
+const Steps = ({ label, title, steps, url }: { label: string; title: string; steps?: Step[]; url: string }) =>
+  steps && steps.length > 0 ? (
+    <section className="mx-auto max-w-page px-4 py-20 md:px-8 md:py-28">
+      <Reveal className="mx-auto max-w-[44rem] text-center">
+        <p className={kicker}>{label}</p>
+        <h2 className="mt-5 font-wide text-[clamp(2rem,5vw,4rem)] font-semibold uppercase leading-[1] tracking-[-0.01em] text-ink">{title}</h2>
+      </Reveal>
+      <ol className="mt-16 space-y-24 md:mt-24 md:space-y-32">
+        {steps.map((s, i) => (
+          <WalkStep key={s.title} step={s} index={i} url={url} />
+        ))}
+      </ol>
+    </section>
+  ) : null;
 
 export default async function CasePage({ params }: Props) {
   const { slug } = await params;
@@ -173,26 +198,18 @@ export default async function CasePage({ params }: Props) {
             <Bullets blocks={process} />
           </Row>
         )}
+      </article>
 
+      <Steps label="From the process board" title="The process." steps={c.board} url={p.link} />
+
+      <article className="mx-auto max-w-page px-4 md:px-8">
         <Row label="What I built">
           <Bullets blocks={c.approach} />
         </Row>
       </article>
 
       {/* The product, working. Full width, because this is the part people came for. */}
-      {c.walkthrough && c.walkthrough.length > 0 && (
-        <section className="mx-auto max-w-page px-4 py-20 md:px-8 md:py-28">
-          <Reveal className="mx-auto max-w-[44rem] text-center">
-            <p className={kicker}>See it work</p>
-            <h2 className="mt-5 font-wide text-[clamp(2rem,5vw,4rem)] font-semibold uppercase leading-[1] tracking-[-0.01em] text-ink">The walkthrough.</h2>
-          </Reveal>
-          <ol className="mt-16 space-y-24 md:mt-24 md:space-y-32">
-            {c.walkthrough.map((s, i) => (
-              <WalkStep key={s.title} step={s} index={i} url={p.link} />
-            ))}
-          </ol>
-        </section>
-      )}
+      <Steps label="See it work" title="The walkthrough." steps={c.walkthrough} url={p.link} />
 
       <article className="mx-auto max-w-page px-4 md:px-8">
         {insights.length > 0 && (

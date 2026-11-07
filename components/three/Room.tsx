@@ -53,18 +53,22 @@ const WALL_H = 1.7;
 const DESK_Y = 0.38;
 const CREAM_HOME: V3 = [-0.3, DESK_Y, -1.02];
 // Simba climbs in over the front edge of the floor, the side nearest the contact card, and loafs on the rug.
-const SIMBA_ENTRY: V3 = [-0.25, -0.18, 1.7];
+// He comes in straight below his spot on screen (same x - z: the camera looks down the diagonal), so he walks straight up to it.
 const SIMBA_HOME: V3 = [-0.4, 0.013, 0.2];
+const SIMBA_ENTRY: V3 = [SIMBA_HOME[0] - SIMBA_HOME[2] + H + 0.2, -0.18, H + 0.2];
+const SIMBA_TALL = 0.25; // how tall he stands on screen, in room units (measured from a render)
 
-// Where Simba's leap ended on screen, as a spot just outside the floor's front edge below it.
-// Screen x tracks x - z (the camera looks down the diagonal), centred on the room, at FitZoom's scale.
-function entryAt(clientX: number, el: HTMLElement | null): V3 {
-  if (!el) return SIMBA_ENTRY;
-  const r = el.getBoundingClientRect();
-  const zoom = Math.min(r.width / 4.0, r.height / 3.45);
-  const s = THREE.MathUtils.clamp(((clientX - r.left - r.width / 2) / zoom) * Math.SQRT2, -2.6, 2.6);
-  // The left front edge is z = H, the right one x = H; both keep x - z = s.
-  return s < 0 ? [s + H, -0.18, H + 0.2] : [H + 0.2, -0.18, H - s];
+// Tells the contact card where Simba's leap lands: his way in, in px on this canvas, and his height there.
+// After FitZoom, so the zoom is current.
+function Door() {
+  const { camera, size, gl } = useThree();
+  useEffect(() => {
+    camera.updateMatrixWorld();
+    const p = new THREE.Vector3(...SIMBA_ENTRY).project(camera);
+    const detail = { el: gl.domElement, x: ((p.x + 1) / 2) * size.width, y: ((1 - p.y) / 2) * size.height, h: SIMBA_TALL * camera.zoom };
+    window.dispatchEvent(new CustomEvent("simba-door", { detail }));
+  }, [camera, size, gl]);
+  return null;
 }
 // The whole work corner (desk, chair, prints, clock, Cream) slides along the back wall by this much,
 // so it sits in the middle of the room instead of crowding the plant.
@@ -838,7 +842,6 @@ function Scene({
   chaos,
   simba,
   simbaFuss,
-  simbaFrom,
   still,
   onHover,
   onPick,
@@ -848,7 +851,6 @@ function Scene({
   chaos: number;
   simba: boolean;
   simbaFuss: number;
-  simbaFrom: V3;
   still: boolean;
   onHover: (v: Hotspot | null) => void;
   onPick: (v: Hotspot) => void;
@@ -885,7 +887,7 @@ function Scene({
 
       {/* Simba: comes in from the contact card. Click him and he complains about it. */}
       <group {...hover("simba", onHover)} onClick={stop(() => onPick("simba"))}>
-        <Cat coat={COATS.simba} home={SIMBA_HOME} homeYaw={0.9} scale={1.15} fuss={simbaFuss} still={still} entry={simbaFrom} inside={simba} />
+        <Cat coat={COATS.simba} home={SIMBA_HOME} homeYaw={0.9} scale={1.15} fuss={simbaFuss} still={still} entry={SIMBA_ENTRY} inside={simba} />
       </group>
 
       <Model name="pillowBlue" p={[-1.0, 0, 0.82]} r={0.5} />
@@ -915,23 +917,21 @@ function Ready({ onReady }: { onReady: () => void }) {
 export default function Room({
   lampOn,
   chaos,
-  simbaX,
+  simba,
   simbaFuss,
   onHover,
   onPick,
 }: {
   lampOn: boolean;
   chaos: number;
-  /** Where Simba's leap out of the contact card ended (clientX), once he's left it. */
-  simbaX: number | null;
+  /** Simba has leapt out of the contact card into the room. */
+  simba: boolean;
   simbaFuss: number;
   onHover: (v: Hotspot | null) => void;
   onPick: (v: Hotspot) => void;
 }) {
   const wrap = useRef<HTMLDivElement>(null);
   const inView = useInView3D(wrap, "0px");
-  const simba = simbaX !== null;
-  const simbaFrom = useMemo(() => (simbaX === null ? SIMBA_ENTRY : entryAt(simbaX, wrap.current)), [simbaX]);
   const still = !!useReducedMotion();
   const { resolvedTheme } = useTheme();
   const [h, setH] = useState<Hour>(NIGHT);
@@ -969,8 +969,9 @@ export default function Room({
         <color attach="background" args={[(h === NIGHT ? dark : light).hex("paper")]} />
         <Lights h={h} on={lampOn} still={still} />
         <FitZoom />
+        <Door />
         <Suspense fallback={null}>
-          <Scene h={h} lampOn={lampOn} chaos={chaos} simba={simba} simbaFuss={simbaFuss} simbaFrom={simbaFrom} still={still} onHover={onHover} onPick={onPick} />
+          <Scene h={h} lampOn={lampOn} chaos={chaos} simba={simba} simbaFuss={simbaFuss} still={still} onHover={onHover} onPick={onPick} />
           <Ready onReady={() => setReady(true)} />
         </Suspense>
         {/* The finish: the lamp and screens glow, then the pixel-art pass inks the outlines. */}

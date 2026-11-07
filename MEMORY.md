@@ -127,6 +127,9 @@ intake answers in `ART-DIRECTION.md`. The open work is in `TASK.md`.
 - **Phase 6:** the studio as one room, plus the Next 15, React 19 and R3F 9 upgrade.
 - **Phase 7 is still owed:** the full security audit and a frontend critique pass. See `TASK.md`.
 
+- **iPhone fixes (later on 7 Nov).** The landing headline no longer blinks blue as it assembles and crumbles. Its dust is each letter's own colour, so only "actually" is blue (`useDust` takes `null` for the blue copy; How I build and the curtain keep their blink). Gallery on iPhone 15: a theme switch showed every card's back, because Safari's view transition flattens 3D and ignores `backface-visibility`. Now a face-up card drops its back once the deal lands, and a clicked card counts as turned only when its flip ends. The deal lagged, so the per-frame airborne `box-shadow` is gone (the resting shadow stays) and only cards landing on screen, plus a 20% margin, are thrown. That's about 20 of 60 on a phone. In throttled Chromium, slow frames during the deal went from about 23 to about 4. Not yet checked on a real iPhone.
+- **Gotcha.** Sevith runs `next dev` on port 3001 (3000 is another project). A second dev server for this repo shares `.next` and makes routes 404, so test against 3001.
+
 ## Things to remember
 
 - Sevith's likeness for the 3D figure: big messy black hair, full beard, no glasses, black tee, indigo jeans, tattoo on the right forearm.

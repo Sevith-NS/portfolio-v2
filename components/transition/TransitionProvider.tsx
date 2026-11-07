@@ -147,7 +147,6 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
                 transition={{ delay: 0.3, duration: 0.3 }}
                 className="hidden font-mono text-[0.75rem] uppercase tracking-[0.18em] sm:block"
               >
-                Sevith Sadashiva
               </motion.p>
             </div>
           </motion.div>

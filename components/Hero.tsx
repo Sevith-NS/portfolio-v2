@@ -40,6 +40,8 @@ function Letters({ text }: { text: string }) {
 // Phones: the longest line ("then I actually", 7.92em with the padding) spans the
 // screen with a little slack, capped where it meets the clamp at 768px.
 const HEADLINE = "px-[0.1em] font-wide text-[clamp(2.1rem,7.4vw,6.25rem)] max-md:text-[min(calc((100vw-2rem)/8.1),3.55rem)] font-semibold uppercase leading-[0.98] tracking-[-0.01em]";
+// The one blue word. The gallery's line borrows it, so it is set exactly like this one.
+export const ACTUALLY = "font-serif text-[1.08em] font-normal normal-case italic tracking-[-0.02em] text-warm";
 
 const lines = (
   <>
@@ -48,7 +50,7 @@ const lines = (
     </span>
     <span className="block">
       <Letters text="then I" />{" "}
-      <span className="font-serif text-[1.08em] font-normal normal-case italic tracking-[-0.02em] text-warm">actually</span>
+      <span className={ACTUALLY}>actually</span>
     </span>
     <span className="block">
       <Letters text="build it." />
@@ -148,7 +150,7 @@ const Hero = () => {
         </div>
 
         <motion.div style={reduce ? undefined : { opacity: fade }}>
-          <motion.p {...enter(0.55)} className="mt-9 max-w-[40ch] text-[1.0625rem] leading-relaxed text-ink-2 md:text-lg">
+          <motion.p {...enter(0.70)} className="mt-9 max-w-[40ch] text-[1.0625rem] leading-relaxed text-ink-2 md:text-lg">
             Product engineer. The interface, the product calls and the code. One person, no handoff.
           </motion.p>
 

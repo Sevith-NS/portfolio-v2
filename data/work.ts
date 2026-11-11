@@ -230,6 +230,71 @@ const cases: CaseStudy[] = [
     },
   },
   {
+    // Client work from the Ceyone Marketing internship. The process is confidential, so there's no
+    // "How I worked" and no board: the walkthrough carries it. Results come from the live site.
+    slug: "only-villas",
+    role: "Frontend build, UI, and the Google Maps and Places integration",
+    status: "Live client work",
+    problem: {
+      text: "Property portals are built for flats. A villa buyer scrolls past apartment listings, then still has to drive out to see *what's near the plot*. Only Villas wanted the opposite. *Villas only, verified*, and everything a buyer asks before a site visit on one page.",
+    },
+    process: [],
+    approach: [
+      { text: "*Map and list, side by side.* Every villa is a pin on Google Maps beside its card, with a satellite view and a full-screen map. Villas and whole projects get their own tabs." },
+      { text: "*Filters modeled on Airbnb's.* One panel for price range, bedrooms, built-up area, facing, villa type, and features like a private pool or a terrace garden." },
+      { text: "*A page per project.* Overview, master plan, villa plan, the full price breakdown, an *EMI calculator*, amenities, gallery and specifications, with a tab bar that follows you down." },
+      { text: "*What's nearby.* The *Places API* finds the bus stops, train stations, airport, hospitals, schools, ATMs, theatres and supermarkets around each project, sorted under Transit, Essentials and Utility, each with its distance." },
+      { text: "*A callback that's always one tap away*, with a phone OTP, so the sales team calls real numbers." },
+      { text: "The look takes its cues from *eXp Realty*. A serif display face, navy and white, and big photography. Built in *React, TypeScript, Tailwind CSS and Zustand*."},
+    ],
+    walkthrough: [
+      {
+        title: "Villas only, from the first screen",
+        text: "A full-bleed villa, then the promise in plain words. Every villa is verified and picked for you, and someone stays with you till the griha pravesha. Then the homebuyers get the last word.",
+        media: { kind: "video", src: "/work/onlyvillas/landing.mp4", poster: "/work/onlyvillas/landing-poster.webp", label: "The Only Villas landing page, from the hero to the verified villas promise and the homebuyer reviews" },
+      },
+      {
+        title: "Search on a map",
+        text: "Every villa is a pin beside its card. Zoom into a neighborhood, or switch to satellite and see the land around it.",
+        media: { kind: "video", src: "/work/onlyvillas/search.mp4", poster: "/work/onlyvillas/search-poster.webp", label: "Villa cards beside a Google Map of Bengaluru, zooming in, then switching to satellite" },
+      },
+      {
+        title: "Filters that think like a buyer",
+        text: "Price, bedrooms, built-up area, facing, villa type and features, all in one panel, the way Airbnb does it. Apply once and the list and the map update together.",
+        media: { kind: "video", src: "/work/onlyvillas/filters.mp4", poster: "/work/onlyvillas/filters-poster.webp", label: "Setting price, bedrooms, built-up area, facing, villa type and features in the filters panel, then the filtered results" },
+      },
+      {
+        title: "Every number on one page",
+        text: "Overview, master plan, villa plan and the full price, down to GST and car parking. Then an EMI calculator, so the monthly number is never a surprise.",
+        media: { kind: "video", src: "/work/onlyvillas/project.mp4", poster: "/work/onlyvillas/project-poster.webp", label: "A project page scrolling through the overview, master plan, villa plan, pricing and EMI calculator" },
+      },
+      {
+        title: "What's around it",
+        text: "The coolest part. Pick Transit, Essentials or Utility and the map lights up with bus stops, the airport, hospitals, theatres and supermarkets, each with how far it is.",
+        media: { kind: "video", src: "/work/onlyvillas/nearby.mp4", poster: "/work/onlyvillas/nearby-poster.webp", label: "The location map switching between bus stations, the airport, hospitals, theatres and supermarkets near a project" },
+      },
+    ],
+    insights: [],
+    decisions: [
+      { text: "*Map and list together*, never a map mode you switch into. A villa's price means little until you see where it is." },
+      { text: "*Filters in one panel* instead of a sidebar of dropdowns. Set everything, apply once." },
+      { text: "*Distances, not just pins.* Every nearby place says how far it is, sorted by what a buyer asks first." },
+    ],
+    wins: [
+      { text: "*The nearby places map.* Turning a pin into an answer to \"how far is the airport\" was the coolest thing I built there." },
+      { text: "Built from *reusable components*, which cut development time by 10%." },
+    ],
+    misses: [
+      { text: "*Type and structure.* I'd pick a better font, add smooth scroll, and tighten the page structure. Then apply proper design principles to the landing page, the nav and every page after it. The features held up better than the polish." },
+    ],
+    outcome: {
+      text: "Live at onlyvillas.in, listing *183 villas across 10 projects* in Bengaluru, with *user engagement up 30%* after rounds of UI and UX changes.",
+    },
+    why: {
+      text: "Read the homebuyer reviews on the site. *8 of the 10* talk about location, from the main road and the bus stop to the highway and the lake. Buyers judge a villa by what's around it, and that's the question every project page answers.",
+    },
+  },
+  {
     slug: "esdeekid",
     role: "Concept, art direction, motion and frontend build",
     status: "Fan concept",

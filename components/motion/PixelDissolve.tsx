@@ -24,12 +24,12 @@ function applyClip(el: HTMLElement, grid: Grid, open: (d: number) => boolean) {
 // own colour in the current theme, and like the curtain each bit of letter shows
 // blue for a beat as it lands and before it breaks off (a blue copy, masked).
 // Without a blue copy (`blue` null) the letters keep their own colour throughout.
-const ASSEMBLE = 1800; // ms from the first speck setting off to the last landing
+const ASSEMBLE = 2000; // ms from the first speck setting off to the last landing
 const LETTER = 0.3; // share of a sweep one letter takes
 const FLY = 0.25; // share of a sweep a speck spends in the air
 const BLUE = 0.1; // share of a sweep a bit of letter stays blue
 const DRIFT = 110; // px a speck travels, at most
-const OUT = [0.06, 0.55]; // the hero's scroll progress over which it crumbles
+const OUT = [0.35, 0.75]; // the hero's scroll progress over which it crumbles
 
 type Speck = { x: number; y: number; d: number; ix: number; iy: number; ox: number; oy: number; src: number };
 

@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { useReducedMotion } from "framer-motion";
+import { useMotionValue, useReducedMotion } from "framer-motion";
 import { X } from "@phosphor-icons/react";
 import { usePageTransition } from "@/components/transition/TransitionProvider";
+import { useDust } from "@/components/motion/PixelDissolve";
+import { ACTUALLY } from "@/components/Hero";
 
 type Photo = { src: string; thumb: string; alt: string; w: number; h: number };
 type View = { w: number; h: number; tw: number; cw: number; ch: number };
@@ -39,8 +41,42 @@ const TILT = 11; // most degrees a card rests at, either way; spread evenly, so 
 const DOWN = 0.07; // share of cards that land face down
 const DEALT = 0.2; // share of the screen past each edge where cards are still dealt
 const FACE = "perspective(1000px) rotateY(0deg)", BACK = "perspective(1000px) rotateY(180deg)";
+// The page's one line, the landing headline's other half in its type. Once the deck is out it
+// gathers from dust in a clearing left for it in the middle of the table, and drags with the photos.
+const SAY = 1100; // ms the line takes to gather
 
 const mod = (a: number, n: number) => ((a % n) + n) % n;
+
+// The landing headline's type at a size that sits among the photos.
+const SMALL = "px-[0.1em] font-wide text-[clamp(1.5rem,3.6vw,3.25rem)] font-semibold uppercase leading-[0.98] tracking-[-0.01em]";
+const WIDE = { fontVariationSettings: '"wdth" 115' };
+// Typed in capitals, not just styled so: the dust is cut from the letters as written.
+const GRASS = (
+  <>
+    <span className="block">BUILT ALL WEEK.</span>
+    <span className="block">
+      THEN I <span className={ACTUALLY}>actually</span>
+    </span>
+    <span className="block">TOUCHED GRASS.</span>
+  </>
+);
+
+// The line, gathering from dust once, on mount. `out` stays 0, so it never crumbles.
+function Line() {
+  const text = useRef<HTMLParagraphElement>(null);
+  const dust = useRef<HTMLCanvasElement>(null);
+  const out = useMotionValue(0);
+  useDust(text, null, dust, out, SAY);
+  return (
+    <div className="relative">
+      <p ref={text} style={WIDE} className={`${SMALL} text-ink [clip-path:inset(50%)] motion-reduce:[clip-path:none]`}>
+        <span className="sr-only">Built all week. Then I actually touched grass.</span>
+        <span aria-hidden>{GRASS}</span>
+      </p>
+      <canvas ref={dust} aria-hidden className="pointer-events-none absolute z-10" />
+    </div>
+  );
+}
 
 // A steady random number in [0, 1) for spot (c, r); k picks which one.
 function noise(c: number, r: number, k: number) {
@@ -56,6 +92,8 @@ function measure(): View {
   return { w, h, tw, cw: spot, ch: spot };
 }
 
+// While the table moves it blurs along the way it is going, its colours parting a little at
+// the edges, like glass; at rest it is sharp.
 export default function Gallery({ photos }: { photos: Photo[] }) {
   const n = photos.length;
   const reduce = useReducedMotion();
@@ -68,11 +106,15 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
   // (the theme switch) flattens 3D and ignores backface-visibility, so a back would cover the photo.
   const [dealt, setDealt] = useState(false);
   const plane = useRef<HTMLElement>(null);
+  const line = useRef<HTMLDivElement>(null); // the line on the table
+  const [hole, setHole] = useState<{ w: number; h: number } | null>(null); // its size, kept clear of photos
+  const blur = useRef<SVGFEGaussianBlurElement>(null), red = useRef<SVGFEOffsetElement>(null), blue = useRef<SVGFEOffsetElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const tiles = useRef(new Map<string, Tile>());
   // Where the plane is and where it is heading, for the frame loop; never rendered.
   // `deal`: -1 while the photos wait in the pile, the start time while they fly, 0 once landed.
-  const at = useRef({ x: 0, y: 0, tx: 0, ty: 0, vx: 0, vy: 0, drag: false, moved: false, raf: 0, c: NaN, r: NaN, view: null as View | null, deal: -1 });
+  // `px`, `py`: where it was last frame, for the glass.
+  const at = useRef({ x: 0, y: 0, tx: 0, ty: 0, vx: 0, vy: 0, px: 0, py: 0, drag: false, moved: false, raf: 0, c: NaN, r: NaN, view: null as View | null, deal: -1, hole: null as { w: number; h: number } | null });
 
   // Every tile's place on the bent plane, and a re-render when new cells come in.
   const place = useCallback(() => {
@@ -106,6 +148,8 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
       const nx = (left + t.w / 2 - v.w / 2) / R, ny = (top + t.h / 2 - v.h / 2) / R;
       t.el.style.transform = `translate3d(${left}px,${top}px,${-SINK * (nx * nx + ny * ny)}px) rotateY(${nx * BEND}deg) rotateX(${-ny * BEND}deg) rotate(${turn}deg) scale(${lift})`;
     });
+    // The line sits where the middle of the screen was at the start, flat on the table.
+    if (line.current && a.hole) line.current.style.transform = `translate3d(${v.cw / 2 + a.x - a.hole.w / 2}px,${v.ch / 2 + a.y - a.hole.h / 2}px,0)`;
     if (a.deal > 0 && now - a.deal > DEAL + THROW) {
       a.deal = 0;
       setDealt(true);
@@ -132,6 +176,20 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
       const k = reduce ? 1 : EASE;
       a.x += (a.tx - a.x) * k;
       a.y += (a.ty - a.y) * k;
+      if (plane.current && blur.current && red.current && blue.current) {
+        const sx = a.x - a.px, sy = a.y - a.py, on = Math.hypot(sx, sy) > 0.5;
+        const part = (d: number) => String(Math.max(-8, Math.min(8, d * 0.2)));
+        a.px = a.x;
+        a.py = a.y;
+        if (on) {
+          blur.current.setAttribute("stdDeviation", `${Math.min(14, Math.abs(sx) * 0.35)} ${Math.min(14, Math.abs(sy) * 0.35)}`);
+          red.current.setAttribute("dx", part(-sx));
+          red.current.setAttribute("dy", part(-sy));
+          blue.current.setAttribute("dx", part(sx));
+          blue.current.setAttribute("dy", part(sy));
+        }
+        plane.current.style.filter = on ? "url(#gallery-glass)" : "";
+      }
       place();
       const left = Math.abs(a.tx - a.x) + Math.abs(a.ty - a.y) + Math.abs(a.vx) + Math.abs(a.vy);
       a.raf = a.drag || left > 0.1 ? requestAnimationFrame(tick) : 0;
@@ -139,7 +197,19 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
     a.raf = requestAnimationFrame(tick);
   }, [place, reduce]);
 
-  useLayoutEffect(() => place(), [view, first, place]);
+  useLayoutEffect(() => place(), [view, first, place, hole]);
+
+  // The line's size, re-read when its font arrives or the screen changes.
+  useEffect(() => {
+    const el = line.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      at.current.hole = { w: el.offsetWidth, h: el.offsetHeight };
+      setHole(at.current.hole);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // Deal once the photos are on screen and the page curtain has lifted off them.
   useEffect(() => {
@@ -173,8 +243,8 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
     if (!a.view) {
       // Start with the first photo in the middle of the screen.
       a.view = measure();
-      a.x = a.tx = (a.view.w - a.view.cw) / 2;
-      a.y = a.ty = (a.view.h - a.view.ch) / 2;
+      a.x = a.tx = a.px = (a.view.w - a.view.cw) / 2;
+      a.y = a.ty = a.py = (a.view.h - a.view.ch) / 2;
       setView(a.view);
     }
 
@@ -264,6 +334,8 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
         const w = Math.round(side * stretch), h = Math.round(side / stretch);
         const x = (c + 0.5 + (noise(c, r, 1) - 0.5) * 2 * SCATTER) * view.cw - w / 2;
         const y = (r + 0.5 + (c & 1) / 2 + (noise(c, r, 2) - 0.5) * 2 * SCATTER) * view.ch - h / 2;
+        // No photo in the line's clearing, with a margin for the cards' lean.
+        if (hole && Math.abs(x + w / 2 - view.cw / 2) < (w + hole.w) / 2 + 28 && Math.abs(y + h / 2 - view.ch / 2) < (h + hole.h) / 2 + 28) continue;
         // Each photo is tabbable and announced once; its repeats are only seen.
         const again = seen.has(i);
         seen.add(i);
@@ -341,8 +413,32 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
         className="fixed inset-0 touch-none select-none overflow-clip [perspective:1100px]"
       >
         {cells}
+        <div ref={line} className="pointer-events-none absolute left-0 top-0 z-[150] text-center">
+          {/* Holds the line's room from the start; the line itself gathers once the deck is out. */}
+          <p aria-hidden style={WIDE} className={`${SMALL} invisible`}>
+            {GRASS}
+          </p>
+          {dealt && (
+            <div className="absolute inset-0">
+              <Line />
+            </div>
+          )}
+        </div>
       </section>
-      
+      {/* The glass: the table blurred along its way, its red and blue parted to either side. */}
+      <svg aria-hidden className="absolute size-0">
+        <filter id="gallery-glass" x="-10%" y="-10%" width="120%" height="120%" colorInterpolationFilters="sRGB">
+          <feGaussianBlur ref={blur} in="SourceGraphic" stdDeviation="0" result="b" />
+          <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r" />
+          <feOffset ref={red} in="r" result="r2" />
+          <feColorMatrix in="b" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g" />
+          <feColorMatrix in="b" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="bl" />
+          <feOffset ref={blue} in="bl" result="b2" />
+          <feBlend in="r2" in2="g" mode="screen" result="rg" />
+          <feBlend in="rg" in2="b2" mode="screen" />
+        </filter>
+      </svg>
+
       {/* A photo opened full size, in a native <dialog> like ZoomImage's. */}
       <dialog
         ref={dialog}

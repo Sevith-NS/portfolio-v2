@@ -20,7 +20,7 @@ Legend: **[S]** needs something from Sevith first.
 
 ## 1. First impression ("WOW, I want to build sites like him")
 
-- [ ] **Loading screen** in the spirit of pamidordesign.co. Done when it shows once per visit, takes under 1.5s, and is skipped under reduced motion.
+- [x] **Loading screen.** The favicon mark builds with a counter, once per visit, about 1.3s, skipped under reduced motion (2026-11-12).
 - [ ] **Hero says what I offer and my name** in under 5 seconds of reading. Done when a non-technical friend can repeat it back.
 - [ ] **Explain "product engineer" by showing it,** like "product designer who engineers". Done when the hero line needs no jargon.
 - [ ] **Numbers as a visual feature.** Pick 3 real numbers (for example +30% engagement, 13 strategies, +5% first month). Done when they appear large on the home page.
@@ -57,7 +57,7 @@ Legend: **[S]** needs something from Sevith first.
 
 ## 6. Type and colour follow-ups
 
-- [ ] **Decide on Bodoni.** It is now only the logo and three or four big moments. Option A: keep. Option B: drop it and go three families. Done when Sevith picks one.
+- [ ] **Decide on Bodoni.** It is the nav logo, the italic "actually" (hero and gallery line) and the studio poster. A same-font "actually" was tried and rejected on 2026-11-12, so Option A (keep) stands unless Sevith says otherwise.
 - [x] **Handwriting removed** everywhere; motto added to /story.
 - [ ] **Paper texture.** The grain is on. Done when light mode feels like paper, not screen, without hurting contrast.
 - [ ] **Dark mode lapis check.** Done when `#2F5BFF` and `#809BFF` have been looked at on every page and small lapis text is readable.

@@ -5,13 +5,15 @@ import { Form } from "./ui/Form";
 import { CopyEmail } from "./ui/CopyEmail";
 import { GlassPaint } from "./ui/GlassPaint";
 import { RiseSheet } from "./motion/RiseSheet";
+import { Rise } from "./motion/Rise";
 import { PixelCats } from "./PixelCats";
 import { CreamHint } from "./CreamHint";
 
 // "sevith." is 2.49em wide in Neue Montreal at this tracking, so 36vw spans ~90% of the screen; capped for big monitors.
 const wordmark = "select-none whitespace-nowrap text-center font-mark text-[min(36vw,40rem)] font-medium leading-[0.86] tracking-[-0.045em]";
 
-const Footer = () => {
+// heading: false where the page has just said "Let's build something." itself (the landing's closing scene).
+const Footer = ({ heading = true }: { heading?: boolean }) => {
   return (
     // The wrap rises over the page as its own sheet (see RiseSheet).
     <footer id="contact" className="mt-16 overflow-x-clip md:mt-24">
@@ -23,9 +25,11 @@ const Footer = () => {
       <div className="grid gap-12 md:grid-cols-12 md:gap-8">
         <div className="md:col-span-5">
           <p className="font-mono text-[0.75rem] uppercase tracking-[0.18em] text-accent">Say hi</p>
-          <h2 className="mt-5 font-wide text-[clamp(2rem,4.6vw,3.6rem)] font-semibold uppercase leading-[1] tracking-[-0.01em] text-ink">
-            Let&apos;s build something.
-          </h2>
+          {heading && (
+            <h2 className="mt-5 font-wide text-[clamp(2rem,4.6vw,3.6rem)] font-semibold uppercase leading-[1] tracking-[-0.01em] text-ink">
+              <Rise lines={["Let's build something."]} />
+            </h2>
+          )}
           <p className="mt-6 max-w-[42ch] text-lg leading-relaxed text-ink-2">
             Got a product that needs designing, building, or both? Freelance or full-time, tell me what you&apos;re making.
           </p>

@@ -247,3 +247,62 @@ body::after {
 .deck-drift-a { animation: deck-drift 11s ease-in-out infinite alternate; }
 .deck-drift-b { animation: deck-drift 13s ease-in-out infinite alternate-reverse; }
 .deck-drift-c { animation: deck-drift 9s ease-in-out infinite alternate; }
+
+/* Opening a project: everything but the pictures lets go first, then the page pushes
+   into the one that was clicked. Coming back, they return as it settles
+   (TransitionProvider sets and clears data-going). */
+main > :is(section, div),
+[data-quiet] {
+  transition: opacity 0.4s cubic-bezier(0.35, 0, 0, 1);
+}
+html[data-going] main > :is(section, div):not(#projects),
+html[data-going] #projects [data-quiet] {
+  opacity: 0;
+}
+
+/* The loader plays once per visit (components/transition/Loader.tsx). Its blocks pop in
+   one after another and its counter runs to 100, all in CSS, so it starts with the
+   first paint. */
+html[data-seen] [data-loader] {
+  display: none;
+}
+@property --load {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+@counter-style pad3 {
+  system: numeric;
+  symbols: "0" "1" "2" "3" "4" "5" "6" "7" "8" "9";
+  pad: 3 "0";
+}
+@keyframes load-block {
+  from { opacity: 0; transform: scale(0.3); }
+}
+@keyframes load-count {
+  to { --load: 100; }
+}
+[data-loader] rect {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: load-block 0.4s cubic-bezier(0.35, 0, 0, 1) both;
+}
+[data-loader] [data-count] {
+  counter-reset: load var(--load);
+  animation: load-count 1.15s cubic-bezier(0.35, 0, 0, 1) forwards;
+}
+[data-loader] [data-count]::after {
+  content: counter(load, pad3);
+}
+
+/* The closing scene's card (components/Space.tsx): cut out of the page beside a few
+   words, and opening to the whole screen as --open goes from 0 to 1. */
+.space-card {
+  --shut: calc(1 - var(--open, 0));
+  clip-path: inset(calc(var(--shut) * 46%) calc(var(--shut) * 4%) calc(var(--shut) * 5%) calc(var(--shut) * 4%) round calc(var(--shut) * 22px));
+}
+@media (min-width: 768px) {
+  .space-card {
+    clip-path: inset(calc(var(--shut) * 15%) calc(var(--shut) * 50%) calc(var(--shut) * 15%) calc(var(--shut) * 3%) round calc(var(--shut) * 28px));
+  }
+}

@@ -97,7 +97,6 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
         <div className="flex items-center gap-2">
           <TransitionLink
             href={home ? "#top" : "/"}
-            label="Home"
             className={cn(pill, "px-4 font-serif text-[1.15rem] tracking-[-0.02em] text-ink")}
           >
             sevith<span className="text-warm">.</span>
@@ -120,7 +119,6 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
                   )}
                   <TransitionLink
                     href={hrefFor(item.link)}
-                    label={item.name}
                     aria-current={on ? "page" : undefined}
                     className={cn(
                       "relative flex h-8 items-center gap-1.5 rounded-full px-3 text-[0.875rem] font-medium transition-colors",
@@ -179,7 +177,6 @@ export const FloatingNav = ({ navItems }: { navItems: { name: string; link: stri
                 <motion.li key={item.link} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.03 * i }}>
                   <TransitionLink
                     href={hrefFor(item.link)}
-                    label={item.name}
                     onClick={() => setOpen(false)}
                     className={cn(
                       "flex items-center gap-3 rounded-2xl px-4 py-3.5 font-wide text-lg font-semibold uppercase",

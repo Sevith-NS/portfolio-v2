@@ -5,6 +5,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion
 import { ArrowDown, ArrowRight, EnvelopeSimple } from "@phosphor-icons/react";
 import { email } from "@/data";
 import { useDust } from "./motion/PixelDissolve";
+import { usePageTransition } from "./transition/TransitionProvider";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -73,7 +74,9 @@ const Hero = () => {
   const headline = useRef<HTMLHeadingElement>(null);
   const dust = useRef<HTMLCanvasElement>(null);
   // No blue blink here: only "actually" is blue, in its own colour.
-  useDust(headline, null, dust, scrollYProgress);
+  // Nothing starts under the loader or a page change.
+  const { covered } = usePageTransition();
+  useDust(headline, null, dust, scrollYProgress, undefined, covered);
   useEffect(() => {
     const h = headline.current;
     if (!h || reduce) return;
@@ -119,7 +122,7 @@ const Hero = () => {
       ? {}
       : {
           initial: { opacity: 0, y: 14, filter: "blur(8px)" },
-          animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+          animate: covered ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" },
           transition: { duration: 1.1, delay, ease },
         };
 

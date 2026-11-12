@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import sharp from "sharp"; // ships with Next
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { navItems, projects } from "@/data";
 import { getCase, type Block, type Step } from "@/data/work";
 import { stack, webp } from "@/lib/work";
 import { cn } from "@/lib/utils";
+import { size } from "@/lib/size";
 import { FloatingNav } from "@/components/ui/FloatingNav";
 import { TransitionLink } from "@/components/transition/TransitionLink";
 import { Reveal } from "@/components/motion/Reveal";
+import { Rise } from "@/components/motion/Rise";
 import { Copy } from "@/components/ui/Copy";
 import { BrowserFrame } from "@/components/ui/BrowserFrame";
 import { DemoVideo } from "@/components/ui/DemoVideo";
 import { ZoomImage } from "@/components/ui/ZoomImage";
 import { dev, live, Prompt } from "@/components/ui/Prompt";
 import Footer from "@/components/Footer";
+import { NextProject } from "@/components/NextProject";
 
 export const dynamicParams = false;
 export const generateStaticParams = () => projects.map((p) => ({ slug: p.slug }));
@@ -31,14 +31,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const kicker = "font-mono text-[0.75rem] uppercase tracking-[0.18em] text-accent";
-
-// A picture's own size, read at build time. Without it the lazy process frames load in at full
-// height as you scroll, the page grows by thousands of pixels, and a jump link stops short.
-// From a buffer: a file sharp keeps open blocks re-exports on Windows.
-const size = async (src: string) => {
-  const { width, height } = await sharp(readFileSync(path.join(process.cwd(), "public", src))).metadata();
-  return { w: width, h: height };
-};
 
 // Drafted, unconfirmed copy is tagged in development only, so it can be reviewed before shipping.
 const Text = ({ b, className }: { b: Block; className?: string }) => (
@@ -126,7 +118,7 @@ const Steps = ({ label, title, id, steps, url }: { label: string; title: string;
     <section className="mx-auto max-w-page px-4 py-20 md:px-8 md:py-28">
       <Reveal className="mx-auto max-w-[44rem] text-center">
         <p className={kicker}>{label}</p>
-        <h2 id={id} tabIndex={-1} className={`${JUMP} mx-auto mt-5 font-wide text-[clamp(2rem,5vw,4rem)] font-semibold uppercase leading-[1] tracking-[-0.01em] text-ink`}>{title}</h2>
+        <h2 id={id} tabIndex={-1} className={`${JUMP} mx-auto mt-5 font-wide text-[clamp(2rem,5vw,4rem)] font-semibold uppercase leading-[1] tracking-[-0.01em] text-ink`}><Rise lines={[title]} /></h2>
       </Reveal>
       <ol className="mt-16 space-y-24 md:mt-24 md:space-y-32">
         {steps.map((s, i) => (
@@ -166,13 +158,13 @@ export default async function CasePage({ params }: Props) {
       <section className="relative isolate overflow-x-clip">
 
         <div className="mx-auto max-w-[64rem] px-4 pt-24 text-center md:px-8 md:pt-28">
-          <TransitionLink href="/#projects" label="Work" className="inline-flex items-center gap-2 font-mono text-[0.75rem] uppercase tracking-[0.14em] text-ink-3 hover:text-ink">
+          <TransitionLink href="/#projects" className="inline-flex items-center gap-2 font-mono text-[0.75rem] uppercase tracking-[0.14em] text-ink-3 hover:text-ink">
             <ArrowLeft size={14} /> All work
           </TransitionLink>
           <p className={cn(kicker, "mt-6")}>
             Case study {String(index + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
           </p>
-          <h1 className="mt-4 font-wide text-[clamp(2.4rem,6.5vw,5.25rem)] font-semibold uppercase leading-[0.95] tracking-[-0.01em] text-ink">{p.title}</h1>
+          <h1 className="mt-4 font-wide text-[clamp(2.4rem,6.5vw,5.25rem)] font-semibold uppercase leading-[0.95] tracking-[-0.01em] text-ink"><Rise lines={[p.title]} /></h1>
 
           {/* The work first: the product right under its name, then one line on what it is. */}
           <Reveal className="mx-auto mt-8 max-w-[60rem]">
@@ -304,23 +296,10 @@ export default async function CasePage({ params }: Props) {
           )}
         </Row>
 
-        <Reveal>
-          <TransitionLink
-            href={`/work/${next.slug}`}
-            label={next.title}
-            data-cursor="Next case"
-            className="group relative isolate mt-10 block overflow-hidden rounded-[1.75rem] border border-rule bg-sheet p-8 md:p-14"
-          >
-            <p className="font-mono text-[0.75rem] uppercase tracking-[0.18em] text-accent">Next case study</p>
-            <p className="mt-4 flex items-center gap-4 font-wide text-4xl font-semibold uppercase tracking-[-0.01em] text-ink md:text-6xl">
-              {next.title}
-              <ArrowRight className="size-8 shrink-0 transition-transform duration-300 group-hover:translate-x-2 md:size-11" />
-            </p>
-          </TransitionLink>
-        </Reveal>
       </article>
 
       <Footer />
+      <NextProject slug={next.slug} title={next.title} />
     </main>
   );
 }

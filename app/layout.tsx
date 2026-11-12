@@ -73,6 +73,8 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} ${display.variable} ${pixel.variable} ${mark.variable}`}
     >
       <body>
+        {/* Later pages of a visit, and reduced motion, skip the loader: marked before the first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: `try{if(sessionStorage.getItem("seen")||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.dataset.seen=""}catch(e){}` }} />
         {/* Internal design notes: kept out of production HTML. */}
         {process.env.NODE_ENV === "development" && <div hidden dangerouslySetInnerHTML={{ __html: `<!--${contract}-->` }} />}
         <a

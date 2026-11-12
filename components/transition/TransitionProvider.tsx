@@ -4,47 +4,116 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "framer-motion";
 import { useLenis } from "lenis/react";
-import { DustReveal } from "@/components/motion/PixelDissolve";
+import { EASE } from "@/lib/utils";
+import { LOAD_MS, Loader } from "./Loader";
 
 type Phase = "idle" | "cover" | "reveal";
-// `covered`: the curtain is shut over the page, so an entrance should wait for it to lift.
-type Ctx = { navigate: (href: string, label?: string) => void; covered: boolean };
+// `covered`: the page is hidden (the loader, or the dip between pages), so an entrance should wait.
+// `navigate` takes the frame of a clicked project, if there is one, to push into.
+type Ctx = { navigate: (href: string, frame?: HTMLElement) => void; covered: boolean };
 
 const TransitionContext = createContext<Ctx>({ navigate: () => {}, covered: false });
 export const usePageTransition = () => useContext(TransitionContext);
 
-// Premium motion personality: one curve for the curtain, in and out.
-const CURTAIN = [0.76, 0, 0.24, 1] as const;
-const COVER_MS = 620;
-// The curtain stays shut at least this long, so the page name finishes
-// assembling from dust before it opens.
-const NAME_MS = 1100;
-const HOLD_MS = NAME_MS + 250;
+const DIP_MS = 450;
+// Opening a project, beat by beat as Lusion does it: the words let go (QUIET), the
+// section pushes toward you out of the clicked frame until its picture has gone past
+// the edges of the screen (PUSH), the page colour closes over the last of that, and
+// the project comes up out of it slowly (RISE). Coming back runs it the other way:
+// the work section starts pushed into that project's picture and pulls back (PULL),
+// and the words return once it has nearly settled.
+const QUIET_MS = 320;
+const PUSH_MS = 950;
+const RISE_MS = 900;
+const PULL_MS = 1150;
 const SAFETY_MS = 3500;
 
-// Page changes play like a film slate: a curtain closes, names the next scene, and opens.
+// Where the section holding `frame` sits when it is pushed all the way in: centred on
+// the frame, and past filling the screen, like a camera that has kept coming.
+function aim(frame: HTMLElement, sec: Element) {
+  const r = frame.getBoundingClientRect(), s = sec.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const fill = Math.max(window.innerWidth / r.width, window.innerHeight / r.height);
+  return {
+    origin: `${cx - s.left}px ${cy - s.top}px`,
+    near: `translate(${window.innerWidth / 2 - cx}px, ${window.innerHeight / 2 - cy}px) scale(${fill * 1.6})`,
+  };
+}
+const TIP = [{ transform: "rotate(0deg)" }, { transform: "rotate(-1.6deg)" }, { transform: "rotate(0deg)" }];
+
+// Send the section holding `frame` toward the viewer.
+function push(frame: HTMLElement) {
+  const sec = frame.closest<HTMLElement>("section");
+  if (!sec) return;
+  // CSS fades everything but the pictures while this is set (globals.css).
+  document.documentElement.dataset.going = "";
+  const { origin, near } = aim(frame, sec);
+  sec.style.transformOrigin = origin;
+  const timing = { duration: PUSH_MS, delay: QUIET_MS, fill: "forwards", easing: "cubic-bezier(0.7, 0, 0.3, 1)" } as const;
+  sec.animate([{ transform: "none" }, { transform: near }], timing);
+  // It tips a little on the way, then squares up.
+  sec.animate(TIP, { ...timing, composite: "add" });
+  // And loses focus as it gets too close.
+  frame.animate([{ filter: "blur(0px)" }, { filter: "blur(0px)", offset: 0.55 }, { filter: "blur(5px)" }], timing);
+}
+
+// The same, backwards: start pushed into `frame` and pull back to rest.
+function pull(frame: HTMLElement) {
+  const sec = frame.closest<HTMLElement>("section");
+  if (!sec) return;
+  const root = document.documentElement;
+  root.dataset.going = "";
+  const { origin, near } = aim(frame, sec);
+  sec.style.transformOrigin = origin;
+  const timing = { duration: PULL_MS, easing: "cubic-bezier(0.25, 0.6, 0, 1)" } as const;
+  sec.animate([{ transform: near }, { transform: "none" }], timing);
+  sec.animate(TIP, { ...timing, composite: "add" });
+  frame.animate([{ filter: "blur(5px)" }, { filter: "blur(0px)", offset: 0.45 }, { filter: "blur(0px)" }], timing);
+  window.setTimeout(() => delete root.dataset.going, PULL_MS * 0.55);
+}
+
+// Page changes dip to the page colour and back, like Lusion's. Opening a project
+// pushes into its picture first, and coming back pulls out of it.
 export function TransitionProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const reduce = useReducedMotion();
   const lenis = useLenis();
   const [phase, setPhase] = useState<Phase>("idle");
-  const [label, setLabel] = useState("");
-  // const [scene, setScene] = useState(1);
+  const [pushing, setPushing] = useState(false);
   const pending = useRef<string | null>(null);
   const pushTimer = useRef<number | undefined>(undefined);
   const safetyTimer = useRef<number | undefined>(undefined);
   const busy = useRef(false);
-  const coveredAt = useRef(0);
+  const last = useRef(pathname);
+
+  // The loader: once per visit. The script in app/layout.tsx marks later pages and
+  // reduced motion with data-seen before the first paint, and CSS hides it there.
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if ("seen" in document.documentElement.dataset) {
+      setLoading(false);
+      return;
+    }
+    // It has been playing since the first paint, so wait only for what is left of it.
+    const t = window.setTimeout(() => {
+      try {
+        sessionStorage.setItem("seen", "1");
+      } catch {} // private mode: it plays again next page, no harm
+      setLoading(false);
+    }, Math.max(0, LOAD_MS + 200 - performance.now()));
+    return () => window.clearTimeout(t);
+  }, []);
 
   const open = useCallback(() => {
     window.clearTimeout(safetyTimer.current);
     pending.current = null;
+    delete document.documentElement.dataset.going;
     setPhase("reveal");
   }, []);
 
   const navigate = useCallback(
-    (href: string, next = "") => {
+    (href: string, frame?: HTMLElement) => {
       const [path, hash] = href.split("#");
       const target = path || pathname;
       if (target === pathname) {
@@ -57,31 +126,42 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
         router.push(href);
         return;
       }
-      // One transition at a time: extra clicks while the curtain moves are ignored.
+      // One transition at a time: extra clicks while it plays are ignored.
       if (busy.current) return;
       busy.current = true;
       pending.current = target;
-      setLabel(next);
-      // setScene((s) => s + 1);
+      setPushing(!!frame);
+      if (frame) push(frame);
       setPhase("cover");
-      coveredAt.current = performance.now();
-      pushTimer.current = window.setTimeout(() => router.push(href), COVER_MS);
-      // Never leave the curtain closed, whatever happens to the navigation.
+      pushTimer.current = window.setTimeout(() => router.push(href), frame ? QUIET_MS + PUSH_MS : DIP_MS);
+      // Never leave the page covered, whatever happens to the navigation.
       safetyTimer.current = window.setTimeout(open, SAFETY_MS);
     },
     [lenis, open, pathname, reduce, router]
   );
 
-  // Open the curtain once the route we asked for has rendered.
+  // A new route has rendered. Lift the dip if we were waiting on it, a frame later so
+  // the page has painted. Back on the landing page from a project (by a link or the
+  // browser's back button), put that project's card mid-screen and pull out of it.
   useEffect(() => {
-    if (pending.current && pathname === pending.current) {
-      const left = HOLD_MS - (performance.now() - coveredAt.current);
-      const t = window.setTimeout(open, Math.max(120, left));
-      return () => window.clearTimeout(t);
-    }
-  }, [pathname, open]);
+    const from = last.current;
+    last.current = pathname;
+    const slug = !reduce && pathname === "/" && from.startsWith("/work/") ? from.slice(6) : null;
+    const waited = pending.current === pathname;
+    if (!waited && !slug) return;
+    const t = window.setTimeout(() => {
+      if (waited) open();
+      const frame = slug && document.querySelector<HTMLElement>(`#projects a[href="/work/${slug}"] [data-zoom]`);
+      if (!frame) return;
+      const offset = -(window.innerHeight - frame.offsetHeight) / 2;
+      if (lenis) lenis.scrollTo(frame, { immediate: true, offset });
+      else frame.scrollIntoView({ block: "center" });
+      pull(frame);
+    }, 80);
+    return () => window.clearTimeout(t);
+  }, [pathname, open, lenis, reduce]);
 
-  // Back/forward during the cover cancels the queued push and opens up.
+  // Back/forward during the dip cancels the queued push and lifts it.
   useEffect(() => {
     const onPop = () => {
       if (!busy.current) return;
@@ -101,8 +181,9 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   );
 
   return (
-    <TransitionContext.Provider value={{ navigate, covered: phase === "cover" }}>
+    <TransitionContext.Provider value={{ navigate, covered: phase === "cover" || loading }}>
       <MotionConfig reducedMotion="user">{children}</MotionConfig>
+      <AnimatePresence>{loading && <Loader key="loader" />}</AnimatePresence>
       <AnimatePresence
         onExitComplete={() => {
           busy.current = false;
@@ -111,45 +192,14 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
       >
         {phase === "cover" && (
           <motion.div
-            key="curtain"
+            key="dip"
             aria-hidden
-            // Between pages the next page's name settles in on the page colour,
-            // in the side's accent, so the type and its dust are one colour.
-            className="pointer-events-auto fixed inset-0 z-[100] flex items-end overflow-hidden bg-paper text-warm"
-            initial={{ clipPath: "inset(100% 0% 0% 0%)" }}
-            animate={{ clipPath: "inset(0% 0% 0% 0%)" }}
-            exit={{ clipPath: "inset(0% 0% 100% 0%)" }}
-            transition={{ duration: 0.62, ease: CURTAIN }}
-          >
-            {/* A soft glow of the accent rising from under the page name, like
-                light spilling in from the next room as it opens. */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ delay: 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_60%_at_22%_105%,rgb(var(--warm)/0.34),transparent_70%)] dark:bg-[radial-gradient(70%_60%_at_22%_105%,rgb(var(--warm)/0.38),transparent_70%)]"
-            />
-            <div className="relative mx-auto flex w-full max-w-page items-end justify-between gap-6 px-4 pb-10 md:px-8 md:pb-14">
-              {/* The next page's name assembles from dust, like the landing headline. */}
-              <DustReveal duration={NAME_MS}>
-                <motion.p
-                  exit={{ opacity: 0, y: -16 }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="font-wide text-5xl font-semibold uppercase leading-none tracking-[-0.01em] md:text-8xl"
-                >
-                  {label || "Sevith"}
-                </motion.p>
-              </DustReveal>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.7 }}
-                transition={{ delay: 0.3, duration: 0.3 }}
-                className="hidden font-mono text-[0.75rem] uppercase tracking-[0.18em] sm:block"
-              >
-              </motion.p>
-            </div>
-          </motion.div>
+            className="pointer-events-auto fixed inset-0 z-[100] bg-paper"
+            initial={{ opacity: 0 }}
+            // After a push, the colour closes over only the last of it.
+            animate={{ opacity: 1, transition: pushing ? { delay: (QUIET_MS + PUSH_MS - 380) / 1000, duration: 0.38, ease: "linear" } : { duration: DIP_MS / 1000, ease: EASE } }}
+            exit={{ opacity: 0, transition: { duration: (pushing ? RISE_MS : DIP_MS) / 1000, ease: EASE } }}
+          />
         )}
       </AnimatePresence>
     </TransitionContext.Provider>

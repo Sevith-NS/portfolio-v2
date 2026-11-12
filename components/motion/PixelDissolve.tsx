@@ -39,13 +39,14 @@ export function useDust(
   dust: RefObject<HTMLCanvasElement | null>,
   scroll: MotionValue<number>,
   assemble = ASSEMBLE,
+  wait = false, // hold the type hidden and don't start yet (the loader, or a page change, is over it)
 ) {
   const reduce = useReducedMotion();
 
   useLayoutEffect(() => {
     const el = text.current, lit = blue?.current, cv = dust.current;
     const ctx = cv?.getContext("2d");
-    if (!el || !cv || !ctx) return;
+    if (!el || !cv || !ctx || wait) return;
     const beat = lit ? BLUE : 0; // no blue copy: the ink shows the moment a speck lands
     if (reduce) {
       el.style.clipPath = "none";
@@ -202,7 +203,7 @@ export function useDust(
       off();
       window.removeEventListener("resize", onResize);
     };
-  }, [text, blue, dust, scroll, reduce, assemble]);
+  }, [text, blue, dust, scroll, reduce, assemble, wait]);
 }
 
 // The curtain's page name, assembled from dust like the landing headline. Move

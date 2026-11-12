@@ -17,9 +17,13 @@ intake answers in `ART-DIRECTION.md`. The open work is in `TASK.md`.
 | Light palette | Oat `#EFE9DE` page, black `#1A1612` text, lapis `#002DB4` as the only accent |
 | Dark palette | Navy `#081028` page, off-white text, near-black surfaces, lapis `#2F5BFF` fills, `#809BFF` small-text accent |
 | Colour source | `lib/theme.ts` only. Tailwind emits the CSS variables from it; canvas, WebGL and metadata call `light.hex()` / `dark.hex()`. No hex anywhere else (3D room materials and pixel cats excepted) |
-| Fonts | Four families: Archivo (wide caps), Geist Sans (body), Geist Mono (labels), Bodoni Moda (logo and a few big statements). No handwriting anywhere |
+| Fonts | Four families: Archivo (wide caps), Geist Sans (body), Geist Mono (labels), Bodoni Moda (the nav logo, the italic "actually" in the hero and the gallery line, the studio poster). A same-font "actually" was tried on 2026-11-12 and rejected. No handwriting anywhere |
 | Theme switch | A slow pixel scan that spreads out from the theme button, a quote, then a second scan from the same button clears it |
-| Page change | Curtain names the next page. Near-black in dark mode, oat with black type in light mode. No glow |
+| Page change | A 450ms dip to the page colour, no name. Opening a project copies Lusion: words fade, the work section pushes into the clicked frame, blur, page colour, slow rise. Coming back (link or browser back) runs it in reverse: the section starts pushed into that card and pulls out (`push` / `pull` in `TransitionProvider.tsx`) |
+| Work cards | A 2-column grid. Each frame is cut to its screenshot's exact size (read on the server, `lib/size.ts`), so nothing is cropped at rest. On hover the picture pushes in 6% and drifts, with a focus pull. Cards bend with scroll speed. Rejected on 2026-11-12: Blender desk scenes with clay cats, a scroll-drawn ribbon, a pixel space scene with floating cats |
+| Loader | Once per visit (`components/transition/Loader.tsx`): the favicon's blocky "s." builds block by block with a 000 to 100 counter, then the screen lifts. CSS-driven so it starts at first paint; skipped on later pages and under reduced motion (`data-seen`) |
+| Landing close | `components/Space.tsx` + `components/three/SpaceScene.tsx`: an astronaut modelled in Blender (`scripts/astronaut.py` writes `public/models/astronaut.glb`, Blender is at `D:/Blender`). A card opens to full screen, a line of type spreads past, a tunnel flight, the astronaut returns and waves under "Let's build something.", then the contact sheet rises over it. Timetable in `components/three/beats.ts` |
+| Case study end | "Keep scrolling for the next project" band with a bar that fills as you scroll past the bottom, then goes there (`components/NextProject.tsx`) |
 | Motto | "Gotta stack up the Gandhis for a Porsche 911 GT3 RS." on /story, under the sign-off |
 | Studio | One night-time room in 3D. Cream loafs on the desk and runs laps when clicked. Posters: Interstellar, Cars, Game of Thrones |
 | Footer | Pixel Simba and Cream on the contact card's edge, playing a five-scene loop |

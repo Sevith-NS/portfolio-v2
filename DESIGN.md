@@ -179,13 +179,13 @@ A product builder's sketchbook, bound in oat paper and lapis. The work reads lik
 
 The ground is warm oat paper (light, the default) or deep lapis-navy (dark), with a faint 24px ruling fixed behind the page that fades out toward the bottom. On that ground, a single lapis accent does all the pointing: primary actions, the headline decision of each role, the highlighter stroke, the active scene, and the film-slate curtain that closes over the page between routes. Projects sit on softly tinted plates, each its own quiet color from a seven-tint family, with the product screenshot floating up out of the plate.
 
-Motion is Premium and cinematic, not busy. Page changes play like a film slate: a lapis curtain wipes up, names the destination and a scene number, then wipes away on the same curve. Three signature 3D pieces (the hero monogram, the film reel, the studio room) carry the spectacle; everything else moves with restraint and stops entirely under reduced motion.
+Motion is smooth and connected, after lusion.co, not busy. Everything moves on one curve. Headings rise word by word out of a mask (the hero headline keeps its dust), project cards bend with the scroll and lie flat at rest, and page changes dip to the page colour and back. Opening a project pushes into its screenshot first. Three signature 3D pieces (the hero monogram, the film reel, the studio room) carry the spectacle; everything else moves with restraint and stops entirely under reduced motion.
 
 **Key Characteristics:**
 - Oat paper and lapis-navy grounds, one lapis accent, seven soft tints for project plates.
 - Bricolage Grotesque display, Geist body, Geist Mono notes, Nothing You Could Do for margin scribbles.
 - Hairline rules instead of cards for lists of facts; cards only where a thing is an object (form, working document, type specimen).
-- A film-slate lapis curtain between pages: clip-path wipe, 620ms, one curve in and out.
+- One motion curve, cubic-bezier(0.35, 0, 0, 1), for every reveal and page change. Dust and pixels belong to the pixel world only (studio, cats, theme switch).
 - Three 3D signature pieces in oat clay and lapis gloss, and no others.
 
 ## Colors
@@ -256,7 +256,7 @@ Flat by default, with depth reserved for things that float. Surfaces separate by
 - **Nav float** (`box-shadow: 0 8px 24px -12px rgb(22 27 45 / 0.22)`, with 12px backdrop blur): the floating nav pill; the mobile menu uses `0 16px 40px -20px rgb(22 27 45 / 0.35)`.
 
 ### Named Rules
-**The Three Pieces Rule.** 3D is used for the three signature pieces only: the hero "S" monogram (lapis clear-coat letter, oat clay forms, turns toward the cursor), the film reel (projects as frames on a turning film strip), and the studio room (isometric voxel room with shader-textured blocks and a lights switch, 10 scenes). Each pauses when off screen, caps DPR at 1.75, and respects reduced motion (no drift, no auto-advance, no pointer chase). No fourth 3D object.
+**The Three Pieces Rule.** 3D is used for the three signature pieces only: the hero "S" monogram (lapis clear-coat letter, oat clay forms, turns toward the cursor), the film reel (projects as frames on a turning film strip), and the studio room (isometric voxel room with shader-textured blocks and a lights switch, 10 scenes). Each pauses when off screen, caps DPR at 1.75, and respects reduced motion (no drift, no auto-advance, no pointer chase). No fourth 3D object. The landing page also closes on a fourth: the space scene (an astronaut built in Blender, `scripts/astronaut.py`), added on 2026-11-12 at Sevith's request.
 
 ## Shapes
 
@@ -289,10 +289,10 @@ Soft, generous corners that scale with the object: pills (9999px) for every butt
 ### Navigation
 - **Style:** a floating pill (max 52rem) 16px from the top: Sheet at 85% with blur, Rule hairline, wordmark "sevith." with a lapis period, 14px Geist links in Ink 2. The active link sits on a 10% lapis pill that glides between links. It hides on scroll down and returns on scroll up; on mobile a menu drops beneath as a 24px-radius Sheet panel with display-face links and a lapis dot for the active item.
 
-### Film-Slate Curtain (signature)
-Every internal navigation routes through a full-bleed lapis curtain: it wipes up from the bottom with `clip-path` (620ms, cubic-bezier(0.76, 0, 0.24, 1)), names the destination bottom-left in the Display face and "Scene NN" bottom-right in mono, then wipes off the top on the same curve once the route renders. One transition at a time; modifier clicks and reduced motion skip it.
+### Page change (signature)
+Every internal navigation fades to the page colour (450ms) and back once the route renders, with no name and no wipe. From a project card, as Lusion does it: the words fade, the work section pushes toward you out of the clicked frame with a slight tip, the picture blurs past the edges of the screen, the page colour closes over it, and the case study comes up slowly. Coming back runs the same thing in reverse. One transition at a time; modifier clicks and reduced motion skip it. Entrances on the new page wait for the dip to lift (`useArrived`).
 
-**The One Curtain Rule.** The motion personality is Premium, with one curtain curve: cubic-bezier(0.76, 0, 0.24, 1) at 620ms, used in and out. In-page reveals use a soft expo-out (cubic-bezier(0.16, 1, 0.3, 1)) or light springs; nothing bounces, and nothing competes with the curtain.
+**The One Curve Rule.** Every reveal, page change and scroll-scrubbed move uses `EASE` in `lib/utils.ts`, cubic-bezier(0.35, 0, 0, 1): a soft start and a long settle. Headings use `Rise` (words out of a mask, 1.1s, 70ms apart), blocks use `Reveal` (40px rise and fade, no blur), and hover parallax glides on springs. Nothing bounces.
 
 ### Project Plate (signature)
 A tinted 28px plate (21:9 featured, 4:3 otherwise) with the screenshot floating up from the bottom edge, lifting 8px on hover. Below: the outcome in the Statement style, then a mono line of title, year and stack, and a round arrow button that fills lapis on hover. Projects without a screenshot show their name large in lapis on the plate.
@@ -311,7 +311,7 @@ The sign-off: "sevith." in the Display face at 700, up to 17.5rem, -0.07em, in l
 - **Do** write tech stacks as Geist Mono text.
 - **Do** take every number from the resume and set it tabular.
 - **Do** put context in the margin note beside a heading, never above it.
-- **Do** use one curtain curve, cubic-bezier(0.76, 0, 0.24, 1) at 620ms, for page transitions, and make every motion stop under reduced motion.
+- **Do** use the one curve, cubic-bezier(0.35, 0, 0, 1), for reveals and page changes, and make every motion stop under reduced motion.
 - **Do** separate content with 1px Rule hairlines before reaching for a card.
 
 ### Don't:

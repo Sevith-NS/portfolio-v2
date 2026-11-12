@@ -56,7 +56,7 @@ export default function StudioView() {
       setSimbaFuss((n) => n + 1);
       // He talks a lot. Each note replaces the last, so they land one after another.
       GRUMBLES.forEach((line, i) => setTimeout(() => catNote(line), i * 1400));
-    } else navigate("/work/polaris", "Polaris");
+    } else navigate("/work/polaris");
   };
 
   return (

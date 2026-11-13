@@ -81,6 +81,8 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   const lenis = useLenis();
   const [phase, setPhase] = useState<Phase>("idle");
   const [pushing, setPushing] = useState(false);
+  // The dip holds the colour of the page you leave, even as the next page brings its own (a case study).
+  const [dip, setDip] = useState("");
   const pending = useRef<string | null>(null);
   const pushTimer = useRef<number | undefined>(undefined);
   const safetyTimer = useRef<number | undefined>(undefined);
@@ -95,14 +97,32 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
       setLoading(false);
       return;
     }
-    // It has been playing since the first paint, so wait only for what is left of it.
-    const t = window.setTimeout(() => {
+    let gone = false;
+    const lift = () => {
+      if (gone) return;
+      gone = true;
       try {
         sessionStorage.setItem("seen", "1");
       } catch {} // private mode: it plays again next page, no harm
       setLoading(false);
-    }, Math.max(0, LOAD_MS + 200 - performance.now()));
-    return () => window.clearTimeout(t);
+    };
+    // The count has run in CSS since the first paint. Lift a beat after it reaches 100,
+    // timed from the count itself, so a slow server response can't cut it short.
+    let hold = 0;
+    const count = document.querySelector<HTMLElement>("[data-loader] [data-count]");
+    if (count?.getAnimations) {
+      Promise.all(count.getAnimations().map((a) => a.finished)).then(() => {
+        hold = window.setTimeout(lift, 200);
+      }, lift);
+    } else {
+      hold = window.setTimeout(lift, Math.max(0, LOAD_MS + 200 - performance.now()));
+    }
+    const safety = window.setTimeout(lift, LOAD_MS + 1500); // never keep a visitor waiting
+    return () => {
+      gone = true;
+      window.clearTimeout(hold);
+      window.clearTimeout(safety);
+    };
   }, []);
 
   const open = useCallback(() => {
@@ -132,6 +152,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
       pending.current = target;
       setPushing(!!frame);
       if (frame) push(frame);
+      setDip(`rgb(${getComputedStyle(document.documentElement).getPropertyValue("--paper").trim()})`);
       setPhase("cover");
       pushTimer.current = window.setTimeout(() => router.push(href), frame ? QUIET_MS + PUSH_MS : DIP_MS);
       // Never leave the page covered, whatever happens to the navigation.
@@ -195,6 +216,7 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
             key="dip"
             aria-hidden
             className="pointer-events-auto fixed inset-0 z-[100] bg-paper"
+            style={dip ? { background: dip } : undefined}
             initial={{ opacity: 0 }}
             // After a push, the colour closes over only the last of it.
             animate={{ opacity: 1, transition: pushing ? { delay: (QUIET_MS + PUSH_MS - 380) / 1000, duration: 0.38, ease: "linear" } : { duration: DIP_MS / 1000, ease: EASE } }}

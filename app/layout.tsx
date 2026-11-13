@@ -8,6 +8,7 @@ import { ThemeProvider } from "./provider";
 import { TransitionProvider } from "@/components/transition/TransitionProvider";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { Cursor } from "@/components/motion/Cursor";
+import { Ambient } from "@/components/Ambient";
 import { EasterEggs } from "@/components/EasterEggs";
 import { dark, light } from "@/lib/theme";
 
@@ -88,6 +89,7 @@ export default function RootLayout({
             <TransitionProvider>{children}</TransitionProvider>
           </SmoothScroll>
           <Cursor />
+          <Ambient />
           <EasterEggs />
         </ThemeProvider>
       </body>

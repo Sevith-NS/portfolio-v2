@@ -149,7 +149,7 @@ export function ThemeToggle() {
       type="button"
       onClick={cross}
       aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
-      className="grid size-9 place-items-center rounded-full text-ink-2 transition-colors hover:bg-ink/[0.06] hover:text-ink active:scale-95"
+      className="grid size-10 place-items-center rounded-full bg-ink/[0.07] text-ink transition-[background-color,transform] duration-300 hover:bg-ink/[0.13] active:scale-95"
     >
       {mounted ? (
         dark ? <Sun size={18} weight="regular" /> : <Moon size={18} weight="regular" />

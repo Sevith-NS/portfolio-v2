@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
 import { usePageTransition } from "@/components/transition/TransitionProvider";
-import { EASE } from "@/lib/utils";
+import { cn, EASE } from "@/lib/utils";
 
-// A word's mask: it clips at the word's own baseline, with room below for commas.
-export const MASK = "inline-block overflow-hidden pb-[0.1em] -mb-[0.1em] align-top";
-// Seconds between one word and the next.
-export const STEP = 0.07;
+// A line's mask: it clips at the line's own edge, with room below for descenders
+// (the italic y of "actually" hangs lowest).
+const MASK = "block overflow-hidden pb-[0.18em] -mb-[0.18em]";
+// Seconds between one line and the next.
+const LINE_STEP = 0.12;
 
 // True once `ref` is on screen with no page change over it, and stays true, so an
 // entrance plays once, where the reader can see it.
@@ -22,42 +23,35 @@ export function useArrived(ref: RefObject<Element | null>) {
   return go;
 }
 
-// Words rise into place out of a mask, one after another, like Lusion's headlines.
-// One string per line. *Stars* mark the accent words.
-export function Rise({ lines, delay = 0 }: { lines: string[]; delay?: number }) {
+// *Stars* mark the accent words.
+function accented(line: string) {
+  return line.split(/\*([^*]+)\*/).map((part, k) => (k % 2 ? <span key={k} className="text-warm">{part}</span> : part));
+}
+
+// Lines rise into place out of a mask, one after another, like Lusion's headings.
+// One entry per line: a string (with *stars*), or markup when a line needs it, then pass `label`.
+// `stagger` pushes the first line of a two-line heading right, as Lusion sets them.
+export function Rise({ lines, delay = 0, label, stagger = false }: { lines: ReactNode[]; delay?: number; label?: string; stagger?: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
   const go = useArrived(ref);
   const reduce = useReducedMotion();
-  let n = 0;
+  const text = label ?? lines.map((l) => (typeof l === "string" ? l : "")).join(" ").replace(/\*/g, "");
   return (
     <span ref={ref}>
-      <span className="sr-only">{lines.join(" ").replace(/\*/g, "")}</span>
+      <span className="sr-only">{text}</span>
       <span aria-hidden>
-        {lines.map((line, l) => {
-          const words = line.split(/\*([^*]+)\*/).flatMap((part, k) => part.split(" ").filter(Boolean).map((w) => ({ w, accent: k % 2 === 1 })));
-          return (
-            <span key={l} className="block">
-              {words.map(({ w, accent }, k) => {
-                const i = n++;
-                return (
-                  <span key={k}>
-                    {k > 0 && " "}
-                    <span className={MASK}>
-                      <motion.span
-                        className={accent ? "inline-block text-warm" : "inline-block"}
-                        initial={reduce ? false : { y: "110%" }}
-                        animate={go ? { y: "0%" } : undefined}
-                        transition={{ duration: 1.1, delay: delay + i * STEP, ease: EASE }}
-                      >
-                        {w}
-                      </motion.span>
-                    </span>
-                  </span>
-                );
-              })}
-            </span>
-          );
-        })}
+        {lines.map((line, l) => (
+          <span key={l} className={cn(MASK, stagger && l === 0 && "pl-[1.6em]")}>
+            <motion.span
+              className="block"
+              initial={reduce ? false : { y: "110%" }}
+              animate={go ? { y: "0%" } : undefined}
+              transition={{ duration: 1.1, delay: delay + l * LINE_STEP, ease: EASE }}
+            >
+              {typeof line === "string" ? accented(line) : line}
+            </motion.span>
+          </span>
+        ))}
       </span>
     </span>
   );

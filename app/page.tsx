@@ -1,4 +1,4 @@
-import { navItems, projects } from "@/data";
+import { projects } from "@/data";
 import { size } from "@/lib/size";
 import { webp } from "@/lib/work";
 import Hero from "@/components/Hero";
@@ -7,14 +7,14 @@ import Projects from "@/components/Projects";
 import Approach from "@/components/Approach";
 import Footer from "@/components/Footer";
 import Space from "@/components/Space";
-import { FloatingNav } from "@/components/ui/FloatingNav";
+import { Header } from "@/components/ui/Header";
 
 const Home = async () => {
   // Every screenshot's own size, so its card is cut to exactly that shape.
   const shots = Object.fromEntries(await Promise.all(projects.filter((p) => p.img).map(async (p) => [p.slug, await size(webp(p.img))] as const)));
   return (
     <main id="main" className="relative overflow-x-clip">
-      <FloatingNav navItems={navItems} />
+      <Header />
       {/* What I offer, who I am, the work, how I build it, then say hi (Q72, Q73, Q82). */}
       <Hero />
       <Intro />

@@ -30,7 +30,8 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   }, []);
   if (reduce) return <>{children}</>;
   return (
-    <ReactLenis root options={{ lerp: 0.085, wheelMultiplier: 1, smoothWheel: true, anchors: { offset: -88 } }}>
+    // Heavier than before, with more glide after the wheel stops, like Lusion's (12 Nov).
+    <ReactLenis root options={{ lerp: 0.065, wheelMultiplier: 1, smoothWheel: true, anchors: { offset: -88 } }}>
       <RouteReset />
       {children}
     </ReactLenis>

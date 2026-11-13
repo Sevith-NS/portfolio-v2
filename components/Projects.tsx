@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { animate, motion, useMotionTemplate, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform, useVelocity, type MotionValue } from "framer-motion";
 import { ArrowRight } from "@phosphor-icons/react";
 import { projects } from "@/data";
-import { stack, webp } from "@/lib/work";
+import { webp } from "@/lib/work";
 import { EASE } from "@/lib/utils";
 import { TransitionLink } from "./transition/TransitionLink";
 import { Reveal } from "./motion/Reveal";
@@ -79,24 +79,24 @@ function Plate({ p, index, shot, bend, lean }: { p: (typeof projects)[number]; i
           )}
         </motion.div>
 
+        {/* Like Lusion's: the role tags, then the title. */}
         <div data-quiet>
-          <ul className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-ink-3">
-            {[...(p.year ? [p.year] : []), ...stack(p.iconLists).slice(0, 4)].map((t, k) => (
-              <li key={t} className="flex items-center gap-2">
+          <ul className="mt-5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[0.8125rem] uppercase text-ink">
+            {p.tags.map((t, k) => (
+              <li key={t} className="flex items-center gap-1.5">
                 {k > 0 && <span aria-hidden>•</span>}
                 {t}
               </li>
             ))}
           </ul>
-          <h3 className="mt-2 flex items-center overflow-hidden font-wide text-[1.5rem] font-semibold uppercase leading-[1.15] tracking-[-0.01em] text-ink md:text-[1.75rem]">
+          <h3 className="mt-2 flex items-center overflow-hidden font-wide text-[1.75rem] font-semibold uppercase leading-[1.15] tracking-[-0.01em] text-ink md:text-[clamp(2rem,3.2vw,3.25rem)]">
             <ArrowRight
               aria-hidden
               weight="bold"
-              className="-ml-8 mr-2 size-6 shrink-0 text-warm opacity-0 transition-[margin,opacity] duration-500 ease-[cubic-bezier(0.35,0,0,1)] group-hover:ml-0 group-hover:opacity-100 group-focus-visible:ml-0 group-focus-visible:opacity-100"
+              className="-ml-[1.05em] mr-[0.25em] size-[0.8em] shrink-0 text-warm opacity-0 transition-[margin,opacity] duration-500 ease-[cubic-bezier(0.35,0,0,1)] group-hover:ml-0 group-hover:opacity-100 group-focus-visible:ml-0 group-focus-visible:opacity-100"
             />
             {p.title}
           </h3>
-          <p className="mt-2 max-w-[46ch] leading-relaxed text-ink-2 [text-wrap:pretty]">{p.outcome}</p>
         </div>
       </TransitionLink>
     </article>
@@ -111,14 +111,23 @@ const Projects = ({ shots }: { shots: Record<string, Shot> }) => {
   const lean = useTransform(speed, [-3000, 3000], [-1.8, 1.8]);
 
   return (
-    <section id="projects" className="mx-auto max-w-page px-4 pb-24 pt-16 md:px-8 md:pt-8">
-      <div data-quiet className="mx-auto mb-16 max-w-[48rem] text-center md:mb-24">
-        <Reveal>
-          <p className="font-mono text-[0.75rem] uppercase tracking-[0.18em] text-accent">The work</p>
-        </Reveal>
-        <h2 className="mt-5 font-wide text-[clamp(2rem,5vw,4rem)] font-semibold uppercase leading-[1] tracking-[-0.01em] text-ink">
+    <section id="projects" className="px-4 pb-24 md:px-[5vw]">
+      {/* Lusion's grid marks along the top edge, in quarters. */}
+      <div className="relative h-[3.2rem]">
+        {[0, 25, 50, 75, 100].map((left) => (
+          <span key={left} aria-hidden className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 font-mono text-[1.1rem] font-light leading-none text-ink" style={{ left: `${left}%` }}>
+            +
+          </span>
+        ))}
+      </div>
+      {/* Lusion's "Featured Work": the heading on the left, the small caps label on the grid's last quarter. */}
+      <div data-quiet className="mb-12 mt-[10vh] flex flex-col gap-5 md:mb-16 md:mt-[18vh] md:flex-row md:items-start md:justify-between">
+        <h2 className="font-wide text-[clamp(2.4rem,7vw,9rem)] font-semibold uppercase leading-[0.98] tracking-[-0.01em] text-ink">
           <Rise lines={["Designed it.", "Built it.", "*Shipped it.*"]} />
         </h2>
+        <Reveal className="order-first md:order-none md:mt-[2.6vw] md:w-1/4">
+          <p className="text-[0.8125rem] uppercase text-ink">The work</p>
+        </Reveal>
       </div>
       <div className="grid gap-x-6 gap-y-14 md:grid-cols-2 md:gap-x-8 md:gap-y-20">
         {projects.map((p, i) => (

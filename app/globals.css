@@ -287,22 +287,23 @@ html[data-seen] [data-loader] {
   transform-origin: center;
   animation: load-block 0.4s cubic-bezier(0.35, 0, 0, 1) both;
 }
+/* LOAD_MS in Loader.tsx. Ease-in: the count creeps first, then rushes to 100. */
 [data-loader] [data-count] {
   counter-reset: load var(--load);
-  animation: load-count 1.15s cubic-bezier(0.35, 0, 0, 1) forwards;
+  animation: load-count 2s cubic-bezier(0.32, 0, 0.67, 0) forwards;
 }
 [data-loader] [data-count]::after {
   content: counter(load, pad3);
 }
 
-/* The closing scene's card (components/Space.tsx): cut out of the page beside a few
-   words, and opening to the whole screen as --open goes from 0 to 1. */
-.space-card {
-  --shut: calc(1 - var(--open, 0));
-  clip-path: inset(calc(var(--shut) * 46%) calc(var(--shut) * 4%) calc(var(--shut) * 5%) calc(var(--shut) * 4%) round calc(var(--shut) * 22px));
-}
-@media (min-width: 768px) {
-  .space-card {
-    clip-path: inset(calc(var(--shut) * 15%) calc(var(--shut) * 50%) calc(var(--shut) * 15%) calc(var(--shut) * 3%) round calc(var(--shut) * 28px));
+
+/* The end stickers (components/Stickers.tsx) bob gently where they land. */
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-0.6vmax) rotate(2deg);
   }
 }

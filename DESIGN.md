@@ -322,3 +322,52 @@ The sign-off: "sevith." in the Display face at 700, up to 17.5rem, -0.07em, in l
 - **Don't** invent metrics, testimonials or client logos.
 - **Don't** add 3D beyond the monogram, the reel and the studio room, or let any of them animate under reduced motion.
 - **Don't** use pure black or pure white; ink is #161B2D and paper is #EFE9DE.
+
+## Lusion rebuild (12 Nov 2026)
+
+Sevith asked for the whole site rebuilt like lusion.co, with his content and his own touch. Every decision is in `MEMORY.md` under "Lusion rebuild". This section is the design summary. Where it disagrees with the rules above, this section wins.
+
+### Art style
+
+A deliberate pair: **Minimalism** for the page (editorial grid, a lot of space, "+" marks on the grid lines, small caps labels) and **photoreal 3D** for the moments (hero pieces, reel, space flight, particle portrait, studio room). Case pages are dark, in a deep shade of each project's tint.
+
+### Palette
+
+- Lapis theme in both modes, unchanged (see `lib/theme.ts`).
+- Hero pieces: lapis, oat, and navy. The card is a shade deeper than the page in both modes.
+- Case pages: each in its own project's colours, read off its live site (Polaris: near-black page, off-white text and accent), dark in both site themes. Lapis stays the accent everywhere else. UX laws applied there: Serial Position and Peak-End (the first screen and the next-project panel carry the most care), Goal-Gradient (the next-project bar fills as you keep scrolling), Jakob's Law (vertical scrolling drives the sideways strip, so wheel, keys and touch all work as usual).
+- **Deliberate exception:** the space flight uses neon pink and green, at his request, in that scene only.
+
+### Type
+
+- Headings stay wide Archivo caps. Two-line headings are staggered (first line pushed right).
+- "actually" stays Bodoni italic in the accent.
+- The about page's giant name is SEVITH in wide caps, edge to edge.
+
+### Motion
+
+- Headings rise line by line out of a mask, a beat apart.
+- Text snap: paired blocks slide in from opposite sides and lock (about page, reel words).
+- Paragraphs fade up once.
+- Lenis is heavier, with more glide.
+- The hero cursor gently pushes the pieces and drags a faint liquid smear with thin rainbow edges, kept subtle like Lusion's. This is a deliberate liquid, pointer-following effect, chosen by Sevith.
+- The hero card is moody: satin plastic, deep contact shadows, back pieces fading into the card, and a vignette on the edges.
+- Reduced motion: no tumbling, no smear, no snaps. Everything shows at rest.
+
+### UX laws applied
+
+- **Jakob's Law:** Lusion's header and dropdown menu patterns, a familiar scroll-to-explore hint.
+- **Von Restorff Effect:** LET'S TALK is the one filled pill.
+- **Peak-End Rule:** the space flight is the peak, and every page ends on a filling next-page bar.
+- **Goal-Gradient Effect:** the next-page bars fill as you scroll.
+- **Feedback Loops:** pills, menu items, and pieces answer every hover and touch.
+- **Fitts's Law:** pills and round buttons at least 44px on phones.
+
+### References
+
+- lusion.co (home, about, case pages, menu), seen live on 12 Nov.
+- Sevith's recording: `C:/Users/asus/Desktop/lusion.mp4`.
+
+### AI tells
+
+Avoided: pure white, drop shadows, emojis, sparkle icons, bento grids, invented facts. Used on purpose and named above: neon in the space flight, a liquid cursor effect in the hero.

@@ -9,7 +9,7 @@ import { usePageTransition } from "./transition/TransitionProvider";
 // How much more scrolling, in pixels of wheel or finger, takes you to the next project.
 const PULL = 900;
 
-// The end of a case study, after Lusion: keep scrolling past the bottom of the page
+// The end of a case study, after Lusion: keep scrolling past the end of the strip
 // and a bar fills; when it is full you are taken to the next project. Stop, and it
 // drains. It is a plain link as well, for keyboards, screen readers and reduced motion.
 export function NextProject({ slug, title }: { slug: string; title: string }) {
@@ -54,25 +54,27 @@ export function NextProject({ slug, title }: { slug: string; title: string }) {
   }, [fill, href, navigate, reduce]);
 
   return (
-    // `band`: the inverted colours of How I build, so the page ends on a full stop.
-    <TransitionLink href={href} data-cursor="Next project" className="band group block bg-paper">
-      <div className="mx-auto flex max-w-page flex-col gap-10 px-4 py-14 md:flex-row md:items-end md:justify-between md:px-8 md:py-20">
-        <div>
-          <p className="font-mono text-[0.75rem] uppercase leading-relaxed tracking-[0.18em] text-ink-2">
-            Keep scrolling
-            <br />
-            for the next project
-          </p>
-          <p className="mt-5 font-wide text-[clamp(2.2rem,6vw,4.75rem)] font-semibold uppercase leading-[0.95] tracking-[-0.01em] text-ink">{title}</p>
-        </div>
-        <div className="flex items-center gap-4 font-mono text-[0.75rem] uppercase tracking-[0.18em] text-ink md:pb-3">
-          Next project
-          {/* The bar: empty track, filling from the left as you keep scrolling. */}
-          <span aria-hidden className="relative h-px w-28 bg-ink/30 md:w-44">
-            <motion.span style={{ scaleX: fill }} className="absolute inset-x-0 -top-px h-[3px] origin-left bg-ink" />
-          </span>
-          <ArrowRight aria-hidden size={18} className="transition-transform duration-500 ease-[cubic-bezier(0.35,0,0,1)] group-hover:translate-x-1.5" />
-        </div>
+    // A light panel closing the strip (the page's colours turned over), like Lusion's: edge to
+    // edge and full height on a laptop, full width on a phone.
+    <TransitionLink
+      href={href}
+      data-cursor="Next project"
+      data-header="light"
+      className="group -mx-4 flex h-[75vh] shrink-0 flex-col justify-between bg-ink p-8 text-paper md:-mx-8 md:p-12 lg:mx-0 lg:-mr-[5vw] lg:-mt-[4rem] lg:h-screen lg:w-[52vw] lg:p-[4vw] lg:pt-[8.5rem]"
+    >
+      <p className="font-mono text-[0.75rem] uppercase leading-relaxed tracking-[0.18em] text-paper/70">
+        Keep scrolling
+        <br />
+        for the next project
+      </p>
+      <p className="font-wide text-[clamp(2.6rem,6vw,6.5rem)] font-semibold uppercase leading-[0.92] tracking-[-0.01em]">{title}</p>
+      <div className="flex items-center gap-4 font-mono text-[0.75rem] uppercase tracking-[0.18em]">
+        Next project
+        {/* The bar: empty track, filling from the left as you keep scrolling. */}
+        <span aria-hidden className="relative h-px w-28 bg-paper/30 md:w-44">
+          <motion.span style={{ scaleX: fill }} className="absolute inset-x-0 -top-px h-[3px] origin-left bg-paper" />
+        </span>
+        <ArrowRight aria-hidden size={18} className="transition-transform duration-500 ease-[cubic-bezier(0.35,0,0,1)] group-hover:translate-x-1.5" />
       </div>
     </TransitionLink>
   );

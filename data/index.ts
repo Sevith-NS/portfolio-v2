@@ -3,8 +3,10 @@ export const resumeLink =
 
 export const email = "sevithns@gmail.com";
 
+// The menu's pages, in order (Header.tsx). Contact and Resume are added there.
 export const navItems = [
   { name: "Work", link: "#projects" },
+  { name: "About", link: "/about" },
   { name: "Studio", link: "/studio" },
   { name: "Gallery", link: "/gallery" },
 ];
@@ -13,9 +15,13 @@ export const navItems = [
 // /story page). First person, punchy, and the first joke is allowed here
 // because the visitor has already scrolled once (Q7). Edit freely.
 export const intro = {
-  kicker: "Who I am",
+  // Lusion's "Bold Ideas" spot (approved 12 Nov): the heading, the shortest cut of
+  // the paragraph below (his words, unchanged), and a link to the about page.
+  heading: ["Learn it at 2am.", "Ship it by morning."],
+  short: "Hi, I'm Sevith, a *self-taught designer* and *product engineer* in Bangalore. I design the interface, decide what the product should *actually do*, and write the code, so what you signed off on is what ships.",
+  link: { label: "My approach", href: "/about" },
+  // The whole paragraph. The space close still quotes its last sentence.
   text: "Hi, I'm Sevith, a *self-taught designer* and *product engineer* in Bangalore. I learn stuff at 2am and ship it by morning. I design the interface, decide what the product should *actually do*, and write the code, so what you signed off on is what ships. By day I'm a *Technical Writer at Digital.ai*. After hours I vibe code the first version fast, then do the product work, cut what doesn't earn its place, and sweat the details until nothing feels accidental.",
-  photo: { src: "/story/pool-table.webp", alt: "Sevith in a dark shirt and sunglasses, standing by a pool table under amber blinds", caption: "" },
 };
 
 export const projects = [
@@ -23,6 +29,8 @@ export const projects = [
     id: 7,
     title: "Polaris",
     slug: "polaris",
+    // The role line under the home card (approved 12 Nov).
+    tags: ["Research", "Product", "UX", "Frontend", "Backend"],
     tint: "sage",
     year: "2026",
     outcome: "I'm designing and building Polaris: India and US markets, one honest view.",
@@ -36,6 +44,7 @@ export const projects = [
     id: 9,
     title: "Only Villas",
     slug: "only-villas",
+    tags: ["UI", "Frontend", "Google Maps"],
     tint: "stone",
     year: "2025",
     outcome: "I built the frontend of a villa marketplace that shows buyers what's around a home before they visit.",
@@ -49,6 +58,7 @@ export const projects = [
     id: 8,
     title: "EsDeeKid",
     slug: "esdeekid",
+    tags: ["Concept", "Art direction", "Motion", "Frontend"],
     tint: "stone",
     year: "2026",
     outcome: "I built a fan site for a rapper who hides his face, and made the site keep the secret too.",
@@ -62,6 +72,7 @@ export const projects = [
     id: 1,
     title: "Tesseract AI",
     slug: "tesseract-ai",
+    tags: ["Product", "Design", "Full-stack"],
     tint: "amber",
     year: "", // TODO: add the year
     outcome: "I built an AI mock-interview coach so students can rehearse placements before the real thing.",
@@ -74,6 +85,7 @@ export const projects = [
     id: 2,
     title: "Vercel Clone",
     slug: "vercel-clone",
+    tags: ["Design", "Full-stack"],
     tint: "stone",
     year: "2024",
     outcome: "I rebuilt a frontend deploy platform to learn how build and hosting pipelines actually work.",
@@ -86,6 +98,7 @@ export const projects = [
     id: 4,
     title: "Ochi",
     slug: "ochi",
+    tags: ["Frontend", "Motion"],
     tint: "blush",
     year: "2024",
     outcome: "I rebuilt a design-studio website to study layout craft and motion.",

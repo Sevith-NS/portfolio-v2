@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import sharp from "sharp"; // ships with Next; reads each photo's shape for the scatter
-import { navItems } from "@/data";
-import { FloatingNav } from "@/components/ui/FloatingNav";
+import { Header } from "@/components/ui/Header";
 import Gallery from "@/components/Gallery";
 
 export const metadata: Metadata = {
@@ -31,7 +30,7 @@ async function photos() {
 export default async function GalleryPage() {
   return (
     <main id="main" className="relative z-[1]">
-      <FloatingNav navItems={navItems} />
+      <Header />
       <h1 className="sr-only">Gallery</h1>
       <Gallery photos={await photos()} />
     </main>

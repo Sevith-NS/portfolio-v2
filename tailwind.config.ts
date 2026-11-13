@@ -33,7 +33,8 @@ const config = {
   },
   plugins: [
     plugin(({ addBase }) => {
-      addBase({ ":root": light.vars(), ".dark": dark.vars(), ".band": band.light.vars(), ".dark .band": band.dark.vars() });
+      // `.light` forces the light tokens inside a dark page (the header over an inverted band).
+      addBase({ ":root": light.vars(), ".dark": dark.vars(), ".light": light.vars(), ".band": band.light.vars(), ".dark .band": band.dark.vars() });
     }),
   ],
 } satisfies Config;

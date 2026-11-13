@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { navItems } from "@/data";
-import { FloatingNav } from "@/components/ui/FloatingNav";
+import { Header } from "@/components/ui/Header";
 import { Reveal } from "@/components/motion/Reveal";
 import StudioView from "@/components/StudioView";
 import Footer from "@/components/Footer";
@@ -13,7 +12,7 @@ export const metadata: Metadata = {
 export default function StudioPage() {
   return (
     <main id="main" className="relative z-[1]">
-      <FloatingNav navItems={navItems} />
+      <Header />
       <section className="mx-auto max-w-page px-4 pb-10 pt-28 md:px-8 md:pt-36">
         <Reveal className="mb-10 grid gap-5 md:mb-14 md:grid-cols-12 md:items-end">
           <div className="md:col-span-8">

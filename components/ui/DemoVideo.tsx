@@ -6,7 +6,7 @@ import { useReducedMotion } from "framer-motion";
 // A silent product clip. Plays only while it is actually on screen, so a page
 // of clips never runs them all at once. With reduced motion it does not play
 // on its own: the poster shows, with ordinary controls to start it.
-export function DemoVideo({ src, poster, label }: { src: string; poster: string; label: string }) {
+export function DemoVideo({ src, poster, label, className = "block h-auto w-full" }: { src: string; poster: string; label: string; className?: string }) {
   const ref = useRef<HTMLVideoElement>(null);
   const reduce = useReducedMotion();
 
@@ -35,7 +35,7 @@ export function DemoVideo({ src, poster, label }: { src: string; poster: string;
       playsInline
       preload="metadata"
       controls={!!reduce}
-      className="block h-auto w-full"
+      className={className}
     />
   );
 }

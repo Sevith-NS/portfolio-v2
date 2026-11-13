@@ -3,17 +3,16 @@
 import Link from "next/link";
 import { usePageTransition } from "./TransitionProvider";
 
-// Internal links route through the curtain; modifier clicks keep native behaviour.
+// Internal links route through the page change; modifier clicks keep native behaviour.
+// A link holding a `[data-zoom]` frame has the page push into that frame on the way.
 export function TransitionLink({
   href,
-  label,
   className,
   children,
   onClick,
   ...rest
 }: {
   href: string;
-  label?: string;
   className?: string;
   children: React.ReactNode;
   onClick?: () => void;
@@ -28,7 +27,7 @@ export function TransitionLink({
         onClick?.();
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
         e.preventDefault();
-        navigate(href, label);
+        navigate(href, e.currentTarget.querySelector<HTMLElement>("[data-zoom]") ?? undefined);
       }}
       {...rest}
     >

@@ -14,6 +14,7 @@ type Rgb = readonly [number, number, number];
 const TOKENS = [
   "paper", // page
   "sheet", // raised surfaces: cards, footer, menus
+  "card", // the hero's 3D card: a shade deeper than the page
   "ink", // body text
   "ink-2", // secondary text
   "ink-3", // tertiary text, still 4.5:1 on paper
@@ -75,6 +76,24 @@ export class Palette {
   with(over: Partial<Record<Token, Rgb>>) {
     return new Palette(this.side, { ...this.values, ...over });
   }
+
+  /** Turned over, ink for ground: the header's colours over a case study's light end panel. */
+  turn() {
+    const { paper, ink } = this.values;
+    return new Palette(this.side === "dark" ? "light" : "dark", {
+      ...this.values,
+      paper: ink,
+      sheet: ink,
+      card: ink,
+      ink: paper,
+      "ink-2": paper,
+      hl: paper,
+      lamp: paper,
+      accent: paper,
+      warm: paper,
+      "on-hl": ink,
+    });
+  }
 }
 
 // The How I build band: lapis in the light, off-white in the dark.
@@ -85,6 +104,7 @@ const OAT: Rgb = [239, 233, 222]; // the light page, and the light band's type
 export const light = new Palette("light", {
   paper: OAT, // #EFE9DE oat
   sheet: [247, 243, 236],
+  card: [224, 216, 201], // deeper oat, so the oat pieces still read on it
   ink: [26, 22, 18], // #1A1612
   "ink-2": [78, 70, 61],
   "ink-3": [112, 103, 92],
@@ -118,6 +138,7 @@ export const light = new Palette("light", {
 export const dark = new Palette("dark", {
   paper: [8, 16, 40], // #081028 navy
   sheet: [19, 21, 27],
+  card: [3, 7, 19], // near-black navy, a shade deeper than the page
   ink: [242, 238, 230],
   "ink-2": [176, 172, 164],
   "ink-3": [125, 123, 119],
@@ -149,6 +170,46 @@ export const dark = new Palette("dark", {
 });
 
 export const themes: Record<Side, Palette> = { light, dark };
+
+// Case study pages, after Lusion's: each is its own dark world in its project's colours,
+// whatever the site theme, with the project's light colour as the accent.
+const lift = ([r, g, b]: Rgb, n: number): Rgb => [r + n, g + n, b + n];
+const casePage = (paper: Rgb, ink: Rgb, ink2: Rgb, ink3: Rgb, accent: Rgb) =>
+  dark.with({
+    paper,
+    sheet: lift(paper, 9),
+    card: lift(paper, 5),
+    rule: lift(paper, 30),
+    ink,
+    "ink-2": ink2,
+    "ink-3": ink3,
+    accent,
+    lamp: accent,
+    hl: accent,
+    warm: accent,
+    "on-hl": paper,
+  });
+// Each read off its live site. Polaris: near-black, off-white and greys (colour there only means
+// gains and losses). The others carry their project's accent on a deep ground, like Lusion's
+// Oryzo page. Only Villas and the Vercel clone are still the stone stand-in.
+const CASES: Record<string, Palette> = {
+  polaris: casePage([11, 11, 12], [245, 245, 245], [181, 181, 181], [160, 160, 160], [245, 245, 245]),
+  // Tesseract's orange on a deep brown, its own off-white for the type.
+  "tesseract-ai": casePage([28, 20, 16], [249, 248, 246], [200, 190, 180], [160, 150, 140], [228, 91, 37]),
+  // EsDeeKid's black and its red, a hair lighter so small type reads (4.9:1).
+  esdeekid: casePage([11, 11, 10], [239, 237, 232], [184, 181, 175], [143, 140, 134], [240, 52, 42]),
+  // Ochi's deep green as the page and its lime as the accent.
+  ochi: casePage([0, 77, 67], [255, 255, 255], [196, 216, 208], [150, 182, 172], [205, 234, 104]),
+};
+const STONE = casePage([26, 28, 34], [242, 238, 230], [176, 172, 164], [140, 138, 134], [236, 236, 234]);
+export const caseTheme = (slug: string) => CASES[slug] ?? STONE;
+
+// The hero's connector pieces, the same in both modes: lit plastic, not page colour.
+export const PIECES = {
+  lapis: "#002DB4",
+  oat: "#EFE9DE",
+  navy: "#081028",
+} as const;
 
 // How I build is a band of its own, the page turned inside out: lapis with
 // oat type in the light, off-white with lapis type in the dark. Every text

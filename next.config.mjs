@@ -2,13 +2,15 @@ const isDev = process.env.NODE_ENV !== "production";
 
 // Content Security Policy. Next.js inlines bootstrap scripts, so 'unsafe-inline' stays for scripts
 // and styles; everything else is locked to this origin. EmailJS is the only third-party endpoint.
+// 'wasm-unsafe-eval' lets the Draco decoder (public/draco) compile its WebAssembly, and blob: in
+// connect-src lets three.js read the textures packed inside a .glb. Neither allows JS eval.
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  `connect-src 'self' https://api.emailjs.com${isDev ? " ws: wss:" : ""}`,
+  `connect-src 'self' blob: https://api.emailjs.com${isDev ? " ws: wss:" : ""}`,
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",

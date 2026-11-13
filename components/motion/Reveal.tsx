@@ -1,8 +1,11 @@
 "use client";
 
+import { useRef } from "react";
 import { motion } from "framer-motion";
+import { EASE } from "@/lib/utils";
+import { useArrived } from "./Rise";
 
-// Blur-in on scroll: content starts soft and slightly low, then settles into focus.
+// A block that rises into place on the site's one curve, once it is on screen.
 export function Reveal({
   children,
   className,
@@ -15,13 +18,15 @@ export function Reveal({
   as?: "div" | "section" | "li" | "article";
 }) {
   const M = motion[as];
+  const ref = useRef<HTMLElement>(null);
+  const go = useArrived(ref);
   return (
     <M
+      ref={ref as never}
       className={className}
-      initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "0px 0px -12% 0px" }}
-      transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0, y: 40 }}
+      animate={go ? { opacity: 1, y: 0 } : undefined}
+      transition={{ duration: 1.1, delay, ease: EASE }}
     >
       {children}
     </M>

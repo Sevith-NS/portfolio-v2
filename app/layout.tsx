@@ -8,6 +8,7 @@ import { ThemeProvider } from "./provider";
 import { TransitionProvider } from "@/components/transition/TransitionProvider";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { Cursor } from "@/components/motion/Cursor";
+import { Ambient } from "@/components/Ambient";
 import { EasterEggs } from "@/components/EasterEggs";
 import { dark, light } from "@/lib/theme";
 
@@ -73,6 +74,8 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable} ${serif.variable} ${display.variable} ${pixel.variable} ${mark.variable}`}
     >
       <body>
+        {/* Later pages of a visit, and reduced motion, skip the loader: marked before the first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: `try{if(sessionStorage.getItem("seen")||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.dataset.seen=""}catch(e){}` }} />
         {/* Internal design notes: kept out of production HTML. */}
         {process.env.NODE_ENV === "development" && <div hidden dangerouslySetInnerHTML={{ __html: `<!--${contract}-->` }} />}
         <a
@@ -86,6 +89,7 @@ export default function RootLayout({
             <TransitionProvider>{children}</TransitionProvider>
           </SmoothScroll>
           <Cursor />
+          <Ambient />
           <EasterEggs />
         </ThemeProvider>
       </body>

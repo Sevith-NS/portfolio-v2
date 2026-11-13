@@ -17,3 +17,6 @@ next-env.d.ts
 .next-verify
 .next-preview
 photos-src
+
+# Blender film work: downloaded assets, frames and renders (rebuild with scripts/space)
+blender-work
